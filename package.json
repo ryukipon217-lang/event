@@ -1,0 +1,13 @@
+{
+  "name": "connecta-participants-checks",
+  "version": "1.0.0",
+  "private": true,
+  "description": "connec+a 参加者画面 (participants-index.html) のデプロイ前チェック (build前進・babelブロック)",
+  "scripts": {
+    "predeploy": "node predeploy_check.js participants-index.html"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.24.0",
+    "@babel/preset-react": "^7.24.0"
+  }
+}
