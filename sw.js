@@ -7,7 +7,7 @@
  *   (2) activate 時の旧バージョンキャッシュ掃除 (v3 以前の cca-cache-* も回収)
  *   を追加。GAS API (script.google.com / googleusercontent.com) は従来どおり一切キャッシュしない。
  */
-const VERSION = 'v4';
+const VERSION = 'v5';
 const CACHE_NAME = 'cca-cache-' + VERSION;   // 静的アセット (cache-first + 裏更新)
 const HTML_CACHE = 'cca-html-' + VERSION;    // ナビゲーションHTML (network-first / 圏外フォールバック専用)
 
