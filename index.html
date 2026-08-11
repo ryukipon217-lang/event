@@ -4048,7 +4048,7 @@ function SheetShell({
     }
   }), React.createElement("div", {
     ref: sheetRef,
-    className: _uk_cx('mg-sheet', open ? 'mg-sheet-on' : ''),
+    className: _uk_cx('mg-sheet', open ? 'mg-sheet-on is-open' : ''),
     role: "dialog",
     "aria-modal": "true",
     style: {
@@ -18639,11 +18639,13 @@ function TabLife() {
       flex: 1,
       minWidth: 0,
       display: 'flex',
+      flexDirection: 'column',
       alignItems: 'center',
       justifyContent: 'center',
-      gap: 8,
-      height: 44,
-      borderRadius: 22,
+      gap: 4,
+      minHeight: 66,
+      padding: '10px 8px',
+      borderRadius: 20,
       textDecoration: 'none',
       background: 'linear-gradient(150deg, rgba(53,97,143,.93), rgba(39,76,115,.97))',
       border: '1px solid rgba(255,255,255,.35)',
@@ -18653,14 +18655,17 @@ function TabLife() {
   }, React.createElement("span", {
     className: "mg-num",
     style: {
-      fontSize: 20,
-      lineHeight: 1
+      fontSize: 23,
+      lineHeight: 1,
+      letterSpacing: '.01em'
     }
   }, b.num), React.createElement("span", {
-    className: "mg-clamp1",
+    className: "mg-clamp2",
     style: {
-      fontSize: 11,
-      lineHeight: 1.3
+      fontSize: 10.5,
+      lineHeight: 1.35,
+      textAlign: 'center',
+      overflowWrap: 'anywhere'
     }
   }, _info_text(lang, b.label))))), disasterCat ? React.createElement("div", {
     className: "mg-tap",
@@ -24691,6 +24696,7 @@ function _ShellIntro({
       position: 'absolute',
       inset: '-9% -6%',
       width: '112%',
+      maxWidth: 'none',
       height: '118%',
       objectFit: 'cover'
     }
