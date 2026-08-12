@@ -26,8 +26,8 @@ window.__earlyBundlePromise = fetch('https://script.google.com/macros/s/AKfycbxL
 <link rel="preconnect" href="https://script.google.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Zen+Old+Mincho:wght@400;500;600&family=Zen+Kaku+Gothic+New:wght@400;500&family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&display=swap" rel="stylesheet">
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,200,0,0&display=block" rel="stylesheet">
-<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" crossorigin></script>
-<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" crossorigin></script>
+<script src="https://unpkg.com/react@18.3.1/umd/react.production.min.js" crossorigin></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.production.min.js" crossorigin></script>
 <script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.js"></script>
 <style>
 /* ==== 01-design.css: 定義するグローバル: (CSSのみ・JSグローバルなし) ====
@@ -4665,6 +4665,14 @@ const _auth_T = {
     step1Inbox: '1. 受信ボックスを確認 (迷惑メールフォルダもご確認ください)',
     step2Click: '2. メール内のボタンをクリック',
     step3Profile: '3. プロフィール詳細を入力して登録完了',
+    resendBtn: '認証メールを再送する',
+    resendWait: '再送する (%s%秒)',
+    resendOk: '再送しました。メールをご確認ください。',
+    resendFailed: '再送に失敗しました。しばらくおいてからお試しください。',
+    resendNoPw: 'この画面からは再送できません。会員登録からやり直してください。',
+    mailFailHead: 'メールを送信できませんでした',
+    mailFailSub: '%email% への認証メールを送信できませんでした。アカウントは仮登録されています。下のボタンからもう一度お試しください。',
+    netErr: '通信に失敗しました。電波の良い場所でもう一度お試しください。',
     haveAccount: 'すでにアカウントをお持ちの方',
     loginLink: 'ログイン →',
     invalidEmail: '有効なメールアドレスを入力してください',
@@ -4784,6 +4792,14 @@ const _auth_T = {
     step1Inbox: '1. メールを かくにん (めいわくメールも みて ください)',
     step2Click: '2. メールの ボタンを クリック',
     step3Profile: '3. プロフィールを いれて とうろく かんりょう',
+    resendBtn: 'にんしょうメールを もういちど おくる',
+    resendWait: 'もういちど おくる (%s%びょう)',
+    resendOk: 'おくりました。メールを みて ください。',
+    resendFailed: 'おくれません でした。すこし まってから もういちど おためし ください。',
+    resendNoPw: 'この がめんからは おくれません。かいいんとうろくから やりなおして ください。',
+    mailFailHead: 'メールを おくれません でした',
+    mailFailSub: '%email% に にんしょうメールを おくれません でした。アカウントは かりとうろく されて います。したの ボタンで もういちど おためし ください。',
+    netErr: 'つうしんに しっぱい しました。でんぱの よい ところで もういちど おためし ください。',
     haveAccount: 'もう アカウントが ある かた',
     loginLink: 'ログイン →',
     invalidEmail: 'ただしい メールアドレスを いれて ください',
@@ -4903,6 +4919,14 @@ const _auth_T = {
     step1Inbox: '1. Check your inbox (also check spam folder)',
     step2Click: '2. Click the button in the email',
     step3Profile: '3. Complete your profile to finish',
+    resendBtn: 'Resend verification email',
+    resendWait: 'Resend (%s%s)',
+    resendOk: 'Sent again. Please check your inbox.',
+    resendFailed: 'Could not resend. Please wait a moment and try again.',
+    resendNoPw: 'Resending is not available here. Please sign up again.',
+    mailFailHead: 'We could not send the email',
+    mailFailSub: 'The verification email to %email% could not be sent. Your account is provisionally created. Please try again with the button below.',
+    netErr: 'Connection failed. Please check your network and try again.',
     haveAccount: 'Already have an account?',
     loginLink: 'Log in →',
     invalidEmail: 'Please enter a valid email address',
@@ -5018,7 +5042,7 @@ function _auth_heroSrc(bundle) {
       if (s && s.imageUrl && s.enabled !== false) {
         const url = String(s.imageUrl);
         const m = url.match(/drive\.google\.com\/thumbnail.*?[?&]id=([^&]+)/) || url.match(/drive\.google\.com\/file\/d\/([^/]+)/) || url.match(/drive\.google\.com\/uc.*?[?&]id=([^&]+)/);
-        return m ? 'https://drive.google.com/thumbnail?id=' + m[1] + '&sz=w800' : url;
+        return m ? 'https://drive.google.com/thumbnail?id=' + m[1] + '&sz=w1600' : url;
       }
     }
   } catch (e) {}
@@ -5095,6 +5119,12 @@ function _auth_Spin({
     name: "progress_activity",
     size: size
   }));
+}
+function _auth_humanErr(raw, at) {
+  const s = String(raw == null ? '' : raw).trim();
+  if (!s) return at.resendFailed;
+  if (/load failed|failed to fetch|networkerror|network request failed/i.test(s)) return at.netErr;
+  return s;
 }
 function _auth_ErrBox({
   msg
@@ -5575,6 +5605,8 @@ function ScreenSignup() {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
   const [sent, setSent] = useState(false);
+  const [sentMailOk, setSentMailOk] = useState(true);
+  const [sentMessage, setSentMessage] = useState('');
   const [agreedPrivacy, setAgreedPrivacy] = useState(false);
   const [agreedTerms, setAgreedTerms] = useState(false);
   const handleSubmit = async e => {
@@ -5598,7 +5630,9 @@ function ScreenSignup() {
     }
     setSubmitting(true);
     try {
-      await authApi.signupStart(email, password, A.lang);
+      const res = await authApi.signupStart(email, password, A.lang);
+      setSentMailOk(!(res && res.mailOk === false));
+      setSentMessage(res && res.message || '');
       setSent(true);
     } catch (err) {
       setError(err.message || at.signupFailed);
@@ -5608,7 +5642,10 @@ function ScreenSignup() {
   };
   if (sent) {
     return React.createElement(ScreenVerifySent, {
-      email: email
+      email: email,
+      password: password,
+      mailOk: sentMailOk,
+      serverMessage: sentMessage
     });
   }
   return React.createElement("div", {
@@ -5739,11 +5776,61 @@ function ScreenSignup() {
     }
   }))));
 }
+const _auth_RESEND_COOLDOWN_MS = 60000;
 function ScreenVerifySent({
-  email
+  email,
+  password,
+  mailOk,
+  serverMessage
 }) {
   const A = useMg();
   const at = _auth_t(A.lang);
+  const failed = mailOk === false;
+  const [busy, setBusy] = useState(false);
+  const [resendErr, setResendErr] = useState('');
+  const [resendOk, setResendOk] = useState(false);
+  const [coolUntil, setCoolUntil] = useState(() => failed ? 0 : Date.now() + _auth_RESEND_COOLDOWN_MS);
+  const [left, setLeft] = useState(failed ? 0 : Math.ceil(_auth_RESEND_COOLDOWN_MS / 1000));
+  const alive = useRef(true);
+  useEffect(() => () => {
+    alive.current = false;
+  }, []);
+  useEffect(() => {
+    const tick = () => setLeft(Math.max(0, Math.ceil((coolUntil - Date.now()) / 1000)));
+    tick();
+    if (coolUntil <= Date.now()) return undefined;
+    const id = setInterval(tick, 1000);
+    return () => clearInterval(id);
+  }, [coolUntil]);
+  const handleResend = async () => {
+    if (busy || left > 0) return;
+    if (!password) {
+      setResendErr(at.resendNoPw);
+      return;
+    }
+    setBusy(true);
+    setResendErr('');
+    setResendOk(false);
+    try {
+      const res = await authApi.signupStart(email, password, A.lang);
+      if (!alive.current) return;
+      if (res && res.mailOk === false) {
+        setResendErr(_auth_humanErr(res.message, at));
+      } else {
+        setResendOk(true);
+      }
+    } catch (err) {
+      if (!alive.current) return;
+      setResendErr(_auth_humanErr(err && err.message, at));
+    } finally {
+      if (alive.current) {
+        setBusy(false);
+        setCoolUntil(Date.now() + _auth_RESEND_COOLDOWN_MS);
+      }
+    }
+  };
+  const resendLabel = busy ? at.sending : left > 0 ? at.resendWait.replace('%s%', String(left)) : at.resendBtn;
+  const showFailed = failed && !resendOk;
   return React.createElement("div", {
     style: {
       minHeight: '100dvh',
@@ -5761,22 +5848,22 @@ function ScreenVerifySent({
       borderRadius: 36,
       display: 'grid',
       placeItems: 'center',
-      background: 'rgba(53,97,143,.10)',
-      border: '1px solid rgba(53,97,143,.25)',
+      background: showFailed ? 'rgba(191,150,32,.12)' : 'rgba(53,97,143,.10)',
+      border: '1px solid ' + (showFailed ? 'rgba(191,150,32,.32)' : 'rgba(53,97,143,.25)'),
       animation: 'mgLineUp .8s cubic-bezier(.16,1,.3,1) both'
     }
   }, React.createElement(Icon, {
-    name: "mark_email_read",
+    name: showFailed ? 'error' : 'mark_email_read',
     size: 32,
     style: {
-      color: 'var(--mg-accent, #35618f)'
+      color: showFailed ? '#8a6d1c' : 'var(--mg-accent, #35618f)'
     }
   })), React.createElement("div", {
     style: {
       marginBottom: 12
     }
   }, React.createElement(LineUp, {
-    lines: [at.signupSent],
+    lines: [showFailed ? at.mailFailHead : at.signupSent],
     size: 27,
     startDelay: 0.15
   })), React.createElement("div", {
@@ -5788,12 +5875,14 @@ function ScreenVerifySent({
       marginBottom: 20,
       animation: 'mgLineUp .8s cubic-bezier(.16,1,.3,1) .3s both'
     }
-  }, at.signupSentSubtitle.replace('%email%', email || '')), React.createElement("div", {
+  }, (showFailed ? at.mailFailSub : at.signupSentSubtitle).replace('%email%', email || '')), React.createElement("div", {
     style: {
       textAlign: 'left',
       animation: 'mgLineUp .8s cubic-bezier(.16,1,.3,1) .45s both'
     }
-  }, React.createElement(_auth_OkBox, {
+  }, showFailed && serverMessage ? React.createElement(_auth_ErrBox, {
+    msg: _auth_humanErr(serverMessage, at)
+  }) : null, !showFailed && React.createElement(_auth_OkBox, {
     icon: "checklist"
   }, React.createElement("strong", {
     style: {
@@ -5801,6 +5890,26 @@ function ScreenVerifySent({
       marginBottom: 6
     }
   }, at.nextSteps), at.step1Inbox, React.createElement("br", null), at.step2Click, React.createElement("br", null), at.step3Profile)), React.createElement("div", {
+    style: {
+      marginTop: 18,
+      textAlign: 'left',
+      animation: 'mgLineUp .8s cubic-bezier(.16,1,.3,1) .6s both'
+    }
+  }, resendErr ? React.createElement(_auth_ErrBox, {
+    msg: resendErr
+  }) : null, resendOk && !resendErr ? React.createElement("div", {
+    style: {
+      marginBottom: 14
+    }
+  }, React.createElement(_auth_OkBox, {
+    icon: "mark_email_read"
+  }, at.resendOk)) : null, React.createElement(PrimaryBtn, {
+    label: resendLabel,
+    icon: "mail",
+    onClick: handleResend,
+    disabled: busy || left > 0,
+    loading: busy
+  })), React.createElement("div", {
     style: {
       marginTop: 20
     }
@@ -6948,13 +7057,13 @@ function _home_dateParts(dateStr) {
     day: DAYS[d.getDay()]
   };
 }
-function _home_img(url) {
+function _home_img(url, w) {
   try {
     if (typeof driveImgUrl === 'function') return driveImgUrl(url);
   } catch (e) {}
   if (!url || typeof url !== 'string') return url || '';
   const m = url.match(/drive\.google\.com\/thumbnail.*?[?&]id=([^&]+)/) || url.match(/drive\.google\.com\/file\/d\/([^/]+)/) || url.match(/drive\.google\.com\/uc.*?[?&]id=([^&]+)/);
-  if (m) return 'https://drive.google.com/thumbnail?id=' + m[1] + '&sz=w800';
+  if (m) return 'https://drive.google.com/thumbnail?id=' + m[1] + '&sz=w' + (w || 800);
   return url;
 }
 function _home_newsTime(n) {
@@ -7076,9 +7185,9 @@ function TabHome() {
   };
   const bandImg = React.useMemo(() => {
     const slides = (Array.isArray(bundle.heroSlidesMobile) ? bundle.heroSlidesMobile : []).filter(s => s && s.imageUrl && s.enabled !== false);
-    if (slides[1] && slides[1].imageUrl) return _home_img(slides[1].imageUrl);
-    if (featured && (featured.heroImageUrl || featured.posterUrl)) return _home_img(featured.heroImageUrl || featured.posterUrl);
-    if (slides[0] && slides[0].imageUrl) return _home_img(slides[0].imageUrl);
+    if (slides[1] && slides[1].imageUrl) return _home_img(slides[1].imageUrl, 1600);
+    if (featured && (featured.heroImageUrl || featured.posterUrl)) return _home_img(featured.heroImageUrl || featured.posterUrl, 1600);
+    if (slides[0] && slides[0].imageUrl) return _home_img(slides[0].imageUrl, 1600);
     return '';
   }, [bundle.heroSlidesMobile, featured]);
   const titleLines = _shell_setTxt(settings, ['hero_headline', 'opening_main'], lang, t && t.hero && t.hero.title || '出会いが、\nまちを変えていく。').split('\n');
@@ -7691,16 +7800,6 @@ const _ev_T = {
     easy: 'ぜんぶ',
     en: 'All'
   },
-  chipMeetup: {
-    ja: '交流会',
-    easy: 'こうりゅうかい',
-    en: 'Meetup'
-  },
-  chipCulture: {
-    ja: '文化体験',
-    easy: 'ぶんか たいけん',
-    en: 'Culture'
-  },
   chipFree: {
     ja: '無料',
     easy: 'むりょう',
@@ -8087,13 +8186,10 @@ function _ev_venueLabel(ev, lang) {
   if (ev.format === 'multi') return lang === 'en' ? 'See each session' : lang === 'easy' ? 'かくセッションで かくにん' : '会場は各セッションで確認';
   return lang === 'en' ? 'TBA' : lang === 'easy' ? 'みてい' : '会場未定';
 }
-function _ev_img(url) {
-  try {
-    if (typeof driveImgUrl === 'function') return driveImgUrl(url);
-  } catch (e) {}
+function _ev_img(url, w) {
   if (!url || typeof url !== 'string') return url || '';
   const m = url.match(/drive\.google\.com\/thumbnail.*?[?&]id=([^&]+)/) || url.match(/drive\.google\.com\/file\/d\/([^/]+)/) || url.match(/drive\.google\.com\/uc.*?[?&]id=([^&]+)/);
-  if (m) return 'https://drive.google.com/thumbnail?id=' + m[1] + '&sz=w800';
+  if (m) return 'https://drive.google.com/thumbnail?id=' + m[1] + '&sz=w' + (w || 800);
   return url;
 }
 function _ev_regStatus(event, lang) {
@@ -8208,9 +8304,6 @@ function _ev_matchChip(ev, chip) {
   if (chip === 'easyja') {
     return !!(ev.title_easy && String(ev.title_easy).trim() || ev.summary_easy && String(ev.summary_easy).trim());
   }
-  const cat = String(ev.category || '') + ' ' + String(ev.category_en || '') + ' ' + String(ev.category_easy || '');
-  if (chip === 'meetup') return cat.indexOf('交流') >= 0 || /meetup|exchange/i.test(cat);
-  if (chip === 'culture') return cat.indexOf('文化') >= 0 || cat.indexOf('体験') >= 0 || /culture|experience/i.test(cat);
   return true;
 }
 function _ev_feeLabelList(ev, lang) {
@@ -8445,12 +8538,6 @@ function TabEvents() {
   const CHIPS = [{
     value: 'all',
     label: L(_ev_T.chipAll)
-  }, {
-    value: 'meetup',
-    label: L(_ev_T.chipMeetup)
-  }, {
-    value: 'culture',
-    label: L(_ev_T.chipCulture)
   }, {
     value: 'free',
     label: L(_ev_T.chipFree)
@@ -9004,7 +9091,7 @@ function SheetEventDetail({
     }, L(_ev_T.closedTitle)), React.createElement("div", null, L(_ev_T.closedBody)));
   } else {
     const title = _ev_i18nField(ev, 'title', lang) || ev.title || '';
-    const heroImg = _ev_img(ev.posterUrl || ev.heroImage || ev.thumbnail || '');
+    const heroImg = _ev_img(ev.posterUrl || ev.heroImage || ev.thumbnail || '', 1200);
     const dp = _ev_dateParts(ev.date);
     const dateLabel = typeof formatEventDate === 'function' && ev.date ? formatEventDate(ev.date) : ev.date || '';
     const timeLabel = _ev_timeRange(ev);
@@ -22367,8 +22454,10 @@ function _ni_newsTime(n) {
   const t = new Date(n.publishedAt || n.publishAt || n.date || 0).getTime();
   return isNaN(t) ? 0 : t;
 }
-function _ni_imgUrl(url) {
-  if (!url) return '';
+function _ni_imgUrl(url, w) {
+  if (!url || typeof url !== 'string') return url || '';
+  const m = url.match(/drive\.google\.com\/thumbnail.*?[?&]id=([^&]+)/) || url.match(/drive\.google\.com\/file\/d\/([^/]+)/) || url.match(/drive\.google\.com\/uc.*?[?&]id=([^&]+)/);
+  if (m) return 'https://drive.google.com/thumbnail?id=' + m[1] + '&sz=w' + (w || 800);
   try {
     if (typeof normalizeNewsImageUrl === 'function') return normalizeNewsImageUrl(url);
   } catch (e) {}
@@ -22773,7 +22862,7 @@ function SheetNewsDetail({
     label: "share",
     onClick: share
   }) : null);
-  const imgSrc = news ? _ni_imgUrl(news.imageUrl || news.coverImageUrl || news.thumbnailImageUrl) : '';
+  const imgSrc = news ? _ni_imgUrl(news.imageUrl || news.coverImageUrl || news.thumbnailImageUrl, 1200) : '';
   const bodyText = news ? _ni_i18nField(news, 'body', lang) || news.body || news.content || news.description || news.shortDescription || '(本文なし)' : '';
   const easyBody = news && lang !== 'easy' && news.body_easy && String(news.body_easy).trim() ? news.body_easy : '';
   const cat = news ? _ni_newsCat(news.category, lang) : '';
@@ -23008,7 +23097,7 @@ function SheetAbout({
       padding: '4px 22px 30px'
     }
   }, React.createElement(ImageSlot, {
-    src: _ni_imgUrl(heroImg),
+    src: _ni_imgUrl(heroImg, 1200),
     alt: "",
     style: {
       height: 200
@@ -24415,7 +24504,7 @@ function _shell_imgUrl(url) {
   } catch (e) {}
   if (!url || typeof url !== 'string') return url || '';
   const m = url.match(/drive\.google\.com\/thumbnail.*?[?&]id=([^&]+)/) || url.match(/drive\.google\.com\/file\/d\/([^/]+)/) || url.match(/drive\.google\.com\/uc.*?[?&]id=([^&]+)/);
-  if (m) return 'https://drive.google.com/thumbnail?id=' + m[1] + '&sz=w800';
+  if (m) return 'https://drive.google.com/thumbnail?id=' + m[1] + '&sz=w1600';
   return url;
 }
 function _shell_parseHash() {
