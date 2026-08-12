@@ -14152,6 +14152,18 @@ function _my_i18nField(obj, fieldName, lang) {
   }
   return obj[fieldName] || '';
 }
+function _my_dayN(r, ev) {
+  try {
+    if (!r || !r.sessionDate || !ev || !ev.date || ev.format !== 'multi') return 0;
+    const a2 = new Date(String(ev.date) + 'T00:00:00'),
+      b2 = new Date(String(r.sessionDate) + 'T00:00:00');
+    if (isNaN(a2) || isNaN(b2)) return 0;
+    const n = Math.round((b2 - a2) / 86400000) + 1;
+    return n >= 1 && n <= 99 ? n : 0;
+  } catch (e) {
+    return 0;
+  }
+}
 function _my_dateParts(dateStr) {
   if (!dateStr) return null;
   const m = String(dateStr).match(/(\d{4})[-/.](\d{1,2})[-/.](\d{1,2})/);
@@ -14430,7 +14442,7 @@ function TabMyPage() {
       dead = true;
     };
   }, [userKey, albumOn]);
-  const albumByEvent = React.useMemo(() => {
+  const albumsByEventList = React.useMemo(() => {
     const m = {};
     (albums || []).forEach(a => {
       if (!a) return;
@@ -14438,10 +14450,23 @@ function TabMyPage() {
       const urls = Array.isArray(a.imageUrls) ? a.imageUrls : Array.isArray(a.urls) ? a.urls : [];
       if (a.status === '下書き' || a.status === 'アーカイブ') return;
       if (!k || urls.length === 0) return;
-      if (!m[k]) m[k] = a;
+      (m[k] = m[k] || []).push(a);
     });
     return m;
   }, [albums]);
+  const _my_pickAlbum = (evKey2, r2) => {
+    const list = albumsByEventList[evKey2] || [];
+    if (list.length === 0) return null;
+    const sd = String(r2 && r2.sessionDate || '');
+    if (sd) {
+      const hit = list.find(a2 => String(a2.shotDate || '') === sd);
+      if (hit) return hit;
+      const undated = list.find(a2 => !a2.shotDate);
+      if (undated) return undated;
+      return list.every(a2 => !a2.shotDate) ? list[0] : null;
+    }
+    return list[0];
+  };
   const [pushState, setPushState] = useState('default');
   useEffect(() => {
     if (typeof window === 'undefined' || !('Notification' in window) || !('serviceWorker' in navigator) || !('PushManager' in window)) {
@@ -14865,7 +14890,7 @@ function TabMyPage() {
     const title = _my_i18nField(ev, 'title', lang) || ev.title || '';
     const evKey = String(r.eventId || ev.id || '');
     const sv = surveyOn ? surveyByEvent[evKey] : null;
-    const album = albumOn ? albumByEvent[evKey] : null;
+    const album = albumOn ? _my_pickAlbum(evKey, r) : null;
     return React.createElement("div", {
       key: r.regId || i,
       style: {
@@ -14882,7 +14907,21 @@ function TabMyPage() {
         color: 'var(--mg-ink4, #5b7796)',
         flex: 'none'
       }
-    }, dp ? dp.md2 : '—'), React.createElement("span", {
+    }, dp ? dp.md2 : '—'), (() => {
+      const n2 = _my_dayN(r, ev);
+      return n2 ? React.createElement("span", {
+        style: {
+          flex: 'none',
+          fontSize: 10,
+          fontWeight: 600,
+          padding: '1px 7px',
+          borderRadius: 8,
+          background: 'rgba(53,97,143,.10)',
+          border: '1px solid rgba(53,97,143,.20)',
+          color: 'var(--mg-accent, #35618f)'
+        }
+      }, "Day", n2) : null;
+    })(), React.createElement("span", {
       className: "mg-clamp1",
       style: {
         flex: 1,
@@ -15887,6 +15926,19 @@ function _eng_timeRange(ev) {
   if (s && e) return s + ' — ' + e;
   return s || '';
 }
+function _eng_dayN(reg) {
+  try {
+    const ev = reg && reg.event;
+    if (!reg || !reg.sessionDate || !ev || !ev.date || ev.format !== 'multi') return 0;
+    const a2 = new Date(String(ev.date) + 'T00:00:00'),
+      b2 = new Date(String(reg.sessionDate) + 'T00:00:00');
+    if (isNaN(a2) || isNaN(b2)) return 0;
+    const n = Math.round((b2 - a2) / 86400000) + 1;
+    return n >= 1 && n <= 99 ? n : 0;
+  } catch (e) {
+    return 0;
+  }
+}
 function _eng_fmtMD(dateStr) {
   if (!dateStr) return '';
   const d = new Date(String(dateStr) + 'T00:00:00');
@@ -16444,7 +16496,21 @@ function SheetTicket({
         color: 'var(--mg-accent, #35618f)',
         flex: 'none'
       }
-    }), React.createElement("span", null, _eng_fmtDateLong(dateStr, lang), timeRange ? '　' + timeRange : '')) : null, venue ? React.createElement("div", {
+    }), (() => {
+      const n2 = _eng_dayN(reg);
+      return n2 ? React.createElement("span", {
+        style: {
+          flex: 'none',
+          fontSize: 11,
+          fontWeight: 600,
+          padding: '2px 8px',
+          borderRadius: 9,
+          background: 'rgba(53,97,143,.10)',
+          border: '1px solid rgba(53,97,143,.22)',
+          color: 'var(--mg-accent, #35618f)'
+        }
+      }, "Day", n2) : null;
+    })(), React.createElement("span", null, _eng_fmtDateLong(dateStr, lang), timeRange ? '　' + timeRange : '')) : null, venue ? React.createElement("div", {
       className: "mg-ui",
       style: {
         display: 'flex',
