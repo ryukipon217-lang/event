@@ -11309,12 +11309,10 @@ function SheetRegister({
     (async () => {
       try {
         const token = authStore.getToken();
-        const myRes = await authApi.listMyCoupons(token);
+        const [myRes, evRes] = await Promise.all([authApi.listMyCoupons(token), authApi.listEventApplicableCoupons(token, eventId)]);
         if (cancelled) return;
         const usable = (myRes.coupons || []).filter(c => c.usable);
         setMyCoupons(usable);
-        const evRes = await authApi.listEventApplicableCoupons(token, eventId);
-        if (cancelled) return;
         const unclaimed = (evRes.coupons || []).filter(c => !c.claimed);
         setUnclaimedEventCoupons(unclaimed);
       } catch (e) {}
