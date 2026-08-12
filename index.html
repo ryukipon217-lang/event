@@ -7273,7 +7273,7 @@ function TabHome() {
     const reg = Number(featured.registered) || 0;
     fSpots = cap > 0 ? Math.max(0, cap - reg) : null;
     fFull = featured.status === '満員' || cap > 0 && fSpots === 0;
-    fDayLabel = fDp ? fDp.day : featured.format === 'multi' && featured.sessionCount ? featured.sessionCount + ' DAYS' : '';
+    fDayLabel = featured.format === 'multi' ? featured.sessionCount ? featured.sessionCount + ' DAYS' : L(_home_T.multiDay) : fDp ? fDp.day : '';
   }
   let surveyTitle = '';
   if (showSurvey) {
@@ -7908,6 +7908,11 @@ const _ev_T = {
     easy: 'もうしこみに すすむ',
     en: 'Proceed to register'
   },
+  loadingDays: {
+    ja: '日程を読み込み中…',
+    easy: 'ひにちを よみこみちゅう…',
+    en: 'Loading dates…'
+  },
   loginProceed: {
     ja: 'ログインして申込',
     easy: 'ログインして もうしこむ',
@@ -8220,6 +8225,17 @@ function _ev_timeRange(ev) {
   const e = _ev_fmtTime(ev.endTime);
   if (s && e) return s + ' — ' + e;
   return s || '';
+}
+function _ev_dayCount(ev) {
+  try {
+    if (!ev || !ev.date || !ev.endDate) return 0;
+    const a2 = new Date(String(ev.date) + 'T00:00:00'),
+      b2 = new Date(String(ev.endDate) + 'T00:00:00');
+    if (isNaN(a2) || isNaN(b2)) return 0;
+    return Math.round((b2 - a2) / 86400000) + 1;
+  } catch (e) {
+    return 0;
+  }
 }
 function _ev_dateParts(dateStr) {
   if (!dateStr) return null;
@@ -8718,7 +8734,18 @@ function TabEvents() {
         letterSpacing: '.12em',
         color: 'var(--mg-ink4, #5b7796)'
       }
-    }, dp.day)) : React.createElement("div", null, React.createElement(Icon, {
+    }, dp.day), ev.format === 'multi' ? React.createElement("div", {
+      style: {
+        fontSize: 9,
+        letterSpacing: '.06em',
+        color: 'var(--mg-accent, #35618f)',
+        fontWeight: 500,
+        marginTop: 2
+      }
+    }, (() => {
+      const n2 = Number(ev.sessionCount) || _ev_dayCount(ev);
+      return n2 > 1 ? lang === 'en' ? n2 + ' DAYS' : '全' + n2 + '日' : L(_ev_T.multiDay);
+    })()) : null) : React.createElement("div", null, React.createElement(Icon, {
       name: "calendar_month",
       size: 24,
       style: {
@@ -8822,6 +8849,9 @@ function SheetEventDetail({
   const [selectedSessionIds, setSelectedSessionIds] = useState([]);
   const [regionFilter, setRegionFilter] = useState('all');
   const _hydrated = useRef(false);
+  const [sessLoaded, setSessLoaded] = useState(false);
+  const [regsLoaded, setRegsLoaded] = useState(false);
+  const _defaulted = useRef(false);
   useEffect(() => {
     if (!open || !eventId) return undefined;
     let cancelled = false;
@@ -8842,9 +8872,19 @@ function SheetEventDetail({
       } catch (e) {}
       return null;
     })();
+    _defaulted.current = false;
+    setRegsLoaded(false);
+    let cachedSess = null;
+    try {
+      if (typeof getSwrCached === 'function') {
+        const cs = getSwrCached('evsess:' + eventId);
+        if (Array.isArray(cs)) cachedSess = cs;
+      }
+    } catch (e) {}
     setEv(cachedEv);
-    setSessions([]);
+    setSessions(cachedSess || []);
     setActivities([]);
+    setSessLoaded(!!cachedSess);
     setLoading(!cachedEv);
     if (typeof fetchEventActivities === 'function') {
       fetchEventActivities(eventId).then(acts => {
@@ -8856,8 +8896,17 @@ function SheetEventDetail({
       if (sessKicked || typeof fetchEventSessions !== 'function') return;
       sessKicked = true;
       fetchEventSessions(eventId).then(d => {
-        if (!cancelled) setSessions(Array.isArray(d) ? d : []);
-      }).catch(() => {});
+        if (cancelled) return;
+        if (Array.isArray(d)) {
+          setSessions(d);
+          try {
+            if (typeof setSwrCache === 'function') setSwrCache('evsess:' + eventId, d);
+          } catch (e) {}
+        }
+        setSessLoaded(true);
+      }).catch(() => {
+        if (!cancelled) setSessLoaded(true);
+      });
     };
     if (cachedEv && cachedEv.format === 'multi') kickSessions();
     (async () => {
@@ -8881,6 +8930,7 @@ function SheetEventDetail({
     if (!open) return undefined;
     if (!user) {
       setMyRegs([]);
+      setRegsLoaded(true);
       return undefined;
     }
     let cancelled = false;
@@ -8953,6 +9003,20 @@ function SheetEventDetail({
     });
     return map;
   }, [myRegs, sessions, eventId]);
+  useEffect(() => {
+    if (!open || !isMulti || _defaulted.current) return;
+    if (!sessLoaded || !regsLoaded || sessions.length === 0) return;
+    if (selectedSessionIds.length > 0) {
+      _defaulted.current = true;
+      return;
+    }
+    const def = sessions.filter(s2 => {
+      const st2 = sessionStates[s2.id] || 'available';
+      return st2 === 'available' || st2 === 'cancelled';
+    }).map(s2 => s2.id);
+    _defaulted.current = true;
+    if (def.length > 0) setSelectedSessionIds(def);
+  }, [open, isMulti, sessLoaded, regsLoaded, sessions, sessionStates]);
   const stateValues = Object.keys(sessionStates).map(k => sessionStates[k]);
   const hasAvailableDayInEvent = isMulti && stateValues.some(s => s === 'available' || s === 'cancelled');
   const isLocked = isMulti ? alreadyRegistered && !hasAvailableDayInEvent : !!(myReg && myReg.paid) || alreadyRegistered;
@@ -9085,7 +9149,7 @@ function SheetEventDetail({
       } else if (!user) {
         label = L(_ev_T.loginProceed);
       } else if (isMulti) {
-        if (n === 0) label = L(_ev_T.selectFirst);else {
+        if (!sessLoaded) label = L(_ev_T.loadingDays);else if (n === 0) label = L(_ev_T.selectFirst);else {
           const hasActive = stateValues.indexOf('active') >= 0;
           const allCancelled = stateValues.length > 0 && stateValues.every(s => s === 'cancelled' || s === 'pending');
           if (allCancelled) label = L(_ev_T.reapplyN).replace('%n%', n);else if (hasActive) label = L(_ev_T.addN).replace('%n%', n);else if (n > 1) label = String(t.detail && t.detail.sessionsRegister || L(_ev_T.proceed)).replace('{n}', n);
@@ -9094,7 +9158,7 @@ function SheetEventDetail({
       footer = React.createElement(PrimaryBtn, {
         label: label,
         icon: "edit_note",
-        disabled: cantRegister || isMulti && n === 0,
+        disabled: cantRegister || isMulti && (!sessLoaded || n === 0),
         onClick: handleRegister
       });
     }
@@ -9179,7 +9243,11 @@ function SheetEventDetail({
     const title = _ev_i18nField(ev, 'title', lang) || ev.title || '';
     const heroImg = _ev_img(ev.posterUrl || ev.heroImage || ev.thumbnail || '', 1200);
     const dp = _ev_dateParts(ev.date);
-    const dateLabel = typeof formatEventDate === 'function' && ev.date ? formatEventDate(ev.date) : ev.date || '';
+    let dateLabel = typeof formatEventDate === 'function' && ev.date ? formatEventDate(ev.date) : ev.date || '';
+    if (isMultiEvt && ev.endDate && String(ev.endDate) !== String(ev.date)) {
+      const endL = typeof formatEventDate === 'function' ? formatEventDate(ev.endDate) : String(ev.endDate);
+      dateLabel = dateLabel + ' 〜 ' + endL;
+    }
     const timeLabel = _ev_timeRange(ev);
     const venueQuery = ev.address || ev.venue || '';
     const mapsHref = venueQuery ? 'https://www.google.com/maps/dir/?api=1&destination=' + encodeURIComponent(venueQuery) : '';
@@ -9437,7 +9505,26 @@ function SheetEventDetail({
       label: r + ' (' + sessions.filter(s => String(s.region || '').trim() === r).length + ')',
       on: regionFilter === r,
       onClick: () => setRegionFilter(r)
-    })))) : null, React.createElement("div", {
+    })))) : null, !sessLoaded ? React.createElement("div", null, React.createElement("div", {
+      className: "mg-ph",
+      style: {
+        height: 72,
+        borderRadius: 18,
+        marginBottom: 11
+      }
+    }), React.createElement("div", {
+      className: "mg-ph",
+      style: {
+        height: 72,
+        borderRadius: 18,
+        marginBottom: 8
+      }
+    }), React.createElement("div", {
+      style: {
+        fontSize: 11.5,
+        color: 'var(--mg-ink5, #8ba0b6)'
+      }
+    }, L(_ev_T.loadingDays))) : null, React.createElement("div", {
       style: {
         display: 'flex',
         flexDirection: 'column',
@@ -9908,6 +9995,21 @@ const _reg_T = {
     easy: 'ぜんぶで',
     en: 'Total'
   },
+  pickDays: {
+    ja: '参加する日程',
+    easy: 'さんかする ひにち',
+    en: 'Select dates'
+  },
+  daysLoading: {
+    ja: '日程を読み込んでいます…',
+    easy: 'ひにちを よみこんで います…',
+    en: 'Loading dates…'
+  },
+  pickAtLeast: {
+    ja: '1日以上選択してください',
+    easy: '1にち いじょう えらんで ください',
+    en: 'Select at least one date'
+  },
   fee: {
     ja: '参加費',
     easy: 'さんかひ',
@@ -10271,12 +10373,28 @@ function _reg_fmtDate(dateStr, lang) {
   const day = lang === 'en' ? ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'][d.getDay()] : ['日', '月', '火', '水', '木', '金', '土'][d.getDay()];
   return yyyy + '.' + mm + '.' + dd + ' (' + day + ')';
 }
+function _reg_sessLabel(s, lang) {
+  try {
+    const d = new Date(String(s.date) + 'T00:00:00');
+    const day = isNaN(d) ? '' : ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'][d.getDay()];
+    let out = isNaN(d) ? String(s.date || '') : d.getMonth() + 1 + '.' + d.getDate() + (day ? ' ' + day : '');
+    if (s.name) out += '　' + s.name;
+    if (s.startTime) out += '  ' + s.startTime + (s.endTime ? '–' + s.endTime : '');
+    return out;
+  } catch (e) {
+    return String(s && s.date || '');
+  }
+}
 function _reg_shortDate(ev) {
   if (!ev || !ev.date) return '';
   const d = new Date(String(ev.date) + 'T00:00:00');
   if (isNaN(d.getTime())) return String(ev.date);
   const day = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'][d.getDay()];
   let s = d.getMonth() + 1 + '.' + d.getDate() + ' ' + day;
+  if (ev.format === 'multi' && ev.endDate && String(ev.endDate) !== String(ev.date)) {
+    const e2 = new Date(String(ev.endDate) + 'T00:00:00');
+    if (!isNaN(e2.getTime())) return d.getMonth() + 1 + '.' + d.getDate() + '–' + (e2.getMonth() + 1) + '.' + e2.getDate();
+  }
   if (ev.time) s += ' ' + String(ev.time);
   return s;
 }
@@ -11223,15 +11341,32 @@ function SheetRegister({
     setDlg(null);
     dlgResolveRef.current = null;
   }, [open, eventId]);
-  const selectedSessionIds = React.useMemo(() => {
+  const hashSessionIds = React.useMemo(() => {
     if (!open) return [];
     const sessionsParam = _reg_hashQuery().get('sessions');
     if (!sessionsParam) return [];
     return sessionsParam.split(',').filter(Boolean);
   }, [open, eventId]);
+  const [selSessIds, setSelSessIds] = useState([]);
+  const [regSessLoaded, setRegSessLoaded] = useState(false);
+  const _regDefaulted = useRef(false);
+  useEffect(() => {
+    if (!open) return;
+    _regDefaulted.current = false;
+    setSelSessIds(hashSessionIds);
+  }, [open, eventId]);
+  const selectedSessionIds = selSessIds;
   useEffect(() => {
     if (!open || !eventId) return;
     let cancelled = false;
+    setRegSessLoaded(false);
+    try {
+      const cs = typeof getSwrCached === 'function' ? getSwrCached('evsess:' + eventId) : null;
+      if (Array.isArray(cs) && cs.length) {
+        setRegisterSessions(cs.slice().sort((x, y) => String(x.date || '').localeCompare(String(y.date || ''))));
+        setRegSessLoaded(true);
+      }
+    } catch (e) {}
     (async () => {
       try {
         const data = typeof fetchEventSessions === 'function' ? await fetchEventSessions(eventId) : null;
@@ -11242,8 +11377,14 @@ function SheetRegister({
             return da.localeCompare(db);
           });
           setRegisterSessions(sorted);
+          try {
+            if (typeof setSwrCache === 'function') setSwrCache('evsess:' + eventId, sorted);
+          } catch (e2) {}
         }
-      } catch (e) {}
+        if (!cancelled) setRegSessLoaded(true);
+      } catch (e) {
+        if (!cancelled) setRegSessLoaded(true);
+      }
     })();
     return () => {
       cancelled = true;
@@ -11304,6 +11445,25 @@ function SheetRegister({
   const error = !loading && !event ? L(_reg_T.notFound) : '';
   const ev = event;
   useEffect(() => {
+    if (!open || _regDefaulted.current) return;
+    if (!ev || ev.format !== 'multi' || !regSessLoaded || registerSessions.length === 0) return;
+    if (selSessIds.length > 0) {
+      _regDefaulted.current = true;
+      return;
+    }
+    const myActive = {};
+    try {
+      (A && A.regs || []).forEach(r => {
+        if (String(r.eventId) !== String(eventId)) return;
+        if (r.status === 'キャンセル' || r.status === '返金') return;
+        if (r.sessionId) myActive[r.sessionId] = true;
+      });
+    } catch (e) {}
+    const def = registerSessions.filter(s2 => !myActive[s2.id]).map(s2 => s2.id);
+    _regDefaulted.current = true;
+    if (def.length > 0) setSelSessIds(def);
+  }, [open, ev, regSessLoaded, registerSessions, selSessIds]);
+  useEffect(() => {
     if (!open || !auth.user || !eventId) return;
     let cancelled = false;
     (async () => {
@@ -11352,7 +11512,7 @@ function SheetRegister({
   const policyText = evtPolicy || fallbackPolicy || DEFAULT_POLICY[lang] || DEFAULT_POLICY.ja;
   const hasPolicy = true;
   const isMultiNoSession = !!(ev && ev.format === 'multi' && selectedSessionIds.length === 0);
-  const canSubmit = hasPolicy && agreedPolicy && !isMultiNoSession && (isFree || isPaid && paymentMethod);
+  const canSubmit = hasPolicy && agreedPolicy && !isMultiNoSession && !(ev && ev.format === 'multi' && !regSessLoaded) && (isFree || isPaid && paymentMethod);
   const calculateSubTotal = () => {
     if (!isPaid || !ev) return 0;
     const isMultiEvent = ev.format === 'multi';
@@ -12344,7 +12504,81 @@ function SheetRegister({
         color: 'var(--mg-accent, #35618f)',
         fontWeight: 500
       }
-    }, L(_reg_T.free)) : null), card(React.createElement("div", null, secTitle('01 — ' + L(_reg_T.sec1)), renderBookingDetails(), isPaid && renderCoupon(), React.createElement("div", {
+    }, L(_reg_T.free)) : null), card(React.createElement("div", null, secTitle('01 — ' + L(_reg_T.sec1)), renderBookingDetails(), ev.format === 'multi' ? React.createElement("div", {
+      style: {
+        marginTop: 14
+      }
+    }, React.createElement("div", {
+      style: {
+        fontSize: 12,
+        fontWeight: 500,
+        color: 'var(--mg-ink4, #5b7796)',
+        marginBottom: 8
+      }
+    }, L(_reg_T.pickDays)), !regSessLoaded ? React.createElement("div", null, React.createElement("div", {
+      className: "mg-ph",
+      style: {
+        height: 46,
+        borderRadius: 12,
+        marginBottom: 8
+      }
+    }), React.createElement("div", {
+      className: "mg-ph",
+      style: {
+        height: 46,
+        borderRadius: 12
+      }
+    }), React.createElement("div", {
+      style: {
+        fontSize: 11.5,
+        color: 'var(--mg-ink5, #8ba0b6)',
+        marginTop: 8
+      }
+    }, L(_reg_T.daysLoading))) : registerSessions.map(s2 => {
+      const on = selSessIds.indexOf(s2.id) >= 0;
+      return React.createElement("div", {
+        key: s2.id,
+        className: "mg-tap",
+        onClick: () => setSelSessIds(on ? selSessIds.filter(x => x !== s2.id) : selSessIds.concat([s2.id])),
+        style: {
+          display: 'flex',
+          alignItems: 'center',
+          gap: 10,
+          padding: '11px 12px',
+          borderRadius: 12,
+          marginBottom: 8,
+          cursor: 'pointer',
+          border: '1px solid ' + (on ? 'var(--mg-accent, #35618f)' : 'rgba(34,49,74,.16)'),
+          background: on ? 'rgba(53,97,143,.08)' : 'rgba(255,255,255,.6)'
+        }
+      }, React.createElement(Icon, {
+        name: on ? 'check_circle' : 'radio_button_unchecked',
+        size: 20,
+        style: {
+          color: on ? 'var(--mg-accent, #35618f)' : 'var(--mg-ink5, #8ba0b6)',
+          flex: 'none'
+        }
+      }), React.createElement("div", {
+        style: {
+          flex: 1,
+          minWidth: 0,
+          fontSize: 13.5,
+          fontWeight: 500
+        }
+      }, _reg_sessLabel(s2, lang)), Number(s2.fee) > 0 ? React.createElement("span", {
+        className: "mg-num",
+        style: {
+          fontSize: 12.5,
+          flex: 'none'
+        }
+      }, "\xA5", Number(s2.fee).toLocaleString()) : null);
+    }), regSessLoaded && registerSessions.length > 0 && selSessIds.length === 0 ? React.createElement("div", {
+      style: {
+        fontSize: 11.5,
+        color: '#8f3542',
+        marginTop: 2
+      }
+    }, L(_reg_T.pickAtLeast)) : null) : null, isPaid && renderCoupon(), React.createElement("div", {
       style: {
         display: 'flex',
         justifyContent: 'space-between',
