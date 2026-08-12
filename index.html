@@ -8237,6 +8237,36 @@ function _ev_dayCount(ev) {
     return 0;
   }
 }
+function _ev_dayItems(ev) {
+  try {
+    if (Array.isArray(ev.sessions) && ev.sessions.length > 1) {
+      return ev.sessions.slice().sort((x, y) => String(x.date || '').localeCompare(String(y.date || ''))).map((x, i) => ({
+        n: Number(x.order) || i + 1,
+        date: x.date || ''
+      }));
+    }
+    const n = _ev_dayCount(ev);
+    if (n <= 1) return [];
+    const out = [];
+    const d0 = new Date(String(ev.date) + 'T00:00:00');
+    if (isNaN(d0.getTime())) return [];
+    for (let i = 0; i < Math.min(n, 7); i++) {
+      const d2 = new Date(d0.getTime() + i * 86400000);
+      out.push({
+        n: i + 1,
+        date: d2.getMonth() + 1 + '.' + d2.getDate()
+      });
+    }
+    return out;
+  } catch (e) {
+    return [];
+  }
+}
+function _ev_md(dateStr) {
+  const m = String(dateStr || '').match(/(\d{4})-(\d{1,2})-(\d{1,2})/);
+  if (m) return +m[2] + '.' + +m[3];
+  return String(dateStr || '');
+}
 function _ev_dateParts(dateStr) {
   if (!dateStr) return null;
   const m = String(dateStr).match(/(\d{4})[-/.](\d{1,2})[-/.](\d{1,2})/);
@@ -8817,7 +8847,46 @@ function TabEvents() {
       style: {
         color: 'var(--mg-accent, #35618f)'
       }
-    }), fee) : null)), React.createElement(Icon, {
+    }), fee) : null), ev.format === 'multi' ? (() => {
+      const days = _ev_dayItems(ev);
+      if (days.length < 2) return null;
+      return React.createElement("div", {
+        style: {
+          display: 'flex',
+          flexWrap: 'wrap',
+          gap: 6,
+          marginTop: 7
+        }
+      }, days.slice(0, 4).map(d2 => React.createElement("span", {
+        key: d2.n,
+        style: {
+          fontSize: 10.5,
+          padding: '3px 8px',
+          borderRadius: 10,
+          background: 'rgba(53,97,143,.08)',
+          border: '1px solid rgba(53,97,143,.16)',
+          color: 'var(--mg-ink3, #3d5877)',
+          display: 'inline-flex',
+          gap: 4,
+          alignItems: 'baseline'
+        }
+      }, React.createElement("span", {
+        style: {
+          fontWeight: 600
+        }
+      }, "Day", d2.n), React.createElement("span", {
+        className: "mg-num",
+        style: {
+          fontSize: 11
+        }
+      }, _ev_md(d2.date)))), days.length > 4 ? React.createElement("span", {
+        style: {
+          fontSize: 10.5,
+          color: 'var(--mg-ink4, #5b7796)',
+          alignSelf: 'center'
+        }
+      }, "+", days.length - 4) : null);
+    })() : null), React.createElement(Icon, {
       name: "chevron_right",
       size: 20,
       style: {
