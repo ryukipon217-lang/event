@@ -728,9 +728,25 @@ select.mg-field,
   color:var(--mg-accent);
 }
 
+/* (WC-M4) CJK禁則システム: 見出しは語中で折らない。auto-phraseはChromiumで文節折返し、
+   非対応環境はkeep-allへカスケード。overflow-wrap:anywhereで長大語のはみ出しのみ許可 */
+.mg-h-hero,.mg-h-tab,.mg-h-article,.mg-h-section{
+  word-break:keep-all;
+  word-break:auto-phrase;
+  overflow-wrap:anywhere;
+  text-wrap:pretty;
+  line-break:strict;
+}
+
 /* 写真上の文字 */
 .mg-onphoto{ color:#fbfcfd; text-shadow:var(--mg-ts); }
 .mg-onphoto-strong{ color:#fbfcfd; text-shadow:var(--mg-ts-strong); }
+/* (WC-M5) カバー写真なし時の適応インク: 「写真前提の白」が写真撤去後に1.4:1へ落ちる問題の根治。
+   写真設定時は現行の白+シャドウを完全温存し、無写真時のみ紺インクへ */
+#mg-app.mg-nocover .mg-onphoto,#mg-app.mg-nocover .mg-onphoto-strong{ color:var(--mg-ink2,#2b3d57); text-shadow:none; }
+#mg-app.mg-nocover{ --mg-onphoto-num:#4c6584; }
+/* (WC-M1) タブバー非表示(ゲート等)時はCookieバーを画面最下部へドック */
+#mg-app.mg-chromeless .mg-cookiebar{ bottom:calc(16px + env(safe-area-inset-bottom,0px)) !important; }
 
 /* 行数制限 */
 .mg-clamp1{ display:-webkit-box; -webkit-line-clamp:1; -webkit-box-orient:vertical; overflow:hidden; }
@@ -919,7 +935,7 @@ const I18N = {
     },
     hero: {
       eyebrow: '一般社団法人 connec+a',
-      title: '出会いが、\nまちを変えていく。',
+      title: '出会いが、\nまちを\n変えていく。',
       sub: '在日外国人留学生と日本人をつなぐ、参加型の国際交流プラットフォーム。',
       cta1: '直近のイベントを見る',
       cta2: '私たちについて'
@@ -1005,7 +1021,7 @@ const I18N = {
     },
     lang: {
       ja: '日本語',
-      easy: 'やさしい日本語',
+      easy: 'やさしい にほんご',
       en: 'English'
     },
     words: ['出会い', '対話', '文化', '仲間'],
@@ -1141,7 +1157,7 @@ const I18N = {
     },
     lang: {
       ja: '日本語',
-      easy: 'やさしい日本語',
+      easy: 'やさしい にほんご',
       en: 'English'
     },
     words: ['であい', 'はなし', 'ぶんか', 'なかま'],
@@ -1277,7 +1293,7 @@ const I18N = {
     },
     lang: {
       ja: '日本語',
-      easy: 'やさしい日本語',
+      easy: 'やさしい にほんご',
       en: 'English'
     },
     words: ['MEETING', 'DIALOGUE', 'CULTURE', 'CARE'],
@@ -3663,6 +3679,17 @@ function CookieConsent({
       }
     } catch (e) {}
   }, []);
+  React.useEffect(() => {
+    if (!visible) return;
+    try {
+      document.documentElement.style.setProperty('--mg-cookie-h', '72px');
+    } catch (e) {}
+    return () => {
+      try {
+        document.documentElement.style.removeProperty('--mg-cookie-h');
+      } catch (e) {}
+    };
+  }, [visible]);
   function accept() {
     try {
       localStorage.setItem('connecta_cookie_consent', JSON.stringify({
@@ -3675,70 +3702,59 @@ function CookieConsent({
   if (!visible) return null;
   return React.createElement("div", {
     role: "dialog",
+    className: "mg-cookiebar",
     "aria-label": lang === 'en' ? 'Cookie consent' : 'Cookie同意',
     style: {
       position: 'fixed',
-      left: 16,
-      right: 16,
-      bottom: 16,
+      left: 14,
+      right: 14,
+      bottom: 'calc(92px + env(safe-area-inset-bottom, 0px))',
       maxWidth: 480,
       margin: '0 auto',
       background: 'var(--mg-accent, #35618f)',
       color: '#f2f7fc',
-      padding: '20px 20px',
-      zIndex: 9999,
-      boxShadow: '0 12px 40px rgba(34,49,74,0.25)',
-      borderRadius: 20,
-      animation: 'mgLineUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) both'
+      padding: '10px 14px',
+      zIndex: 39,
+      boxShadow: '0 8px 28px rgba(34,49,74,0.3)',
+      borderTop: '1px solid rgba(255,255,255,0.18)',
+      borderRadius: 16,
+      display: 'flex',
+      alignItems: 'center',
+      gap: 10,
+      animation: 'mgLineUp 0.32s cubic-bezier(0.32, 0.72, 0, 1) both'
     }
-  }, React.createElement("div", {
+  }, React.createElement("p", {
     style: {
-      fontSize: 10,
-      letterSpacing: '0.2em',
-      fontFamily: "'Zen Kaku Gothic New', 'Hiragino Sans', sans-serif",
-      opacity: 0.7,
-      marginBottom: 8
-    }
-  }, "COOKIES"), React.createElement("p", {
-    style: {
-      fontSize: 13,
-      lineHeight: 1.6,
-      margin: '0 0 16px',
+      flex: 1,
+      minWidth: 0,
+      fontSize: 12,
+      lineHeight: 1.5,
+      margin: 0,
       fontFamily: "'Zen Kaku Gothic New', 'Hiragino Sans', sans-serif"
     }
-  }, lang === 'en' ? 'We use cookies to improve your experience. By using this site, you accept our use of cookies.' : lang === 'easy' ? 'このサイトは、Cookie を つかいます。サイトを つかうと、どういしたことに なります。' : '当サイトでは、サービス向上のためCookieを使用しています。続行することで、Cookieの使用に同意したものとみなされます。'), React.createElement("div", {
+  }, lang === 'en' ? 'We use cookies to improve your experience.' : lang === 'easy' ? 'Cookie を つかいます。' : 'サービス向上のためCookieを使用します。', ' ', React.createElement("a", {
+    href: "#/privacy",
     style: {
-      display: 'flex',
-      gap: 12,
-      alignItems: 'center',
-      flexWrap: 'wrap'
+      color: 'rgba(255,255,255,0.72)',
+      textDecoration: 'underline'
     }
-  }, React.createElement("button", {
+  }, lang === 'en' ? 'Policy' : 'ポリシー')), React.createElement("button", {
     onClick: accept,
     style: {
-      padding: '8px 20px',
+      flex: 'none',
+      height: 32,
+      padding: '0 16px',
       background: '#ffffff',
       color: 'var(--mg-accent, #35618f)',
       border: 'none',
-      borderRadius: 19,
-      fontSize: 13,
+      borderRadius: 16,
+      fontSize: 12.5,
       fontWeight: 600,
       fontFamily: "'Zen Kaku Gothic New', 'Hiragino Sans', sans-serif",
       letterSpacing: '0.04em',
-      cursor: 'pointer',
-      transition: 'all 0.25s cubic-bezier(0.4, 0, 0.2, 1)'
-    },
-    onMouseEnter: e => e.currentTarget.style.background = '#e8eef8',
-    onMouseLeave: e => e.currentTarget.style.background = '#ffffff'
-  }, lang === 'en' ? 'Accept' : '同意する'), React.createElement("a", {
-    href: "#/privacy",
-    style: {
-      fontSize: 13,
-      color: 'rgba(255,255,255,0.7)',
-      textDecoration: 'underline',
-      fontFamily: "'Zen Kaku Gothic New', 'Hiragino Sans', sans-serif"
+      cursor: 'pointer'
     }
-  }, lang === 'en' ? 'Privacy Policy' : 'プライバシーポリシー')));
+  }, lang === 'en' ? 'Accept' : '同意する'));
 }
 if ('serviceWorker' in navigator && location.protocol === 'https:') {
   window.addEventListener('load', () => {
@@ -4082,6 +4098,19 @@ function SheetShell({
       padding: '14px 16px',
       pointerEvents: 'auto',
       touchAction: 'none'
+    }
+  }), React.createElement("div", {
+    "aria-hidden": "true",
+    style: {
+      position: 'absolute',
+      top: 8,
+      left: '50%',
+      transform: 'translateX(-50%)',
+      width: 40,
+      height: 4,
+      borderRadius: 2,
+      background: 'rgba(34,49,74,.28)',
+      boxShadow: '0 1px 2px rgba(255,255,255,.35)'
     }
   }), React.createElement("div", {
     style: {
@@ -4576,6 +4605,22 @@ function DotDivider() {
     }
   });
 }
+function jaTitle(s) {
+  const str = String(s == null ? '' : s);
+  if (!str) return str;
+  const parts = str.split(/([・&\/、])/).reduce((acc, tk) => {
+    if (!tk) return acc;
+    if (/^[・&\/、]$/.test(tk) && acc.length) acc[acc.length - 1] += tk;else acc.push(tk);
+    return acc;
+  }, []);
+  if (parts.length <= 1) return str;
+  return parts.map((p, i) => React.createElement("span", {
+    key: i,
+    style: {
+      display: 'inline-block'
+    }
+  }, p));
+}
 function MgQr({
   text,
   size = 200
@@ -4643,8 +4688,8 @@ const _auth_T = {
     next: '次へ',
     homeBack: '← ホームに戻る',
     gateHead1: 'はじめまして。',
-    gateHead2: 'まずは、あなたのことを。',
-    gateDesc: 'イベントの申し込みと生活情報の保存には、会員登録が必要です。',
+    gateHead2: 'まずは、\nあなたのことを。',
+    gateDesc: 'イベントの申し込みと生活情報の保存には、\n会員登録が必要です。',
     gateLook: 'まずは見るだけ →',
     loginTitle: 'ログイン',
     loginHead: 'おかえりなさい。',
@@ -4770,8 +4815,8 @@ const _auth_T = {
     next: 'つぎへ',
     homeBack: '← ホームに もどる',
     gateHead1: 'はじめまして。',
-    gateHead2: 'まずは、あなたの ことを。',
-    gateDesc: 'イベントの もうしこみには、かいいん とうろくが ひつようです。',
+    gateHead2: 'まずは、\nあなたの ことを。',
+    gateDesc: 'イベントの もうしこみには、\nかいいん とうろくが ひつようです。',
     gateLook: 'まずは みるだけ →',
     loginTitle: 'ログイン',
     loginHead: 'おかえりなさい。',
@@ -4898,7 +4943,7 @@ const _auth_T = {
     homeBack: '← Back to Home',
     gateHead1: 'Nice to meet you.',
     gateHead2: 'First, tell us about you.',
-    gateDesc: 'Sign-up is needed to register for events and save life info.',
+    gateDesc: 'Sign-up is needed to register for events\nand save life info.',
     gateLook: 'Just looking →',
     loginTitle: 'Log In',
     loginHead: 'Welcome back.',
@@ -5376,7 +5421,7 @@ function ScreenGate() {
     style: {
       position: 'relative',
       marginTop: 'auto',
-      padding: '0 22px calc(env(safe-area-inset-bottom) + 34px)',
+      padding: '0 22px calc(env(safe-area-inset-bottom) + 34px + var(--mg-cookie-h, 0px))',
       display: 'flex',
       flexDirection: 'column',
       gap: 12
@@ -5396,7 +5441,7 @@ function ScreenGate() {
       marginBottom: 6
     }
   }, React.createElement(LineUp, {
-    lines: [at.gateHead1, at.gateHead2],
+    lines: [at.gateHead1].concat(String(at.gateHead2).split('\n')),
     size: 33,
     color: "#fbfcfd",
     shadow: "0 3px 18px rgba(20,32,50,.5)",
@@ -5405,6 +5450,7 @@ function ScreenGate() {
   })), React.createElement("div", {
     className: "mg-ui",
     style: {
+      whiteSpace: 'pre-line',
       fontSize: 12.5,
       lineHeight: 1.9,
       color: 'rgba(251,252,253,.82)',
@@ -5550,12 +5596,7 @@ function ScreenLogin() {
     style: {
       color: 'var(--mg-ink4, #5b7796)'
     }
-  }, at.agreeSuffix), React.createElement("span", {
-    style: {
-      color: '#c0392b',
-      marginLeft: 4
-    }
-  }, "\u203B")), React.createElement("div", {
+  }, at.agreeSuffix)), React.createElement("div", {
     style: {
       marginTop: 24
     }
@@ -5563,7 +5604,7 @@ function ScreenLogin() {
     label: at.loginBtn,
     icon: "login",
     onClick: handleSubmit,
-    disabled: submitting || !agreedPrivacy,
+    disabled: submitting,
     loading: submitting
   }))), React.createElement("div", {
     style: {
@@ -5723,12 +5764,7 @@ function ScreenSignup() {
     style: {
       color: 'var(--mg-ink4, #5b7796)'
     }
-  }, at.agreeSuffix), React.createElement("span", {
-    style: {
-      color: '#c0392b',
-      marginLeft: 4
-    }
-  }, "\u203B")), React.createElement(_auth_Check, {
+  }, at.agreeSuffix)), React.createElement(_auth_Check, {
     on: agreedTerms,
     onToggle: () => setAgreedTerms(!agreedTerms)
   }, React.createElement(_auth_DocLink, {
@@ -5738,12 +5774,7 @@ function ScreenSignup() {
     style: {
       color: 'var(--mg-ink4, #5b7796)'
     }
-  }, at.agreeSuffix), React.createElement("span", {
-    style: {
-      color: '#c0392b',
-      marginLeft: 4
-    }
-  }, "\u203B"))), React.createElement("div", {
+  }, at.agreeSuffix))), React.createElement("div", {
     style: {
       marginTop: 24
     }
@@ -5751,7 +5782,7 @@ function ScreenSignup() {
     label: submitting ? at.sending : at.signupBtn,
     icon: "mail",
     onClick: handleSubmit,
-    disabled: submitting || !agreedPrivacy || !agreedTerms,
+    disabled: submitting,
     loading: submitting
   }))), React.createElement("div", {
     style: {
@@ -7190,7 +7221,7 @@ function TabHome() {
     if (slides[0] && slides[0].imageUrl) return _home_img(slides[0].imageUrl, 1600);
     return '';
   }, [bundle.heroSlidesMobile, featured]);
-  const titleLines = _shell_setTxt(settings, ['hero_headline', 'opening_main'], lang, t && t.hero && t.hero.title || '出会いが、\nまちを変えていく。').split('\n');
+  const titleLines = _shell_setTxt(settings, ['hero_headline', 'opening_main'], lang, t && t.hero && t.hero.title || '出会いが、\nまちを\n変えていく。').split('\n');
   const homeTagline = _shell_setTxt(settings, ['hero_catch', 'opening_subtitle'], lang, 'Tokyo, since 2019');
   let fDp = null,
     fTitle = '',
@@ -7254,7 +7285,7 @@ function TabHome() {
     style: {
       fontSize: 16,
       letterSpacing: '.1em',
-      color: '#f4f7fb',
+      color: 'var(--mg-onphoto-num, #f4f7fb)',
       textShadow: '0 2px 10px rgba(34,49,74,.45)',
       marginBottom: 14
     }
@@ -7336,7 +7367,7 @@ function TabHome() {
       lineHeight: 1.4,
       marginBottom: 1
     }
-  }, fTitle) : null, fTime ? React.createElement("div", {
+  }, jaTitle(fTitle)) : null, fTime ? React.createElement("div", {
     style: {
       display: 'flex',
       alignItems: 'center',
@@ -7806,7 +7837,7 @@ const _ev_T = {
     en: 'Free'
   },
   chipEasy: {
-    ja: 'やさしい日本語',
+    ja: 'やさしい にほんご',
     easy: 'やさしい にほんご',
     en: 'Easy Japanese'
   },
@@ -8679,7 +8710,7 @@ function TabEvents() {
         fontSize: 16.5,
         lineHeight: 1.3
       }
-    }, title), React.createElement("div", {
+    }, jaTitle(title)), React.createElement("div", {
       style: {
         display: 'flex',
         gap: 12,
@@ -17671,7 +17702,7 @@ const _info_CATEGORIES = [{
   region: 'national',
   importance: 'high',
   targetUsers: ['all', 'student', 'worker'],
-  titleJa: '在留資格と在留カード',
+  titleJa: '在留資格・在留カード',
   titleEn: 'Residence Status & Residence Card',
   summaryJa: '日本に住むために必要な在留資格、在留期間、在留カードに関する情報です。',
   summaryEn: 'About the residence status, period of stay, and residence card you need to live in Japan.',
@@ -18064,6 +18095,11 @@ const _info_T = {
     ja: 'よく調べられていること',
     easy: 'よく しらべられて いる こと',
     en: 'POPULAR SEARCHES'
+  },
+  browseCat: {
+    ja: 'カテゴリから探す',
+    easy: 'カテゴリから さがす',
+    en: 'BROWSE BY CATEGORY'
   },
   breadcrumb: {
     ja: '生活情報',
@@ -19120,7 +19156,48 @@ function SheetSearch({
     label: w,
     on: _info_norm(w) === q,
     onClick: () => setQuery(w)
-  }))))), React.createElement(_info_ArticleSheet, {
+  }))), !q && Array.isArray(D.categories) && D.categories.length > 0 ? React.createElement(React.Fragment, null, React.createElement("div", {
+    style: {
+      marginTop: 26,
+      fontSize: 11,
+      letterSpacing: '.16em',
+      color: 'var(--mg-ink4, #5b7796)',
+      marginBottom: 12
+    }
+  }, L(_info_T.browseCat)), React.createElement("div", {
+    style: {
+      display: 'grid',
+      gridTemplateColumns: '1fr 1fr',
+      gap: 8
+    }
+  }, D.categories.map((cat, i) => React.createElement("div", {
+    key: cat.id || i,
+    className: "mg-card mg-tap",
+    onClick: () => setArticle({
+      kind: 'cat',
+      cat
+    }),
+    style: {
+      cursor: 'pointer',
+      display: 'flex',
+      alignItems: 'center',
+      gap: 10,
+      padding: '12px 14px'
+    }
+  }, React.createElement(Icon, {
+    name: _info_catIcon(cat),
+    size: 20,
+    style: {
+      color: 'var(--mg-accent, #35618f)',
+      flex: 'none'
+    }
+  }), React.createElement("div", {
+    className: "mg-clamp1",
+    style: {
+      fontSize: 13,
+      minWidth: 0
+    }
+  }, _info_field(cat, 'title', lang)))))) : null)), React.createElement(_info_ArticleSheet, {
     open: !!article,
     item: article,
     data: D,
@@ -23096,20 +23173,20 @@ function SheetAbout({
     style: {
       padding: '4px 22px 30px'
     }
-  }, React.createElement(ImageSlot, {
+  }, heroImg ? React.createElement(ImageSlot, {
     src: _ni_imgUrl(heroImg, 1200),
     alt: "",
     style: {
       height: 200
     },
     radius: 26
-  }), React.createElement("div", {
+  }) : null, React.createElement("div", {
     className: "mg-serif",
     style: {
       fontSize: 27,
       lineHeight: 1.4,
       color: 'var(--mg-ink, #22314a)',
-      margin: '20px 0 14px'
+      margin: heroImg ? '20px 0 14px' : '8px 0 14px'
     }
   }, titleLines.map((ln, i) => React.createElement("div", {
     key: i
@@ -25355,7 +25432,8 @@ function _ShellRoot() {
   }, React.createElement("div", {
     id: "mg-canvas"
   }, React.createElement("div", {
-    id: "mg-app"
+    id: "mg-app",
+    className: [coverSrcs.length ? '' : 'mg-nocover', chromeHidden ? 'mg-chromeless' : ''].filter(Boolean).join(' ') || undefined
   }, React.createElement(_ShellCover, {
     srcs: coverSrcs,
     innerRef: _coverInner
@@ -25386,7 +25464,7 @@ function _ShellRoot() {
         visibility: active ? 'visible' : 'hidden',
         transition: 'opacity .38s ease, visibility .38s',
         pointerEvents: active ? 'auto' : 'none',
-        paddingBottom: 'calc(112px + env(safe-area-inset-bottom))'
+        paddingBottom: 'calc(112px + var(--mg-cookie-h, 0px) + env(safe-area-inset-bottom))'
       }
     }, React.createElement(Pane, null));
   })), showTicketPill && React.createElement(TicketPill, null), React.createElement(MgTabBar, {
