@@ -1443,6 +1443,20 @@ const authStore = {
   clear() {
     try {
       localStorage.removeItem(AUTH_STORAGE_KEY);
+      localStorage.removeItem(AUTH_STORAGE_KEY + '_user');
+    } catch (e) {}
+  },
+  getUserSnap() {
+    try {
+      const raw = localStorage.getItem(AUTH_STORAGE_KEY + '_user');
+      return raw ? JSON.parse(raw) : null;
+    } catch (e) {
+      return null;
+    }
+  },
+  setUserSnap(u) {
+    try {
+      if (u) localStorage.setItem(AUTH_STORAGE_KEY + '_user', JSON.stringify(u));
     } catch (e) {}
   }
 };
@@ -1890,6 +1904,13 @@ function AuthProvider({
         if (!cancelled) setLoading(false);
         return;
       }
+      const snap = authStore.getUserSnap();
+      if (snap && !cancelled) {
+        setUser(snap);
+        setLoading(false);
+        favoritesStore.load().catch(function () {});
+        prefetchMyRegistrations();
+      }
       try {
         const result = await authApi.me(token);
         if (!cancelled) {
@@ -1898,8 +1919,11 @@ function AuthProvider({
             authStore.clear();
           } else {
             if (result.sessionExpires) authStore.setToken(token, result.sessionExpires);
-            favoritesStore.load().catch(e => console.error('[restore] favorites load failed:', e));
-            prefetchMyRegistrations();
+            authStore.setUserSnap(result.user);
+            if (!snap) {
+              favoritesStore.load().catch(e => console.error('[restore] favorites load failed:', e));
+              prefetchMyRegistrations();
+            }
           }
         }
       } catch (err) {
@@ -1923,6 +1947,7 @@ function AuthProvider({
     const result = await authApi.login(email, password);
     authStore.setToken(result.sessionToken, result.sessionExpires);
     setUser(result.user);
+    authStore.setUserSnap(result.user);
     favoritesStore.load().catch(e => console.error('[login] favorites load failed:', e));
     prefetchMyRegistrations();
     return result.user;
@@ -1945,6 +1970,7 @@ function AuthProvider({
     try {
       const result = await authApi.me(token);
       setUser(result.user || null);
+      if (result.user) authStore.setUserSnap(result.user);
       if (result.user && result.sessionExpires) authStore.setToken(token, result.sessionExpires);
     } catch (err) {}
   }, []);
