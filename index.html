@@ -8828,26 +8828,49 @@ function SheetEventDetail({
     _hydrated.current = false;
     setRegionFilter('all');
     setSelectedSessionIds(_ev_hashQuerySessions());
-    setLoading(true);
-    setEv(null);
-    setSessions([]);
-    setActivities([]);
     try {
       if (typeof logAction === 'function') logAction('event_view', String(eventId));
     } catch (e) {}
+    const cachedEv = (() => {
+      try {
+        const be = A && A.bundle && Array.isArray(A.bundle.events) ? A.bundle.events.find(e => String(e.id) === String(eventId)) : null;
+        if (be) return be;
+        if (typeof getSwrCached === 'function') {
+          const c = getSwrCached('event:' + eventId);
+          if (c) return c;
+        }
+      } catch (e) {}
+      return null;
+    })();
+    setEv(cachedEv);
+    setSessions([]);
+    setActivities([]);
+    setLoading(!cachedEv);
+    if (typeof fetchEventActivities === 'function') {
+      fetchEventActivities(eventId).then(acts => {
+        if (!cancelled) setActivities(Array.isArray(acts) ? acts : []);
+      }).catch(() => {});
+    }
+    let sessKicked = false;
+    const kickSessions = () => {
+      if (sessKicked || typeof fetchEventSessions !== 'function') return;
+      sessKicked = true;
+      fetchEventSessions(eventId).then(d => {
+        if (!cancelled) setSessions(Array.isArray(d) ? d : []);
+      }).catch(() => {});
+    };
+    if (cachedEv && cachedEv.format === 'multi') kickSessions();
     (async () => {
       const eventData = typeof fetchEvent === 'function' ? await fetchEvent(eventId) : null;
       if (cancelled) return;
-      setEv(eventData);
-      if (eventData && eventData.format === 'multi' && typeof fetchEventSessions === 'function') {
-        const sessData = await fetchEventSessions(eventId);
-        if (!cancelled) setSessions(Array.isArray(sessData) ? sessData : []);
+      if (eventData) {
+        setEv(eventData);
+        try {
+          if (typeof setSwrCache === 'function') setSwrCache('event:' + eventId, eventData);
+        } catch (e) {}
       }
-      try {
-        const acts = typeof fetchEventActivities === 'function' ? await fetchEventActivities(eventId) : [];
-        if (!cancelled) setActivities(Array.isArray(acts) ? acts : []);
-      } catch (e) {}
-      if (!cancelled) setLoading(false);
+      setLoading(false);
+      if (eventData && eventData.format === 'multi') kickSessions();
     })();
     return () => {
       cancelled = true;
@@ -11244,12 +11267,28 @@ function SheetRegister({
   useEffect(() => {
     if (!open || !eventId || bundleEvent) return;
     let cancelled = false;
-    setEvFetchDone(false);
+    let seeded = false;
+    try {
+      const c = typeof getSwrCached === 'function' ? getSwrCached('event:' + eventId) : null;
+      if (c) {
+        setFetchedEvent(c);
+        setEvFetchDone(true);
+        seeded = true;
+      }
+    } catch (e) {}
+    if (!seeded) setEvFetchDone(false);
     (async () => {
       try {
         const d = typeof fetchEvent === 'function' ? await fetchEvent(eventId) : null;
         if (!cancelled) {
-          setFetchedEvent(d || null);
+          if (d) {
+            setFetchedEvent(d);
+            try {
+              if (typeof setSwrCache === 'function') setSwrCache('event:' + eventId, d);
+            } catch (e) {}
+          } else if (!seeded) {
+            setFetchedEvent(null);
+          }
           setEvFetchDone(true);
         }
       } catch (e) {
