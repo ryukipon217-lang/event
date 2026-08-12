@@ -206,6 +206,14 @@ body::-webkit-scrollbar{ display:none; width:0; height:0; }
   box-shadow:0 16px 34px rgba(34,49,74,.18), inset 0 1px 0 rgba(255,255,255,.75);
   border-radius:var(--mg-r-card);
 }
+/* (2026-08-12 代表指定) 紺パネル: 白ガラス一辺倒のリズムを破る反転面(紺地+白文字)。数字バンド・CTAの強調面に使う */
+.mg-navy{
+  background:linear-gradient(160deg, rgba(34,49,74,.94), rgba(53,97,143,.88));
+  border:1px solid rgba(255,255,255,.16);
+  box-shadow:0 20px 44px -14px rgba(20,32,50,.55), inset 0 1px 0 rgba(255,255,255,.12);
+  color:#f4f7fb;
+}
+
 /* 大カード */
 .mg-card-lg{
   background:linear-gradient(155deg,rgba(255,255,255,.92),rgba(255,255,255,.80));
@@ -7533,14 +7541,12 @@ function TabHome() {
       padding: '22px 18px 0'
     }
   }, React.createElement("div", {
+    className: "mg-navy",
     style: {
       borderRadius: 30,
       padding: 20,
       display: 'grid',
-      gridTemplateColumns: '1fr 1fr 1fr',
-      background: 'linear-gradient(155deg,rgba(255,255,255,.70),rgba(255,255,255,.48))',
-      border: '1px solid rgba(255,255,255,.62)',
-      boxShadow: '0 18px 38px rgba(34,49,74,.16), inset 0 1px 0 rgba(255,255,255,.7)'
+      gridTemplateColumns: '1fr 1fr 1fr'
     }
   }, stats.map((s, i) => React.createElement("div", {
     key: s.icon,
@@ -7550,27 +7556,28 @@ function TabHome() {
       alignItems: 'center',
       gap: 3,
       ...(i === 1 ? {
-        borderLeft: '1px solid rgba(34,49,74,.12)',
-        borderRight: '1px solid rgba(34,49,74,.12)'
+        borderLeft: '1px solid rgba(255,255,255,.16)',
+        borderRight: '1px solid rgba(255,255,255,.16)'
       } : {})
     }
   }, React.createElement(Icon, {
     name: s.icon,
     size: 20,
     style: {
-      color: 'var(--mg-accent, #35618f)'
+      color: 'rgba(244,247,251,.85)'
     }
   }), React.createElement(Counter, {
     to: s.to,
     className: "mg-num",
     style: {
       fontSize: 30,
-      lineHeight: 1
+      lineHeight: 1,
+      color: '#f4f7fb'
     }
   }), React.createElement("span", {
     style: {
       fontSize: 10.5,
-      color: 'var(--mg-ink4, #5b7796)'
+      color: 'rgba(244,247,251,.62)'
     }
   }, s.label))))), React.createElement("div", {
     style: {
@@ -7608,17 +7615,16 @@ function TabHome() {
       right: 16,
       bottom: 16,
       borderRadius: 24,
-      padding: '16px 18px',
-      background: 'linear-gradient(155deg,rgba(255,255,255,.90),rgba(255,255,255,.76))',
-      border: '1px solid rgba(255,255,255,.85)',
-      boxShadow: '0 14px 30px rgba(34,49,74,.20), inset 0 1px 0 rgba(255,255,255,.9)'
-    }
+      padding: '16px 18px'
+    },
+    className: "mg-navy"
   }, React.createElement("div", {
     className: "mg-serif",
     style: {
       fontSize: 19,
       lineHeight: 1.45,
-      marginBottom: 10
+      marginBottom: 10,
+      color: '#f4f7fb'
     }
   }, L(_home_T.yourTurn)), React.createElement("div", {
     className: "mg-tap",
@@ -7628,7 +7634,7 @@ function TabHome() {
       alignItems: 'center',
       gap: 8,
       fontSize: 13,
-      color: 'var(--mg-accent, #35618f)',
+      color: '#cfe0f3',
       cursor: 'pointer'
     }
   }, React.createElement(Icon, {
