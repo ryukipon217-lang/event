@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
+<script>window.__MG_BUILD='20260813131243';</script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>connec+a — 出会いが、まちを変えていく。</title>
@@ -2090,6 +2091,36 @@ function mgNextSession(ev, now) {
   }
   return null;
 }
+(function () {
+  try {
+    const cur = String(window.__MG_BUILD || '');
+    if (!cur) return;
+    let lastCheck = 0;
+    const check = async () => {
+      const now = Date.now();
+      if (now - lastCheck < 60000) return;
+      lastCheck = now;
+      try {
+        const r = await fetch('version.json?t=' + now, {
+          cache: 'no-store'
+        });
+        if (!r.ok) return;
+        const j = await r.json();
+        const nb = String(j && j.build || '');
+        if (!nb || nb <= cur) return;
+        if (sessionStorage.getItem('mg_reloaded_for') === nb) return;
+        const ae = document.activeElement;
+        if (ae && (ae.tagName === 'INPUT' || ae.tagName === 'TEXTAREA')) return;
+        sessionStorage.setItem('mg_reloaded_for', nb);
+        location.reload();
+      } catch (e) {}
+    };
+    setTimeout(check, 3500);
+    document.addEventListener('visibilitychange', () => {
+      if (!document.hidden) setTimeout(check, 600);
+    });
+  } catch (e) {}
+})();
 try {
   window.addEventListener('beforeinstallprompt', e => {
     e.preventDefault();
