@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-<script>window.__MG_BUILD='20260813133535';</script>
+<script>window.__MG_BUILD='20260813134138';</script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>connec+a — 出会いが、まちを変えていく。</title>
@@ -173,6 +173,10 @@ body::-webkit-scrollbar{ display:none; width:0; height:0; }
 /* ============================================================
    3. キャンバス+アプリ枠
    ============================================================ */
+/* (iOSスタンドアロン帯対策・恒久) ビューポート外(下端インセット/オーバースクロール)はhtmlの背景色で塗られる。
+   薄色だと起動画面の下に帯として見えるため、根の背景は常時 紺。可視領域は #mg-canvas 以下が全て覆うため通常表示には影響しない。 */
+html{ background:#1a2740; }
+
 #mg-canvas{
   min-height:100dvh;
   background:var(--mg-canvas-bg);
