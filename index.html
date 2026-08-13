@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-<script>window.__MG_BUILD='20260813134308';</script>
+<script>window.__MG_BUILD='20260813135213';</script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>connec+a — 出会いが、まちを変えていく。</title>
@@ -149,7 +149,7 @@ window.__earlyBundlePromise = fetch('https://script.google.com/macros/s/AKfycbxL
 html, body{ margin:0; padding:0; }
 html{ -webkit-text-size-adjust:100%; }
 body{
-  background:#1a2740;   /* (帯対策) ビューポート外はbody背景で塗られる。可視領域は#mg-canvasが覆うため表示影響なし(旧 #dfe7ef が起動画面下の帯の正体) */
+  background:#dfe7ef;   /* 通常はアプリ内の明るい面と同系。オープニング/認証中はJSが一時的に紺へ切替(帯を紺化) */
   font-family:var(--mg-font-ui);
   color:var(--mg-ink);
   -webkit-font-smoothing:antialiased;
@@ -5551,25 +5551,44 @@ function ScreenGate() {
       minHeight: '100%',
       display: 'flex',
       flexDirection: 'column',
-      overflow: 'hidden',
       background: '#1a2740'
     }
-  }, img && React.createElement("img", {
+  }, React.createElement("div", {
+    "aria-hidden": "true",
+    style: {
+      position: 'fixed',
+      top: 0,
+      left: 0,
+      right: 0,
+      bottom: '-280px',
+      background: '#1a2740',
+      zIndex: 0
+    }
+  }), img && React.createElement("img", {
     src: img,
     alt: "",
     style: {
-      position: 'absolute',
-      inset: 0,
-      width: '100%',
-      height: '100%',
-      objectFit: 'cover'
+      position: 'fixed',
+      top: 0,
+      left: 0,
+      right: 0,
+      bottom: '-280px',
+      width: 'auto',
+      height: 'auto',
+      maxWidth: 'none',
+      objectFit: 'cover',
+      zIndex: 0
     }
   }), React.createElement("div", {
     "aria-hidden": "true",
     style: {
-      position: 'absolute',
-      inset: 0,
-      background: 'linear-gradient(180deg, rgba(20,32,50,.30) 0%, rgba(20,32,50,.10) 34%, rgba(20,32,50,.62) 74%, rgba(15,24,38,.88) 100%)'
+      position: 'fixed',
+      top: 0,
+      left: 0,
+      right: 0,
+      bottom: '-280px',
+      background: 'linear-gradient(180deg, rgba(20,32,50,.30) 0%, rgba(20,32,50,.10) 30%, rgba(20,32,50,.62) 64%, rgba(15,24,38,.88) 88%, rgba(15,24,38,.9) 100%)',
+      zIndex: 0
     }
   }), React.createElement("div", {
     style: {
@@ -26598,6 +26617,18 @@ function _ShellIntro({
       clearTimeout(guard);
     };
   }, [leave, onDone]);
+  React.useEffect(() => {
+    try {
+      document.documentElement.style.backgroundColor = '#1a2740';
+      document.body.style.backgroundColor = '#1a2740';
+    } catch (e) {}
+    return () => {
+      try {
+        document.documentElement.style.backgroundColor = '';
+        document.body.style.backgroundColor = '';
+      } catch (e) {}
+    };
+  }, []);
   const _defHead = lang === 'easy' ? 'であいで、\nまちが\nかわる。' : lang === 'en' ? 'Where meetings\nreshape\nthe city.' : '出会いが、\nまちを\n変えていく。';
   const lines = _shell_setTxt(settings, ['opening_main', 'hero_headline'], lang, _defHead).split('\n');
   const tagline = _shell_setTxt(settings, ['opening_subtitle', 'hero_catch'], lang, 'Tokyo, since 2019');
@@ -26612,7 +26643,30 @@ function _ShellIntro({
       background: '#1a2740',
       animation: leaving ? 'mgIntroOut .9s ease both' : 'mgIntroOut .9s ease 6.5s both'
     }
-  }, React.createElement("div", {
+  }, img && React.createElement("img", {
+    src: img,
+    alt: "",
+    style: {
+      position: 'absolute',
+      top: '-9%',
+      left: '-6%',
+      right: '-6%',
+      bottom: '-280px',
+      width: 'auto',
+      maxWidth: 'none',
+      height: 'auto',
+      objectFit: 'cover'
+    }
+  }), React.createElement("div", {
+    style: {
+      position: 'absolute',
+      top: 0,
+      left: 0,
+      right: 0,
+      bottom: '-280px',
+      background: 'linear-gradient(180deg, rgba(20,32,50,.34) 0%, rgba(20,32,50,.08) 30%, rgba(20,32,50,.52) 60%, rgba(15,24,38,.86) 92%, rgba(15,24,38,.9) 100%)'
+    }
+  }), React.createElement("div", {
     style: {
       position: 'absolute',
       inset: 0,
@@ -26626,24 +26680,7 @@ function _ShellIntro({
       position: 'relative',
       overflow: 'hidden'
     }
-  }, img && React.createElement("img", {
-    src: img,
-    alt: "",
-    style: {
-      position: 'absolute',
-      inset: '-9% -6%',
-      width: '112%',
-      maxWidth: 'none',
-      height: '118%',
-      objectFit: 'cover'
-    }
-  }), React.createElement("div", {
-    style: {
-      position: 'absolute',
-      inset: 0,
-      background: 'linear-gradient(180deg, rgba(20,32,50,.34) 0%, rgba(20,32,50,.08) 30%, rgba(20,32,50,.52) 66%, rgba(15,24,38,.86) 100%)'
-    }
-  }), React.createElement("div", {
+  }, React.createElement("div", {
     className: "mg-num",
     style: {
       position: 'absolute',
