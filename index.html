@@ -14152,6 +14152,15 @@ function _my_i18nField(obj, fieldName, lang) {
   }
   return obj[fieldName] || '';
 }
+function _my_imgUrl(url, w) {
+  try {
+    if (typeof driveImgUrl === 'function') return driveImgUrl(url);
+  } catch (e) {}
+  if (!url || typeof url !== 'string') return url || '';
+  const m = url.match(/drive\.google\.com\/(?:thumbnail.*?[?&]id=|file\/d\/|uc.*?[?&]id=)([^&\/]+)/);
+  if (m) return 'https://drive.google.com/thumbnail?id=' + m[1] + '&sz=w' + (w || 1200);
+  return url;
+}
 function _my_dayN(r, ev) {
   try {
     if (!r || !r.sessionDate || !ev || !ev.date || ev.format !== 'multi') return 0;
@@ -14427,46 +14436,7 @@ function TabMyPage() {
     });
     return m;
   }, [unanswered]);
-  const albumOn = typeof MG_FEATURES === 'undefined' || !!(MG_FEATURES && MG_FEATURES.album);
-  const [albums, setAlbums] = useState([]);
-  useEffect(() => {
-    let dead = false;
-    if (!userKey || !albumOn || typeof fetchAlbums !== 'function') {
-      setAlbums([]);
-      return undefined;
-    }
-    fetchAlbums().then(list => {
-      if (!dead && Array.isArray(list)) setAlbums(list);
-    }).catch(() => {});
-    return () => {
-      dead = true;
-    };
-  }, [userKey, albumOn]);
-  const albumsByEventList = React.useMemo(() => {
-    const m = {};
-    (albums || []).forEach(a => {
-      if (!a) return;
-      const k = String(a.eventId || '');
-      const urls = Array.isArray(a.imageUrls) ? a.imageUrls : Array.isArray(a.urls) ? a.urls : [];
-      if (a.status === '下書き' || a.status === 'アーカイブ') return;
-      if (!k || urls.length === 0) return;
-      (m[k] = m[k] || []).push(a);
-    });
-    return m;
-  }, [albums]);
-  const _my_pickAlbum = (evKey2, r2) => {
-    const list = albumsByEventList[evKey2] || [];
-    if (list.length === 0) return null;
-    const sd = String(r2 && r2.sessionDate || '');
-    if (sd) {
-      const hit = list.find(a2 => String(a2.shotDate || '') === sd);
-      if (hit) return hit;
-      const undated = list.find(a2 => !a2.shotDate);
-      if (undated) return undated;
-      return list.every(a2 => !a2.shotDate) ? list[0] : null;
-    }
-    return list[0];
-  };
+  const [mviewer, setMviewer] = useState(null);
   const [pushState, setPushState] = useState('default');
   useEffect(() => {
     if (typeof window === 'undefined' || !('Notification' in window) || !('serviceWorker' in navigator) || !('PushManager' in window)) {
@@ -14546,7 +14516,7 @@ function TabMyPage() {
     const upcomingRaw = all.filter(r => {
       if (r.event.status === '終了' || r.event.status === 'アーカイブ' || r.event.status === '非公開') return false;
       if (!_my_isActive(r)) return false;
-      const endStr = r.event.endDate || r.event.date;
+      const endStr = r.sessionDate || r.event.endDate || r.event.date;
       if (!endStr) return true;
       const endDate = new Date(String(endStr) + 'T23:59:59');
       return !isNaN(endDate.getTime()) && endDate >= todayStart;
@@ -14558,7 +14528,7 @@ function TabMyPage() {
     const upcoming = _my_groupByApplicationId(upcomingRaw, all);
     const past = all.filter(r => {
       if (r.status === 'キャンセル') return false;
-      const endStr = r.event.endDate || r.event.date;
+      const endStr = r.sessionDate || r.event.endDate || r.event.date;
       if (!endStr) return false;
       const endDate = new Date(String(endStr) + 'T23:59:59');
       return !isNaN(endDate.getTime()) && endDate < todayStart;
@@ -14739,7 +14709,7 @@ function TabMyPage() {
     const venue = _my_i18nField(ev, 'venue', lang) || ev.venue || '';
     const time = _my_fmtTime(ev.time);
     const activeN = g.activeRegs.length;
-    const multiLabel = activeN > 1 ? lang === 'en' ? activeN + ' sessions' : lang === 'easy' ? activeN + 'かいぶん' : '全' + activeN + '日程' : '';
+    const multiLabel = activeN > 1 ? lang === 'en' ? activeN + ' sessions' : lang === 'easy' ? activeN + 'かいぶん' : activeN + '日程' : '';
     const unpaid = g.activeRegs.some(_my_isUnpaid);
     const meta = [dp ? dp.md + ' ' + dp.day + (time ? ' ' + time : '') : time || '', venue].filter(Boolean).join(' ／ ');
     return React.createElement("div", {
@@ -14890,7 +14860,14 @@ function TabMyPage() {
     const title = _my_i18nField(ev, 'title', lang) || ev.title || '';
     const evKey = String(r.eventId || ev.id || '');
     const sv = surveyOn ? surveyByEvent[evKey] : null;
-    const album = albumOn ? _my_pickAlbum(evKey, r) : null;
+    const dayN2 = _my_dayN(r, ev);
+    const photos = (() => {
+      const sg = Array.isArray(r.sessionMementoGallery) ? r.sessionMementoGallery.filter(Boolean) : [];
+      if (sg.length) return sg;
+      const pub = ev.mementoPublishAt ? new Date(ev.mementoPublishAt) : null;
+      if (pub && !isNaN(pub.getTime()) && pub > new Date()) return [];
+      return ev.mementoPhotoUrl ? [ev.mementoPhotoUrl] : [];
+    })();
     return React.createElement("div", {
       key: r.regId || i,
       style: {
@@ -14907,38 +14884,34 @@ function TabMyPage() {
         color: 'var(--mg-ink4, #5b7796)',
         flex: 'none'
       }
-    }, dp ? dp.md2 : '—'), (() => {
-      const n2 = _my_dayN(r, ev);
-      return n2 ? React.createElement("span", {
-        style: {
-          flex: 'none',
-          fontSize: 10,
-          fontWeight: 600,
-          padding: '1px 7px',
-          borderRadius: 8,
-          background: 'rgba(53,97,143,.10)',
-          border: '1px solid rgba(53,97,143,.20)',
-          color: 'var(--mg-accent, #35618f)'
-        }
-      }, "Day", n2) : null;
-    })(), React.createElement("span", {
+    }, dp ? dp.md2 : '—'), dayN2 ? React.createElement("span", {
+      style: {
+        flex: 'none',
+        fontSize: 10,
+        fontWeight: 600,
+        padding: '1px 7px',
+        borderRadius: 8,
+        background: 'rgba(53,97,143,.10)',
+        border: '1px solid rgba(53,97,143,.20)',
+        color: 'var(--mg-accent, #35618f)'
+      }
+    }, "Day", dayN2) : null, React.createElement("span", {
       className: "mg-clamp1",
       style: {
         flex: 1,
         fontSize: 13,
         minWidth: 0
       }
-    }, title), album ? React.createElement("button", {
+    }, title), photos.length ? React.createElement("button", {
       type: "button",
       className: "mg-tap",
       onClick: () => {
         try {
-          if (typeof logAction === 'function') logAction('album_open', evKey);
+          if (typeof logAction === 'function') logAction('memento_view', evKey);
         } catch (e) {}
-        A.openSheet('album', album.id ? {
-          albumId: album.id
-        } : {
-          eventId: evKey
+        setMviewer({
+          title: title + (dayN2 ? ' — Day' + dayN2 : ''),
+          photos
         });
       },
       "aria-label": L(_my_T.photos),
@@ -14988,7 +14961,7 @@ function TabMyPage() {
     }, React.createElement(Icon, {
       name: "rate_review",
       size: 15
-    }), L(_my_T.survey)) : !album ? React.createElement(Icon, {
+    }), L(_my_T.survey)) : !photos.length ? React.createElement(Icon, {
       name: "check_circle",
       size: 18,
       style: {
@@ -15072,7 +15045,76 @@ function TabMyPage() {
     right: null,
     onClick: () => setConfirmLogout(true),
     last: true
-  }))), React.createElement(_my_Confirm, {
+  }))), mviewer ? React.createElement("div", {
+    role: "dialog",
+    "aria-label": mviewer.title,
+    onClick: () => setMviewer(null),
+    style: {
+      position: 'fixed',
+      inset: 0,
+      zIndex: 'var(--mg-z-toast, 60)',
+      background: 'rgba(20,32,50,.78)',
+      display: 'flex',
+      flexDirection: 'column'
+    }
+  }, React.createElement("div", {
+    style: {
+      flex: 'none',
+      display: 'flex',
+      alignItems: 'center',
+      gap: 10,
+      padding: '14px 16px',
+      color: '#f4f7fb'
+    }
+  }, React.createElement("span", {
+    className: "mg-serif mg-clamp1",
+    style: {
+      flex: 1,
+      fontSize: 15
+    }
+  }, mviewer.title), React.createElement("button", {
+    type: "button",
+    "aria-label": "\u9589\u3058\u308B",
+    onClick: () => setMviewer(null),
+    style: {
+      width: 34,
+      height: 34,
+      borderRadius: 17,
+      background: 'rgba(255,255,255,.14)',
+      border: '1px solid rgba(255,255,255,.3)',
+      color: '#f4f7fb',
+      display: 'inline-flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      cursor: 'pointer'
+    }
+  }, React.createElement(Icon, {
+    name: "close",
+    size: 19
+  }))), React.createElement("div", {
+    className: "mg-hidebar",
+    onClick: e => e.stopPropagation(),
+    style: {
+      flex: 1,
+      overflowY: 'auto',
+      WebkitOverflowScrolling: 'touch',
+      padding: '0 14px calc(24px + env(safe-area-inset-bottom))',
+      display: 'flex',
+      flexDirection: 'column',
+      gap: 12
+    }
+  }, mviewer.photos.map((u, i2) => React.createElement("img", {
+    key: i2,
+    src: _my_imgUrl(u, 1200),
+    alt: "",
+    loading: "lazy",
+    style: {
+      width: '100%',
+      borderRadius: 18,
+      display: 'block',
+      background: 'rgba(255,255,255,.08)'
+    }
+  })))) : null, React.createElement(_my_Confirm, {
     open: confirmLogout,
     title: L(_my_T.logout),
     body: L(_my_T.logoutBody),
