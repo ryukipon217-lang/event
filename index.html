@@ -17050,19 +17050,41 @@ function SheetTicket({
           window.open(gcal, '_blank', 'noopener');
         } catch (e) {}
       }
-    })), !isCheckedIn && React.createElement("div", {
-      style: {
-        marginTop: 10,
-        display: 'flex'
+    })), (() => {
+      const today = _eng_todayYmd();
+      const futureSib = sibs.find(r => r.regId !== reg.regId && String(r.sessionDate || '') > today && r.status !== 'チェックイン済');
+      if (!isCheckedIn) {
+        return React.createElement("div", {
+          style: {
+            marginTop: 10,
+            display: 'flex'
+          }
+        }, React.createElement(_eng_MidBtn, {
+          icon: "cancel",
+          muted: true,
+          label: L(_eng_T.tCancelBtn),
+          onClick: () => {
+            if (A) A.go('/cancel/' + encodeURIComponent(reg.regId));
+          }
+        }));
       }
-    }, React.createElement(_eng_MidBtn, {
-      icon: "cancel",
-      muted: true,
-      label: L(_eng_T.tCancelBtn),
-      onClick: () => {
-        if (A) A.go('/cancel/' + encodeURIComponent(reg.regId));
+      if (futureSib) {
+        return React.createElement("div", {
+          style: {
+            marginTop: 10,
+            display: 'flex'
+          }
+        }, React.createElement(_eng_MidBtn, {
+          icon: "cancel",
+          muted: true,
+          label: lang === 'en' ? 'Cancel remaining days' : lang === 'easy' ? 'のこりの ひを キャンセル' : '残りの日程をキャンセル',
+          onClick: () => {
+            if (A) A.go('/cancel/' + encodeURIComponent(futureSib.regId));
+          }
+        }));
       }
-    })), React.createElement("div", {
+      return null;
+    })(), React.createElement("div", {
       style: {
         height: 30
       }
@@ -22426,7 +22448,14 @@ function ScreenCancel({
         fontStyle: 'italic',
         color: srIsDisabled ? 'var(--mg-ink5, #8ba0b6)' : 'var(--mg-ink3, #3d5877)'
       }
-    }, sTime), srLabel && React.createElement("span", {
+    }, sTime), Number(sr.amount) > 0 && React.createElement("span", {
+      className: "mg-num",
+      style: {
+        fontSize: 12,
+        color: srIsDisabled ? 'var(--mg-ink5, #8ba0b6)' : '#8f3542',
+        flex: 'none'
+      }
+    }, "\xA5", Number(sr.amount).toLocaleString(), sr.paid ? '' : lang === 'en' ? ' (unpaid)' : '・未決済'), srLabel && React.createElement("span", {
       className: "mg-ui",
       style: {
         marginLeft: 'auto',
@@ -22710,7 +22739,7 @@ function ScreenCancel({
       color: '#6e5716',
       listStyle: 'disc'
     }
-  }, React.createElement("li", null, T.note1), React.createElement("li", null, T.note2), companions && companions.length > 0 && React.createElement("li", null, T.noteComp(companions.length)), reg.paid && (() => {
+  }, React.createElement("li", null, T.note1), React.createElement("li", null, T.note2), companions && companions.length > 0 && React.createElement("li", null, T.noteComp(companions.length)), (reg.paid || siblingRegs.some(r => r.paid && Number(r.amount) > 0)) && (() => {
     const evForPolicy = Array.isArray(events) && reg && reg.eventId ? events.find(e => String(e.id) === String(reg.eventId)) : null;
     let tiers = null;
     const rawRule = evForPolicy && evForPolicy.cancelPolicyRule;
@@ -22747,14 +22776,51 @@ function ScreenCancel({
     } else if (tiers && tiers.length > 0 && daysUntil === null) {
       percent = null;
     }
-    const paidAmt = Number(reg.amount) || 0;
-    const refundAmt = percent !== null ? Math.floor(paidAmt * percent / 100) : null;
-    return React.createElement(React.Fragment, null, percent !== null && React.createElement("li", {
+    const selRegs = siblingRegs.length ? siblingRegs.filter(r => selectedRegIds.has(r.regId)) : [reg];
+    const pctOf = dateStr => {
+      if (!tiers || !tiers.length) return 100;
+      if (!dateStr) return null;
+      const d2 = new Date(dateStr);
+      if (isNaN(d2.getTime())) return null;
+      d2.setHours(0, 0, 0, 0);
+      const td = new Date();
+      td.setHours(0, 0, 0, 0);
+      const du = Math.floor((d2.getTime() - td.getTime()) / 86400000);
+      const sorted2 = tiers.slice().sort((a, b) => Number(b.days) - Number(a.days));
+      for (let i2 = 0; i2 < sorted2.length; i2++) {
+        if (du >= Number(sorted2[i2].days)) return Number(sorted2[i2].percent) || 0;
+      }
+      return 0;
+    };
+    let selPaid = 0,
+      selRefund = 0,
+      unknownPct = false;
+    selRegs.forEach(r => {
+      const amt = Number(r.amount) || 0;
+      if (amt <= 0) return;
+      selPaid += amt;
+      const ds2 = r.sessionId && sessionDetails[r.sessionId] && sessionDetails[r.sessionId].date || r.sessionDate || r.event && r.event.date || '';
+      const pc = pctOf(ds2);
+      if (pc === null) {
+        unknownPct = true;
+        return;
+      }
+      selRefund += Math.floor(amt * pc / 100);
+    });
+    const feeElsewhere = selPaid === 0 && siblingRegs.some(r => !selectedRegIds.has(r.regId) && Number(r.amount) > 0);
+    const paidAmt = selPaid || Number(reg.amount) || 0;
+    const effPct = selPaid > 0 && !unknownPct ? Math.round(selRefund / selPaid * 100) : unknownPct ? null : percent;
+    const refundAmt = selPaid > 0 && !unknownPct ? selRefund : percent !== null ? Math.floor(paidAmt * percent / 100) : null;
+    return React.createElement(React.Fragment, null, feeElsewhere && React.createElement("li", {
       style: {
-        color: percent > 0 ? '#3f6a3c' : '#6e5716',
         fontWeight: 500
       }
-    }, T.refund(percent, refundAmt !== null && paidAmt > 0 ? refundAmt.toLocaleString() : '', daysUntil)), React.createElement("li", null, T.refundFinal));
+    }, lang === 'en' ? 'The fee is billed on the Day 1 registration — cancelling only this day does not change the payment.' : lang === 'easy' ? 'りょうきんは 1にちめの ぶんに はいっています。この ひ だけ やめても おかねは かわりません。' : '参加費はDay1分の申込に計上されています。この日だけのキャンセルでは金額は変わりません。'), !feeElsewhere && effPct !== null && React.createElement("li", {
+      style: {
+        color: effPct > 0 ? '#3f6a3c' : '#6e5716',
+        fontWeight: 500
+      }
+    }, T.refund(effPct, refundAmt !== null && paidAmt > 0 ? refundAmt.toLocaleString() : '', daysUntil)), React.createElement("li", null, T.refundFinal));
   })())), React.createElement("div", {
     style: {
       display: 'flex',
