@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-<script>window.__MG_BUILD='20260813131714';</script>
+<script>window.__MG_BUILD='20260813133109';</script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>connec+a — 出会いが、まちを変えていく。</title>
@@ -2121,6 +2121,16 @@ function mgNextSession(ev, now) {
     });
   } catch (e) {}
 })();
+try {
+  if (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true) {
+    setTimeout(() => {
+      try {
+        window.scrollTo(0, 1);
+        window.scrollTo(0, 0);
+      } catch (e) {}
+    }, 350);
+  }
+} catch (e) {}
 try {
   window.addEventListener('beforeinstallprompt', e => {
     e.preventDefault();
