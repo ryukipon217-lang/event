@@ -16038,7 +16038,18 @@ function TabMyPage() {
       marginLeft: i3 % 2 === 0 ? 0 : 14,
       marginRight: i3 % 2 === 0 ? 14 : 0
     }
-  }, React.createElement("div", {
+  }, y2.img ? React.createElement("img", {
+    src: y2.img,
+    alt: "",
+    loading: "lazy",
+    style: {
+      width: '100%',
+      maxHeight: 210,
+      objectFit: 'contain',
+      display: 'block',
+      mixBlendMode: 'multiply'
+    }
+  }) : React.createElement("div", {
     className: "mg-serif",
     style: {
       fontSize: 14,
