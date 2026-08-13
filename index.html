@@ -15218,6 +15218,7 @@ function TabMyPage() {
     const sv = surveyOn ? surveyByEvent[evKey + '|' + String(r.sessionId || '')] || surveyByEvent[evKey + '|'] : null;
     const dayN2 = _my_dayN(r, ev);
     const photos = (() => {
+      if (r.status !== 'チェックイン済') return [];
       const sg = Array.isArray(r.sessionMementoGallery) ? r.sessionMementoGallery.filter(Boolean) : [];
       if (sg.length) return sg;
       if (ev.format === 'multi') return [];
