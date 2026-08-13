@@ -14634,6 +14634,275 @@ function _my_imgUrl(url, w) {
   if (m) return 'https://drive.google.com/thumbnail?id=' + m[1] + '&sz=w' + (w || 1200);
   return url;
 }
+function _my_Seal({
+  variant,
+  date,
+  color,
+  size,
+  lang
+}) {
+  const uid = React.useId().replace(/:/g, '');
+  const c = color || '#0a2960';
+  const s = size || 56;
+  const v = variant || 'classic';
+  const mono = 'var(--mono, ui-monospace, SFMono-Regular, monospace)';
+  const sealLabel = lang === 'en' ? 'CONNEC+A \u00B7 MEMENTO' : lang === 'easy' ? 'CONNEC+A さんかきねん' : 'CONNEC+A 参加記念';
+  let inner;
+  if (v === 'beaded') {
+    inner = React.createElement(React.Fragment, null, React.createElement("circle", {
+      cx: "60",
+      cy: "60",
+      r: "55",
+      fill: "none",
+      stroke: "currentColor",
+      strokeWidth: "3.4",
+      strokeDasharray: "3.6 4.4"
+    }), React.createElement("circle", {
+      cx: "60",
+      cy: "60",
+      r: "45",
+      fill: "none",
+      stroke: "currentColor",
+      strokeWidth: "1.4"
+    }), React.createElement("polygon", {
+      points: "60,35 64.17,46.25 76.2,46.73 66.76,54.2 70.01,65.79 60,59.1 49.99,65.79 53.24,54.2 43.8,46.73 55.83,46.25",
+      fill: "currentColor"
+    }), React.createElement("text", {
+      x: "60",
+      y: "94",
+      fontSize: "11",
+      fontWeight: "700",
+      fill: "currentColor",
+      textAnchor: "middle",
+      style: {
+        fontFamily: mono
+      }
+    }, date));
+  } else if (v === 'laurel') {
+    inner = React.createElement(React.Fragment, null, React.createElement("path", {
+      d: "M26 82 C16 60 24 38 40 30",
+      fill: "none",
+      stroke: "currentColor",
+      strokeWidth: "2.2"
+    }), React.createElement("ellipse", {
+      cx: "22",
+      cy: "68",
+      rx: "5.5",
+      ry: "2.6",
+      fill: "currentColor",
+      transform: "rotate(40 22 68)"
+    }), React.createElement("ellipse", {
+      cx: "20",
+      cy: "58",
+      rx: "5.5",
+      ry: "2.6",
+      fill: "currentColor",
+      transform: "rotate(25 20 58)"
+    }), React.createElement("ellipse", {
+      cx: "24",
+      cy: "48",
+      rx: "5.5",
+      ry: "2.6",
+      fill: "currentColor",
+      transform: "rotate(5 24 48)"
+    }), React.createElement("ellipse", {
+      cx: "32",
+      cy: "38",
+      rx: "5.5",
+      ry: "2.6",
+      fill: "currentColor",
+      transform: "rotate(-20 32 38)"
+    }), React.createElement("path", {
+      d: "M94 82 C104 60 96 38 80 30",
+      fill: "none",
+      stroke: "currentColor",
+      strokeWidth: "2.2"
+    }), React.createElement("ellipse", {
+      cx: "98",
+      cy: "68",
+      rx: "5.5",
+      ry: "2.6",
+      fill: "currentColor",
+      transform: "rotate(-40 98 68)"
+    }), React.createElement("ellipse", {
+      cx: "100",
+      cy: "58",
+      rx: "5.5",
+      ry: "2.6",
+      fill: "currentColor",
+      transform: "rotate(-25 100 58)"
+    }), React.createElement("ellipse", {
+      cx: "96",
+      cy: "48",
+      rx: "5.5",
+      ry: "2.6",
+      fill: "currentColor",
+      transform: "rotate(-5 96 48)"
+    }), React.createElement("ellipse", {
+      cx: "88",
+      cy: "38",
+      rx: "5.5",
+      ry: "2.6",
+      fill: "currentColor",
+      transform: "rotate(20 88 38)"
+    }), React.createElement("text", {
+      x: "60",
+      y: "64",
+      fontSize: "30",
+      fill: "currentColor",
+      textAnchor: "middle",
+      style: {
+        fontFamily: 'var(--mg-serif, serif)',
+        fontWeight: 700
+      }
+    }, "A"), React.createElement("text", {
+      x: "60",
+      y: "92",
+      fontSize: "10",
+      fontWeight: "700",
+      fill: "currentColor",
+      textAnchor: "middle",
+      style: {
+        fontFamily: mono
+      }
+    }, date));
+  } else if (v === 'passport') {
+    inner = React.createElement(React.Fragment, null, React.createElement("rect", {
+      x: "14",
+      y: "32",
+      width: "92",
+      height: "56",
+      rx: "7",
+      fill: "none",
+      stroke: "currentColor",
+      strokeWidth: "2.6"
+    }), React.createElement("rect", {
+      x: "20",
+      y: "38",
+      width: "80",
+      height: "44",
+      rx: "4",
+      fill: "none",
+      stroke: "currentColor",
+      strokeWidth: "0.9"
+    }), React.createElement("text", {
+      x: "60",
+      y: "56",
+      fontSize: "10",
+      letterSpacing: "2.5",
+      fontWeight: "700",
+      fill: "currentColor",
+      textAnchor: "middle",
+      style: {
+        fontFamily: mono
+      }
+    }, "CONNEC+A"), React.createElement("path", {
+      d: "M30 63 h60",
+      stroke: "currentColor",
+      strokeWidth: "0.9",
+      opacity: "0.5"
+    }), React.createElement("text", {
+      x: "60",
+      y: "77",
+      fontSize: "11",
+      fontWeight: "700",
+      fill: "currentColor",
+      textAnchor: "middle",
+      style: {
+        fontFamily: mono
+      }
+    }, date));
+  } else if (v === 'minimal') {
+    inner = React.createElement(React.Fragment, null, React.createElement("circle", {
+      cx: "60",
+      cy: "60",
+      r: "50",
+      fill: "none",
+      stroke: "currentColor",
+      strokeWidth: "1.4"
+    }), React.createElement("path", {
+      d: "M60 46 V70 M48 58 H72",
+      fill: "none",
+      stroke: "currentColor",
+      strokeWidth: "3",
+      strokeLinecap: "round"
+    }), React.createElement("text", {
+      x: "60",
+      y: "92",
+      fontSize: "10",
+      letterSpacing: "1.5",
+      fontWeight: "700",
+      fill: "currentColor",
+      textAnchor: "middle",
+      style: {
+        fontFamily: mono
+      }
+    }, date));
+  } else {
+    inner = React.createElement(React.Fragment, null, React.createElement("defs", null, React.createElement("path", {
+      id: 'mgseal' + uid,
+      d: "M60 62 m-40 0 a40 40 0 0 1 80 0",
+      fill: "none"
+    })), React.createElement("circle", {
+      cx: "60",
+      cy: "60",
+      r: "55",
+      fill: "none",
+      stroke: "currentColor",
+      strokeWidth: "2.4"
+    }), React.createElement("circle", {
+      cx: "60",
+      cy: "60",
+      r: "49",
+      fill: "none",
+      stroke: "currentColor",
+      strokeWidth: "1"
+    }), React.createElement("text", {
+      fontSize: "9.5",
+      fontWeight: "700",
+      letterSpacing: "2.5",
+      fill: "currentColor",
+      style: {
+        fontFamily: mono
+      }
+    }, React.createElement("textPath", {
+      href: '#mgseal' + uid,
+      startOffset: "50%",
+      textAnchor: "middle"
+    }, sealLabel)), React.createElement("path", {
+      d: "M45 56 l9 9 18 -20",
+      fill: "none",
+      stroke: "currentColor",
+      strokeWidth: "5",
+      strokeLinecap: "round",
+      strokeLinejoin: "round"
+    }), React.createElement("path", {
+      d: "M34 76 h52",
+      stroke: "currentColor",
+      strokeWidth: "1",
+      opacity: "0.55"
+    }), React.createElement("text", {
+      x: "60",
+      y: "92",
+      fontSize: "11",
+      fontWeight: "700",
+      fill: "currentColor",
+      textAnchor: "middle",
+      style: {
+        fontFamily: mono
+      }
+    }, date));
+  }
+  return React.createElement("svg", {
+    width: s,
+    height: s,
+    viewBox: "0 0 120 120",
+    style: {
+      color: c
+    },
+    "aria-hidden": "true"
+  }, inner);
+}
 function _my_todayYmd() {
   const n = new Date();
   return n.getFullYear() + '-' + String(n.getMonth() + 1).padStart(2, '0') + '-' + String(n.getDate()).padStart(2, '0');
@@ -15421,12 +15690,16 @@ function TabMyPage() {
           if (typeof logAction === 'function') logAction('memento_view', evKey);
         } catch (e) {}
         const yg = Array.isArray(r.sessionYosegaki) && r.sessionYosegaki.length ? r.sessionYosegaki : ev.format !== 'multi' && Array.isArray(r.eventYosegaki) ? r.eventYosegaki : [];
+        const sealT = r.sessionId && r.sessionSealType || ev.sealType || '';
+        const sealP = r.sessionId && r.sessionSealPos || ev.sealPos || '';
         setMviewer({
           title,
           dayN: dayN2,
           dateStr: r.sessionDate || ev.date || '',
           photos,
-          yosegaki: yg
+          yosegaki: yg,
+          sealType: sealT,
+          sealPos: sealP
         });
       },
       "aria-label": L(_my_T.photos),
@@ -15673,6 +15946,10 @@ function TabMyPage() {
       boxShadow: '0 24px 50px rgba(4,10,22,.55), 0 4px 12px rgba(4,10,22,.35)',
       transform: 'rotate(' + (i2 % 2 === 0 ? '-.4' : '.35') + 'deg)'
     }
+  }, React.createElement("div", {
+    style: {
+      position: 'relative'
+    }
   }, React.createElement("img", {
     src: _my_imgUrl(u, 1200),
     alt: "",
@@ -15683,7 +15960,36 @@ function TabMyPage() {
       display: 'block',
       background: 'rgba(34,49,74,.08)'
     }
-  })))), Array.isArray(mviewer.yosegaki) && mviewer.yosegaki.length > 0 ? React.createElement("div", {
+  }), i2 === 0 ? (() => {
+    const pp = String(mviewer.sealPos || '').split(',');
+    const cl = (n, d3) => {
+      const v3 = parseFloat(n);
+      return isNaN(v3) ? d3 : Math.max(0.05, Math.min(0.95, v3));
+    };
+    const sx = cl(pp[0], 0.26),
+      sy = cl(pp[1], 0.80);
+    const sd = (() => {
+      const d3 = String(mviewer.dateStr || '').slice(0, 10);
+      return d3 ? d3.replace(/-/g, '.') : '';
+    })();
+    return React.createElement("div", {
+      style: {
+        position: 'absolute',
+        left: sx * 100 + '%',
+        top: sy * 100 + '%',
+        transform: 'translate(-50%,-50%)',
+        pointerEvents: 'none',
+        opacity: .95,
+        filter: 'drop-shadow(0 2px 8px rgba(0,0,0,.5))'
+      }
+    }, React.createElement(_my_Seal, {
+      variant: mviewer.sealType || 'classic',
+      date: sd,
+      color: "#ffffff",
+      size: 92,
+      lang: lang
+    }));
+  })() : null)))), Array.isArray(mviewer.yosegaki) && mviewer.yosegaki.length > 0 ? React.createElement("div", {
     style: {
       marginTop: 34
     }
