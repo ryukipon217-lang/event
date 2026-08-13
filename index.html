@@ -15368,8 +15368,12 @@ function TabMyPage() {
     const dayN2 = _my_dayN(r, ev);
     const photos = (() => {
       if (r.status !== 'チェックイン済') return [];
-      const sg = Array.isArray(r.sessionMementoGallery) ? r.sessionMementoGallery.filter(Boolean) : [];
-      if (sg.length) return sg;
+      const pubS = r.sessionMementoPublishAt ? new Date(r.sessionMementoPublishAt) : null;
+      const sessHidden = pubS && !isNaN(pubS.getTime()) && pubS > new Date();
+      const main = !sessHidden && r.sessionMementoPhotoUrl ? [r.sessionMementoPhotoUrl] : [];
+      const sg = !sessHidden && Array.isArray(r.sessionMementoGallery) ? r.sessionMementoGallery.filter(Boolean) : [];
+      const allS = main.concat(sg.filter(u => u !== main[0]));
+      if (allS.length) return allS;
       if (ev.format === 'multi') return [];
       const pub = ev.mementoPublishAt ? new Date(ev.mementoPublishAt) : null;
       if (pub && !isNaN(pub.getTime()) && pub > new Date()) return [];
