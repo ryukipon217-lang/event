@@ -7220,16 +7220,24 @@ function TabHome() {
       setSurveys([]);
       return undefined;
     }
-    let token = null;
-    try {
-      token = typeof authStore !== 'undefined' && authStore && authStore.getToken ? authStore.getToken() : null;
-    } catch (e) {}
-    if (!token || typeof authApi === 'undefined' || !authApi || !authApi.getMySurveys) return undefined;
-    authApi.getMySurveys(token).then(res => {
-      if (!dead && res && Array.isArray(res.surveys)) setSurveys(res.surveys);
-    }).catch(() => {});
+    const load = () => {
+      let token = null;
+      try {
+        token = typeof authStore !== 'undefined' && authStore && authStore.getToken ? authStore.getToken() : null;
+      } catch (e) {}
+      if (!token || typeof authApi === 'undefined' || !authApi || !authApi.getMySurveys) return;
+      authApi.getMySurveys(token).then(res => {
+        if (!dead && res && Array.isArray(res.surveys)) setSurveys(res.surveys);
+      }).catch(() => {});
+    };
+    load();
+    const onVis = () => {
+      if (!document.hidden) load();
+    };
+    document.addEventListener('visibilitychange', onVis);
     return () => {
       dead = true;
+      document.removeEventListener('visibilitychange', onVis);
     };
   }, [userKey]);
   const unanswered = surveys.filter(s => s && !s.answered);
@@ -14414,16 +14422,24 @@ function TabMyPage() {
       setSurveys([]);
       return undefined;
     }
-    let token = null;
-    try {
-      token = typeof authStore !== 'undefined' && authStore && authStore.getToken ? authStore.getToken() : null;
-    } catch (e) {}
-    if (!token || typeof authApi === 'undefined' || !authApi || !authApi.getMySurveys) return undefined;
-    authApi.getMySurveys(token).then(res => {
-      if (!dead && res && Array.isArray(res.surveys)) setSurveys(res.surveys);
-    }).catch(() => {});
+    const load = () => {
+      let token = null;
+      try {
+        token = typeof authStore !== 'undefined' && authStore && authStore.getToken ? authStore.getToken() : null;
+      } catch (e) {}
+      if (!token || typeof authApi === 'undefined' || !authApi || !authApi.getMySurveys) return;
+      authApi.getMySurveys(token).then(res => {
+        if (!dead && res && Array.isArray(res.surveys)) setSurveys(res.surveys);
+      }).catch(() => {});
+    };
+    load();
+    const onVis = () => {
+      if (!document.hidden) load();
+    };
+    document.addEventListener('visibilitychange', onVis);
     return () => {
       dead = true;
+      document.removeEventListener('visibilitychange', onVis);
     };
   }, [userKey]);
   const surveyOn = typeof MG_FEATURES === 'undefined' || !!(MG_FEATURES && MG_FEATURES.survey);
