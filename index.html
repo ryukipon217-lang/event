@@ -2059,6 +2059,30 @@ async function fetchFrontBundle() {
     return null;
   }
 }
+function mgSessionOver(dateStr, endTime, now) {
+  if (!dateStr) return false;
+  const n = now || new Date();
+  const ymd = n.getFullYear() + '-' + String(n.getMonth() + 1).padStart(2, '0') + '-' + String(n.getDate()).padStart(2, '0');
+  const d = String(dateStr).slice(0, 10);
+  if (d < ymd) return true;
+  if (d > ymd) return false;
+  if (!endTime) return false;
+  const m = String(endTime).match(/^(\d{1,2}):(\d{2})/);
+  if (!m) return false;
+  return n.getHours() * 60 + n.getMinutes() > Number(m[1]) * 60 + Number(m[2]);
+}
+function mgNextSession(ev, now) {
+  if (!ev || ev.format !== 'multi' || !Array.isArray(ev.sessions) || !ev.sessions.length) return null;
+  const list = ev.sessions.filter(x => x && x.date).slice().sort((a, b) => String(a.date).localeCompare(String(b.date)));
+  for (let i = 0; i < list.length; i++) {
+    if (!mgSessionOver(list[i].date, list[i].endTime, now)) return {
+      s: list[i],
+      n: Number(list[i].order) || i + 1,
+      total: list.length
+    };
+  }
+  return null;
+}
 async function fetchStaticBundle() {
   try {
     const ctl = new AbortController();
@@ -7296,14 +7320,11 @@ function TabHome() {
     const isMultiF = featured.format === 'multi';
     let fDate = featured.date,
       fCurDayN = 0;
-    if (isMultiF && Array.isArray(featured.sessions) && featured.sessions.length) {
-      const n0 = new Date();
-      const tYmd = n0.getFullYear() + '-' + String(n0.getMonth() + 1).padStart(2, '0') + '-' + String(n0.getDate()).padStart(2, '0');
-      const sorted = featured.sessions.slice().filter(x => x && x.date).sort((a, b) => String(a.date).localeCompare(String(b.date)));
-      const nxt = sorted.find(x => String(x.date).slice(0, 10) >= tYmd);
-      if (nxt) {
-        fDate = nxt.date;
-        fCurDayN = Number(nxt.order) || sorted.indexOf(nxt) + 1;
+    if (isMultiF && typeof mgNextSession === 'function') {
+      const nx = mgNextSession(featured);
+      if (nx) {
+        fDate = nx.s.date;
+        fCurDayN = nx.n;
       }
     }
     fDp = _home_dateParts(fDate);
@@ -7540,7 +7561,8 @@ function TabHome() {
       WebkitOverflowScrolling: 'touch'
     }
   }, others.map(ev => {
-    const dp = _home_dateParts(ev.date);
+    const _nx2 = ev.format === 'multi' && typeof mgNextSession === 'function' ? mgNextSession(ev) : null;
+    const dp = _home_dateParts(_nx2 && _nx2.s.date || ev.date);
     const title = _home_i18nField(ev, 'title', lang) || ev.title || '';
     return React.createElement("div", {
       key: ev.id,
@@ -8790,7 +8812,8 @@ function TabEvents() {
       color: 'var(--mg-ink3, #41597a)'
     }
   }, g.label)), g.items.map(ev => {
-    const dp = _ev_dateParts(ev.date);
+    const _nx = ev.format === 'multi' && typeof mgNextSession === 'function' ? mgNextSession(ev) : null;
+    const dp = _ev_dateParts(_nx && _nx.s.date || ev.date);
     const title = _ev_i18nField(ev, 'title', lang) || ev.title || '';
     const time = _ev_fmtTime(ev.time);
     const venue = _ev_venueLabel(ev, lang);
@@ -14843,6 +14866,7 @@ function TabMyPage() {
       if (!_my_isActive(r)) return false;
       const endStr = r.sessionDate || r.event.endDate || r.event.date;
       if (!endStr) return true;
+      if (r.sessionDate && typeof _eng_regOver === 'function' && _eng_regOver(r)) return false;
       const endDate = new Date(String(endStr) + 'T23:59:59');
       return !isNaN(endDate.getTime()) && endDate >= todayStart;
     }).sort((a, b) => {
@@ -14855,6 +14879,7 @@ function TabMyPage() {
       if (r.status === 'キャンセル') return false;
       const endStr = r.sessionDate || r.event.endDate || r.event.date;
       if (!endStr) return false;
+      if (r.sessionDate && typeof _eng_regOver === 'function' && _eng_regOver(r)) return true;
       const endDate = new Date(String(endStr) + 'T23:59:59');
       return !isNaN(endDate.getTime()) && endDate < todayStart;
     }).sort((a, b) => {
@@ -16350,14 +16375,30 @@ function _eng_todayYmd() {
   const n = new Date();
   return n.getFullYear() + '-' + String(n.getMonth() + 1).padStart(2, '0') + '-' + String(n.getDate()).padStart(2, '0');
 }
+function _eng_regOver(r) {
+  try {
+    const d = r.sessionDate || r.event && r.event.date || '';
+    if (!d) return false;
+    let end = '';
+    const ev = r.event;
+    if (ev && r.sessionId && Array.isArray(ev.sessions)) {
+      const h = ev.sessions.find(x => String(x.id) === String(r.sessionId));
+      if (h) end = h.endTime || '';
+    }
+    if (!end && ev) end = ev.endTime || '';
+    return typeof mgSessionOver === 'function' ? mgSessionOver(d, end) : false;
+  } catch (e) {
+    return false;
+  }
+}
 function _eng_pickReg(regs) {
   const ts = _eng_todayYmd();
   const act = (Array.isArray(regs) ? regs : []).filter(r => r && r.event && _eng_ACTIVE_STATUSES.indexOf(r.status) >= 0);
-  const today = act.find(r => (r.sessionDate || r.event.date) === ts);
+  const today = act.find(r => (r.sessionDate || r.event.date) === ts && !_eng_regOver(r));
   if (today) return today;
   const up = act.filter(r => {
     const d = r.sessionDate || r.event.date;
-    return d && d >= ts;
+    return d && d >= ts && !_eng_regOver(r);
   }).sort((a, b) => String(a.sessionDate || a.event.date).localeCompare(String(b.sessionDate || b.event.date)));
   return up.length ? up[0] : null;
 }
@@ -16831,8 +16872,11 @@ function SheetTicket({
       if (!event || event.format !== 'multi' || sibs.length < 2) return null;
       const today = _eng_todayYmd();
       const sorted = sibs.slice().sort((a, b) => String(a.sessionDate || '').localeCompare(String(b.sessionDate || '')));
-      const todaySib = sorted.find(r => String(r.sessionDate || '') === today);
-      const showGuide = todaySib && todaySib.regId !== reg.regId;
+      const todaySib = sorted.find(r => String(r.sessionDate || '') === today && !_eng_regOver(r));
+      const nextSib = sorted.find(r => !_eng_regOver(r));
+      const curOver = _eng_regOver(reg);
+      const guideSib = todaySib && todaySib.regId !== reg.regId ? todaySib : curOver && nextSib && nextSib.regId !== reg.regId ? nextSib : null;
+      const showGuide = !!guideSib;
       return React.createElement("div", {
         style: {
           marginBottom: 14
@@ -16842,7 +16886,7 @@ function SheetTicket({
         role: "button",
         onClick: () => {
           if (A) A.openSheet('ticket', {
-            regId: todaySib.regId
+            regId: guideSib.regId
           });
         },
         style: {
@@ -16867,7 +16911,14 @@ function SheetTicket({
           color: '#6b5f31',
           flex: 1
         }
-      }, lang === 'en' ? 'Today\u2019s ticket is Day ' + (_eng_dayN(todaySib, sibs) || '') + ' — tap to switch' : lang === 'easy' ? 'きょうの チケットは ' + (_eng_dayN(todaySib, sibs) || '') + 'にちめです。タップで ひらきます' : '本日のチケットは Day ' + (_eng_dayN(todaySib, sibs) || '') + ' です — タップで切替'), React.createElement(Icon, {
+      }, (() => {
+        const gn = _eng_dayN(guideSib, sibs) || '';
+        const gmd = guideSib.sessionDate ? _eng_fmtMD(guideSib.sessionDate) : '';
+        if (guideSib === todaySib) {
+          return lang === 'en' ? 'Today\u2019s ticket is Day ' + gn + ' — tap to switch' : lang === 'easy' ? 'きょうの チケットは ' + gn + 'にちめです。タップで ひらきます' : '本日のチケットは Day ' + gn + ' です — タップで切替';
+        }
+        return lang === 'en' ? 'This day has ended — next is Day ' + gn + (gmd ? ' (' + gmd + ')' : '') + '. Tap to open' : lang === 'easy' ? 'この ひは おわりました。つぎは ' + gn + 'にちめ' + (gmd ? '（' + gmd + '）' : '') + ' です。タップで ひらきます' : 'この回は終了しました — 次は Day ' + gn + (gmd ? '（' + gmd + '）' : '') + ' です。タップで切替';
+      })()), React.createElement(Icon, {
         name: "arrow_forward",
         size: 16,
         style: {
@@ -16885,7 +16936,7 @@ function SheetTicket({
       }, sorted.map(r2 => {
         const cur = r2.regId === reg.regId;
         const n2 = _eng_dayN(r2, sibs);
-        const isToday = String(r2.sessionDate || '') === today;
+        const isToday = String(r2.sessionDate || '') === today && !_eng_regOver(r2);
         return React.createElement("button", {
           key: r2.regId,
           type: "button",
