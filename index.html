@@ -7287,22 +7287,40 @@ function TabHome() {
     fFull = false,
     fDayLabel = '';
   if (featured) {
-    fDp = _home_dateParts(featured.date);
+    const isMultiF = featured.format === 'multi';
+    let fDate = featured.date,
+      fCurDayN = 0;
+    if (isMultiF && Array.isArray(featured.sessions) && featured.sessions.length) {
+      const n0 = new Date();
+      const tYmd = n0.getFullYear() + '-' + String(n0.getMonth() + 1).padStart(2, '0') + '-' + String(n0.getDate()).padStart(2, '0');
+      const sorted = featured.sessions.slice().filter(x => x && x.date).sort((a, b) => String(a.date).localeCompare(String(b.date)));
+      const nxt = sorted.find(x => String(x.date).slice(0, 10) >= tYmd);
+      if (nxt) {
+        fDate = nxt.date;
+        fCurDayN = Number(nxt.order) || sorted.indexOf(nxt) + 1;
+      }
+    }
+    fDp = _home_dateParts(fDate);
     fTitle = _home_i18nField(featured, 'title', lang) || featured.title || '';
     fTime = _home_timeRange(featured);
     fVenue = _home_venueLabel(featured, lang);
     const cap = Number(featured.capacity) || 0;
     const reg = Number(featured.registered) || 0;
-    fSpots = cap > 0 ? Math.max(0, cap - reg) : null;
-    fFull = featured.status === '満員' || cap > 0 && fSpots === 0;
-    fDayLabel = featured.format === 'multi' ? featured.sessionCount ? featured.sessionCount + ' DAYS' : L(_home_T.multiDay) : fDp ? fDp.day : '';
+    fSpots = !isMultiF && cap > 0 ? Math.max(0, cap - reg) : null;
+    fFull = featured.status === '満員' || !isMultiF && cap > 0 && fSpots === 0;
+    fDayLabel = isMultiF ? fCurDayN && featured.sessionCount ? 'DAY ' + fCurDayN + ' / ' + featured.sessionCount : featured.sessionCount ? featured.sessionCount + ' DAYS' : L(_home_T.multiDay) : fDp ? fDp.day : '';
   }
-  let surveyTitle = '';
+  let surveyTitle = '',
+    surveyDayNote = '';
   if (showSurvey) {
     const sv = unanswered[0];
     const svT = _home_i18nField(sv, 'title', lang) || sv.title || '';
     const evT = _home_i18nField(sv, 'eventTitle', lang) || sv.eventTitle || '';
     surveyTitle = svT || (evT ? lang === 'en' ? 'How was ' + evT + '?' : evT + 'は、どうでしたか？' : L(_home_T.surveyGeneric));
+    if (sv.sessionId && (sv.sessionOrder || sv.sessionDate)) {
+      const md = sv.sessionDate ? (Number(String(sv.sessionDate).slice(5, 7)) || '') + '.' + (Number(String(sv.sessionDate).slice(8, 10)) || '') : '';
+      surveyDayNote = (sv.sessionOrder ? lang === 'easy' ? sv.sessionOrder + 'にちめ' : 'Day ' + sv.sessionOrder : '') + (md ? ' · ' + md : '');
+    }
   }
   const org = typeof CONFIG !== 'undefined' && CONFIG && CONFIG.ORG || {
     members: 0,
@@ -7400,7 +7418,7 @@ function TabHome() {
       lineHeight: 1.4,
       paddingTop: 6
     }
-  }, L(_home_T.multiDay)), fDayLabel ? React.createElement("div", {
+  }, L(_home_T.multiDay)), fDayLabel && fDayLabel !== L(_home_T.multiDay) ? React.createElement("div", {
     style: {
       fontSize: 11,
       letterSpacing: '.16em',
@@ -7548,9 +7566,20 @@ function TabHome() {
       style: {
         fontSize: 15,
         letterSpacing: '.08em',
-        color: 'var(--mg-ink4, #5b7796)'
+        color: 'var(--mg-ink4, #5b7796)',
+        display: 'flex',
+        alignItems: 'baseline',
+        gap: 6
       }
-    }, dp ? dp.md2 : L(_home_T.multiDay)), React.createElement("div", {
+    }, React.createElement("span", null, dp ? dp.md2 : L(_home_T.multiDay)), ev.format === 'multi' && dp ? React.createElement("span", {
+      className: "mg-ui",
+      style: {
+        fontSize: 9.5,
+        letterSpacing: '.12em',
+        color: 'var(--mg-accent, #35618f)',
+        fontWeight: 600
+      }
+    }, ev.sessionCount ? ev.sessionCount + ' DAYS' : L(_home_T.multiDay)) : null), React.createElement("div", {
       className: "mg-serif mg-clamp2",
       style: {
         fontSize: 16.5,
@@ -7703,7 +7732,7 @@ function TabHome() {
       color: '#6b5f31',
       marginTop: 4
     }
-  }, L(_home_T.surveySub))), React.createElement("span", {
+  }, (surveyDayNote ? surveyDayNote + ' ／ ' : '') + L(_home_T.surveySub))), React.createElement("span", {
     style: {
       flex: 'none',
       display: 'inline-flex',
@@ -8431,7 +8460,10 @@ function _ev_monthLabel(lang, y, m) {
 function _ev_matchChip(ev, chip) {
   if (!ev) return false;
   if (chip === 'all') return true;
-  if (chip === 'free') return _ev_feeType(ev) === 'free';
+  if (chip === 'free') {
+    if (ev.format === 'multi' && String(ev.feeMode || '') === 'per_session' && !ev.feeType) return false;
+    return _ev_feeType(ev) === 'free';
+  }
   if (chip === 'easyja') {
     return !!(ev.title_easy && String(ev.title_easy).trim() || ev.summary_easy && String(ev.summary_easy).trim());
   }
@@ -8441,6 +8473,9 @@ function _ev_feeLabelList(ev, lang) {
   const st = _ev_st(lang);
   const fee = Number(ev.fee) || 0;
   if (fee > 0) return '¥' + fee.toLocaleString();
+  if (ev.format === 'multi' && String(ev.feeMode || '') === 'per_session' && !ev.feeType) {
+    return lang === 'en' ? 'Varies by day' : lang === 'easy' ? 'ひによって ちがいます' : '日程により異なる';
+  }
   const ft = _ev_feeType(ev);
   if (ft === 'free') return st.feeFree;
   if (ft === 'paid') return st.feePaid;
@@ -9028,7 +9063,10 @@ function SheetEventDetail({
     (async () => {
       try {
         const token = typeof authStore !== 'undefined' && authStore && authStore.getToken ? authStore.getToken() : null;
-        if (!token) return;
+        if (!token) {
+          if (!cancelled) setRegsLoaded(true);
+          return;
+        }
         if (typeof getMyRegistrationsCached === 'function') {
           const result = await getMyRegistrationsCached(token, {
             onFresh: fresh => {
@@ -9045,6 +9083,7 @@ function SheetEventDetail({
           console.warn('getMyRegistrations failed (will retry on next reload):', e);
         } catch (e2) {}
       }
+      if (!cancelled) setRegsLoaded(true);
     })();
     return () => {
       cancelled = true;
@@ -9057,7 +9096,7 @@ function SheetEventDetail({
     _hydrated.current = true;
     const validIds = {};
     sessions.forEach(s => {
-      validIds[s.id] = true;
+      if (!_sessPast(s) && !_sessFull(s)) validIds[s.id] = true;
     });
     const blockedIds = {};
     myRegs.filter(r => r.eventId === eventId).filter(r => r.status !== 'キャンセル' && r.status !== '返金').forEach(r => {
@@ -9094,6 +9133,16 @@ function SheetEventDetail({
     });
     return map;
   }, [myRegs, sessions, eventId]);
+  const _n0 = new Date();
+  const _todayYmd = _n0.getFullYear() + '-' + String(_n0.getMonth() + 1).padStart(2, '0') + '-' + String(_n0.getDate()).padStart(2, '0');
+  const _sessPast = s2 => {
+    const d2 = String(s2 && s2.date || '').slice(0, 10);
+    return !!d2 && d2 < _todayYmd;
+  };
+  const _sessFull = s2 => {
+    const c2 = Number(s2 && s2.capacity) || 0;
+    return c2 > 0 && (Number(s2.registered) || 0) >= c2;
+  };
   useEffect(() => {
     if (!open || !isMulti || _defaulted.current) return;
     if (!sessLoaded || !regsLoaded || sessions.length === 0) return;
@@ -9103,7 +9152,8 @@ function SheetEventDetail({
     }
     const def = sessions.filter(s2 => {
       const st2 = sessionStates[s2.id] || 'available';
-      return st2 === 'available' || st2 === 'cancelled';
+      if (st2 !== 'available' && st2 !== 'cancelled') return false;
+      return !_sessPast(s2) && !_sessFull(s2);
     }).map(s2 => s2.id);
     _defaulted.current = true;
     if (def.length > 0) setSelectedSessionIds(def);
@@ -9160,12 +9210,14 @@ function SheetEventDetail({
       const allRegsHere = myRegsForEvent.length > 0 ? myRegsForEvent : [myReg];
       const anyRefundPending = allRegsHere.some(r => r.status === '返金待ち');
       const totalRefundAmount = allRegsHere.reduce((sum, r) => sum + (Number(r.refundAmount) || 0), 0);
-      const anyPaid = allRegsHere.some(r => r.paid);
+      const unpaidRows = allRegsHere.filter(r => !r.paid && Number(r.amount) > 0);
+      const anyPaid = allRegsHere.some(r => r.paid) && unpaidRows.length === 0;
       const isRefunded = anyRefundPending || totalRefundAmount > 0;
       const badgeLabel = isRefunded ? L(_ev_T.refunded) : anyPaid ? st.paid : isOnsite ? _ev_onsiteLabel(myReg, lang) : st.registered;
       const badgeColor = isRefunded ? '#8f3542' : anyPaid ? '#16723f' : '#8a6d1c';
       const badgeBg = isRefunded ? 'rgba(143,53,66,.08)' : anyPaid ? 'rgba(22,114,63,.08)' : 'rgba(233,208,106,.24)';
-      const canPayNow = !myReg.paid && !isOnsite && myReg.amount > 0 && myReg.event && myReg.event.paymentUrl && !myReg.event.paymentLinkExpired && /^https?:\/\//i.test(myReg.event.paymentUrl);
+      const payRow = unpaidRows[0] || myReg;
+      const canPayNow = unpaidRows.length > 0 && !isOnsite && payRow.event && payRow.event.paymentUrl && !payRow.event.paymentLinkExpired && /^https?:\/\//i.test(payRow.event.paymentUrl);
       footer = React.createElement("div", {
         className: "mg-ui",
         style: {
@@ -9194,7 +9246,7 @@ function SheetEventDetail({
         size: 16
       }), badgeLabel), canPayNow && React.createElement("a", {
         className: "mg-tap",
-        href: myReg.event.paymentUrl,
+        href: payRow.event.paymentUrl,
         target: "_blank",
         rel: "noopener noreferrer",
         style: {
@@ -9436,7 +9488,7 @@ function SheetEventDetail({
       }
     }, React.createElement(_ev_MetaRow, {
       icon: "event"
-    }, isMultiEvt ? (t.detail && t.detail.multiTotal || '全') + ' ' + (sessions.length || ev.sessionCount || '-') + ' ' + (t.detail && t.detail.multiSessions || 'セッション') : (dateLabel || '—') + (dp ? '' : '') + (timeLabel ? '　' + timeLabel : '')), React.createElement(_ev_MetaRow, {
+    }, isMultiEvt ? (dateLabel || '—') + '（' + (t.detail && t.detail.multiTotal || '全') + ' ' + (sessions.length || ev.sessionCount || '-') + ' ' + (t.detail && t.detail.multiSessions || 'セッション') + '）' : (dateLabel || '—') + (dp ? '' : '') + (timeLabel ? '　' + timeLabel : '')), React.createElement(_ev_MetaRow, {
       icon: "place"
     }, React.createElement("span", null, venueValue || '—'), venueHref ? React.createElement("a", {
       href: venueHref,
@@ -9633,8 +9685,9 @@ function SheetEventDetail({
       const sIsMyActive = sState === 'active';
       const sIsMyPending = sState === 'pending';
       const sIsMyCancelled = sState === 'cancelled';
-      const sDisabled = sIsMyActive || sIsMyPending || sFull || isLocked;
+      const sPast = _sessPast(s);
       const selected = selectedSessionIds.indexOf(s.id) >= 0;
+      const sDisabled = sIsMyActive || sIsMyPending || isLocked || (sFull || sPast) && !selected;
       const sdp = _ev_dateParts(s.date);
       const sVenue = s.online ? lang === 'en' ? 'Online' : 'オンライン' : s.venue || '—';
       const sName = (lang === 'easy' ? s.name_easy || s.name : lang === 'en' ? s.name_en || s.name : s.name) || 'Session ' + (s.order || i + 1);
@@ -9655,10 +9708,23 @@ function SheetEventDetail({
           padding: '14px 14px',
           border: '1px solid ' + borderColor,
           boxShadow: selected && !sDisabled ? '0 12px 26px rgba(53,97,143,.2)' : undefined,
-          opacity: sFull && !isLocked || sIsMyPending ? .6 : 1,
+          opacity: sFull && !isLocked || sIsMyPending || sPast ? .6 : 1,
           cursor: sDisabled ? 'default' : 'pointer'
         }
-      }, sState !== 'available' ? React.createElement("span", {
+      }, sPast && sState === 'available' ? React.createElement("span", {
+        style: {
+          position: 'absolute',
+          top: 8,
+          right: 10,
+          padding: '2px 9px',
+          borderRadius: 10,
+          fontSize: 9.5,
+          letterSpacing: '.06em',
+          fontWeight: 500,
+          color: '#fbfcfd',
+          background: '#8a97a8'
+        }
+      }, lang === 'en' ? 'Ended' : lang === 'easy' ? 'おわりました' : '終了') : null, sState !== 'available' ? React.createElement("span", {
         style: {
           position: 'absolute',
           top: 8,
@@ -10519,34 +10585,47 @@ function _reg_buildGCalUrl(event, extraDescription) {
     return null;
   }
 }
-function _reg_buildICal(event, extraDescription) {
+function _reg_buildICal(event, extraDescription, sessionsArr) {
   if (!event || !event.date) return null;
   try {
-    const startStr = String(event.date).replace(/-/g, '');
-    const startTime = (event.time || '00:00').replace(':', '');
-    const start = startStr + 'T' + startTime + '00';
-    let end;
-    if (event.endTime) {
-      const endTime = String(event.endTime).replace(':', '');
-      end = startStr + 'T' + endTime + '00';
-    } else {
-      const startHourNum = parseInt((event.time || '00:00').substring(0, 2), 10) || 0;
-      const endHourNum = (startHourNum + 2) % 24;
-      const endHourStr = endHourNum.toString().padStart(2, '0');
-      const endMinStr = (event.time || '00:00').substring(3, 5);
-      end = startStr + 'T' + endHourStr + endMinStr + '00';
+    function mkTimes(dateStr, timeStr, endTimeStr) {
+      const d0 = String(dateStr).replace(/-/g, '');
+      const t0 = (timeStr || '00:00').replace(':', '');
+      const start = d0 + 'T' + t0 + '00';
+      let end;
+      if (endTimeStr) {
+        end = d0 + 'T' + String(endTimeStr).replace(':', '') + '00';
+      } else {
+        const sh = parseInt((timeStr || '00:00').substring(0, 2), 10) || 0;
+        end = d0 + 'T' + ((sh + 2) % 24).toString().padStart(2, '0') + (timeStr || '00:00').substring(3, 5) + '00';
+      }
+      return {
+        start: start,
+        end: end
+      };
     }
     const description = [event.description || '', extraDescription || ''].filter(Boolean).join('\\n\\n').replace(/\n/g, '\\n');
-    const uid = (event.id || Date.now()) + '@connecta.jp';
     const now = new Date();
     const nowStr = now.getUTCFullYear().toString() + String(now.getUTCMonth() + 1).padStart(2, '0') + String(now.getUTCDate()).padStart(2, '0') + 'T' + String(now.getUTCHours()).padStart(2, '0') + String(now.getUTCMinutes()).padStart(2, '0') + String(now.getUTCSeconds()).padStart(2, '0') + 'Z';
-    return ['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//connec+a//EventsApp//JA', 'CALSCALE:GREGORIAN', 'BEGIN:VEVENT', 'UID:' + uid, 'DTSTAMP:' + nowStr, 'DTSTART;TZID=Asia/Tokyo:' + start, 'DTEND;TZID=Asia/Tokyo:' + end, 'SUMMARY:' + (event.title || '').replace(/[\r\n,;]/g, ' '), 'DESCRIPTION:' + description, 'LOCATION:' + (event.venue || '').replace(/[\r\n,;]/g, ' '), 'END:VEVENT', 'END:VCALENDAR'].join('\r\n');
+    const days = Array.isArray(sessionsArr) && sessionsArr.filter(x => x && x.date).length > 0 ? sessionsArr.filter(x => x && x.date) : [{
+      date: event.date,
+      startTime: event.time || '',
+      endTime: event.endTime || '',
+      name: ''
+    }];
+    const events = days.map(function (dsy, i) {
+      const tt = mkTimes(dsy.date, dsy.startTime || event.time, dsy.endTime || (days.length === 1 ? event.endTime : ''));
+      const uid = (event.id || Date.now()) + '-' + (dsy.id || i) + '@connecta.jp';
+      const summary = ((event.title || '') + (days.length > 1 ? '（Day ' + (dsy.order || i + 1) + '）' : '')).replace(/[\r\n,;]/g, ' ');
+      return ['BEGIN:VEVENT', 'UID:' + uid, 'DTSTAMP:' + nowStr, 'DTSTART;TZID=Asia/Tokyo:' + tt.start, 'DTEND;TZID=Asia/Tokyo:' + tt.end, 'SUMMARY:' + summary, 'DESCRIPTION:' + description, 'LOCATION:' + (event.venue || '').replace(/[\r\n,;]/g, ' '), 'END:VEVENT'].join('\r\n');
+    });
+    return ['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//connec+a//EventsApp//JA', 'CALSCALE:GREGORIAN', events.join('\r\n'), 'END:VCALENDAR'].join('\r\n');
   } catch (e) {
     return null;
   }
 }
-function _reg_downloadICal(event, extraDescription) {
-  const ics = _reg_buildICal(event, extraDescription);
+function _reg_downloadICal(event, extraDescription, sessionsArr) {
+  const ics = _reg_buildICal(event, extraDescription, sessionsArr);
   if (!ics) return;
   const blob = new Blob([ics], {
     type: 'text/calendar;charset=utf-8'
@@ -11555,6 +11634,17 @@ function SheetRegister({
     if (def.length > 0) setSelSessIds(def);
   }, [open, ev, regSessLoaded, registerSessions, selSessIds]);
   useEffect(() => {
+    const ids = {};
+    try {
+      (A && A.regs || []).forEach(r => {
+        if (String(r.eventId) !== String(eventId)) return;
+        if (r.status === 'キャンセル' || r.status === '返金' || r.status === '返金待ち') return;
+        if (r.sessionId) ids[r.sessionId] = true;
+      });
+    } catch (e) {}
+    if (Object.keys(ids).length) setSelSessIds(prev => prev.some(x => ids[x]) ? prev.filter(x => !ids[x]) : prev);
+  }, [A && A.regs, eventId]);
+  useEffect(() => {
     if (!open || !auth.user || !eventId) return;
     let cancelled = false;
     (async () => {
@@ -11572,7 +11662,24 @@ function SheetRegister({
       cancelled = true;
     };
   }, [open, auth.user, eventId]);
-  const companionTotal = companions.reduce((sum, x) => sum + (Number(x.fee) || 0), 0);
+  const companionTotal = (() => {
+    const base = companions.reduce((sum, x) => sum + (Number(x.fee) || 0), 0);
+    if (!ev || ev.format !== 'multi' || String(ev.feeMode || 'uniform') === 'uniform') return base;
+    const maxA = ev.childAgeMax != null && ev.childAgeMax !== '' ? Number(ev.childAgeMax) : 12;
+    const isChild = c => {
+      const a = c.age !== '' && c.age != null ? Number(c.age) : null;
+      return a != null ? a <= maxA : c.kind === '子供';
+    };
+    let sum = 0;
+    selSessIds.forEach(sid => {
+      const s2 = registerSessions.find(x2 => x2.id === sid);
+      const eff = s2 && Number(s2.fee) > 0 ? Number(s2.fee) : Number(ev.fee) || 0;
+      companions.forEach(c => {
+        sum += isChild(c) ? Number(ev.childFee) || 0 : eff;
+      });
+    });
+    return sum;
+  })();
   const hasPaidCompanions = companionTotal > 0;
   useEffect(() => {
     if (hasPaidCompanions && paymentMethod && paymentMethod !== '当日 PayPay' && paymentMethod !== '当日 現金') {
@@ -11620,6 +11727,36 @@ function SheetRegister({
     return sum;
   };
   const subTotal = calculateSubTotal();
+  const _cpnRevalRef = React.useRef(0);
+  useEffect(() => {
+    if (!appliedCoupon || !auth.user) return undefined;
+    const seq = ++_cpnRevalRef.current;
+    if (subTotal <= 0) {
+      setAppliedCoupon(null);
+      return undefined;
+    }
+    const t2 = setTimeout(async () => {
+      try {
+        const token = authStore.getToken();
+        const res = await authApi.validateCoupon(token, appliedCoupon.code, eventId, subTotal);
+        if (seq !== _cpnRevalRef.current) return;
+        if (!res.valid) {
+          setAppliedCoupon(null);
+          setCouponError(res.error || L(_reg_T.couponInvalid));
+        } else if (res.discount !== appliedCoupon.discount) {
+          setAppliedCoupon({
+            code: res.code,
+            name: res.name,
+            discount: res.discount,
+            finalAmount: res.finalAmount
+          });
+        }
+      } catch (e) {}
+    }, 450);
+    return () => {
+      clearTimeout(t2);
+    };
+  }, [subTotal]);
   const displayTotal = appliedCoupon ? Math.max(0, subTotal - appliedCoupon.discount) : subTotal;
   const grandTotal = displayTotal + companionTotal;
   const parsedEligibilityRule = (() => {
@@ -11747,6 +11884,26 @@ function SheetRegister({
       const result = await authApi.registerEvent(token, eventId, isPaid ? paymentMethod : '', sessionIdsToSend, couponToSend, companionsToSend, lang);
       const regId = result && result.registrationId ? result.registrationId : '';
       const allRegIds = Array.isArray(result.registrationIds) && result.registrationIds.length > 0 ? result.registrationIds : regId ? [regId] : [];
+      if (isMultiEvent && allRegIds.length > 0) {
+        try {
+          const det = selectedSessionIds.map(sid => {
+            const s2 = registerSessions.find(x => x.id === sid) || {};
+            return {
+              id: sid,
+              date: s2.date || '',
+              name: s2.name || '',
+              startTime: s2.startTime || '',
+              endTime: s2.endTime || '',
+              order: s2.order || 0
+            };
+          }).filter(x => x.id);
+          sessionStorage.setItem('connecta_reg_sessions_' + allRegIds[0], JSON.stringify({
+            t: Date.now(),
+            regIds: allRegIds,
+            sessions: det
+          }));
+        } catch (e) {}
+      }
       if (allRegIds.length > 0) {
         try {
           const selectedMethod = isPaid ? paymentMethod : '';
@@ -12625,45 +12782,74 @@ function SheetRegister({
         color: 'var(--mg-ink5, #8ba0b6)',
         marginTop: 8
       }
-    }, L(_reg_T.daysLoading))) : registerSessions.map(s2 => {
-      const on = selSessIds.indexOf(s2.id) >= 0;
-      return React.createElement("div", {
-        key: s2.id,
-        className: "mg-tap",
-        onClick: () => setSelSessIds(on ? selSessIds.filter(x => x !== s2.id) : selSessIds.concat([s2.id])),
-        style: {
-          display: 'flex',
-          alignItems: 'center',
-          gap: 10,
-          padding: '11px 12px',
-          borderRadius: 12,
-          marginBottom: 8,
-          cursor: 'pointer',
-          border: '1px solid ' + (on ? 'var(--mg-accent, #35618f)' : 'rgba(34,49,74,.16)'),
-          background: on ? 'rgba(53,97,143,.08)' : 'rgba(255,255,255,.6)'
-        }
-      }, React.createElement(Icon, {
-        name: on ? 'check_circle' : 'radio_button_unchecked',
-        size: 20,
-        style: {
-          color: on ? 'var(--mg-accent, #35618f)' : 'var(--mg-ink5, #8ba0b6)',
-          flex: 'none'
-        }
-      }), React.createElement("div", {
-        style: {
-          flex: 1,
-          minWidth: 0,
-          fontSize: 13.5,
-          fontWeight: 500
-        }
-      }, _reg_sessLabel(s2, lang)), Number(s2.fee) > 0 ? React.createElement("span", {
-        className: "mg-num",
-        style: {
-          fontSize: 12.5,
-          flex: 'none'
-        }
-      }, "\xA5", Number(s2.fee).toLocaleString()) : null);
-    }), regSessLoaded && registerSessions.length > 0 && selSessIds.length === 0 ? React.createElement("div", {
+    }, L(_reg_T.daysLoading))) : (() => {
+      const perSess = String(ev.feeMode || 'uniform') === 'per_session';
+      const myActiveIds = {};
+      try {
+        (A && A.regs || []).forEach(r => {
+          if (String(r.eventId) !== String(eventId)) return;
+          if (r.status === 'キャンセル' || r.status === '返金' || r.status === '返金待ち') return;
+          if (r.sessionId) myActiveIds[r.sessionId] = true;
+        });
+      } catch (e) {}
+      return registerSessions.map(s2 => {
+        const on = selSessIds.indexOf(s2.id) >= 0;
+        const mine = !!myActiveIds[s2.id];
+        const eff = perSess ? Number(s2.fee) > 0 ? Number(s2.fee) : Number(ev.fee) || 0 : 0;
+        return React.createElement("div", {
+          key: s2.id,
+          className: mine ? '' : 'mg-tap',
+          onClick: mine ? undefined : () => setSelSessIds(on ? selSessIds.filter(x => x !== s2.id) : selSessIds.concat([s2.id])),
+          style: {
+            display: 'flex',
+            alignItems: 'center',
+            gap: 10,
+            padding: '11px 12px',
+            borderRadius: 12,
+            marginBottom: 8,
+            cursor: mine ? 'default' : 'pointer',
+            opacity: mine ? .62 : 1,
+            border: '1px solid ' + (mine ? 'rgba(22,114,63,.4)' : on ? 'var(--mg-accent, #35618f)' : 'rgba(34,49,74,.16)'),
+            background: mine ? 'rgba(22,114,63,.06)' : on ? 'rgba(53,97,143,.08)' : 'rgba(255,255,255,.6)'
+          }
+        }, React.createElement(Icon, {
+          name: mine ? 'how_to_reg' : on ? 'check_circle' : 'radio_button_unchecked',
+          size: 20,
+          style: {
+            color: mine ? '#16723f' : on ? 'var(--mg-accent, #35618f)' : 'var(--mg-ink5, #8ba0b6)',
+            flex: 'none'
+          }
+        }), React.createElement("div", {
+          style: {
+            flex: 1,
+            minWidth: 0,
+            fontSize: 13.5,
+            fontWeight: 500
+          }
+        }, _reg_sessLabel(s2, lang)), mine ? React.createElement("span", {
+          className: "mg-ui",
+          style: {
+            fontSize: 10.5,
+            color: '#16723f',
+            flex: 'none',
+            fontWeight: 600
+          }
+        }, lang === 'en' ? 'Registered' : lang === 'easy' ? 'もうしこみずみ' : '申込済み') : perSess && eff > 0 ? React.createElement("span", {
+          className: "mg-num",
+          style: {
+            fontSize: 12.5,
+            flex: 'none'
+          }
+        }, "\xA5", eff.toLocaleString()) : null);
+      });
+    })(), regSessLoaded && String(ev.feeMode || 'uniform') === 'uniform' && Number(ev.fee) > 0 ? React.createElement("div", {
+      style: {
+        fontSize: 11.5,
+        color: 'var(--mg-ink4, #5b7796)',
+        marginTop: 2,
+        marginBottom: 6
+      }
+    }, lang === 'en' ? 'Flat fee \u00A5' + Number(ev.fee).toLocaleString() + ' regardless of days (billed once, on Day 1)' : lang === 'easy' ? 'なんにち えらんでも りょうきんは \u00A5' + Number(ev.fee).toLocaleString() + ' です（1にちめに まとめて はらいます）' : '何日選んでも一律 \u00A5' + Number(ev.fee).toLocaleString() + '（初日にまとめて計上されます）') : null, regSessLoaded && registerSessions.length > 0 && selSessIds.length === 0 ? React.createElement("div", {
       style: {
         fontSize: 11.5,
         color: '#8f3542',
@@ -12840,7 +13026,26 @@ function SheetRegister({
         fontWeight: 500,
         textAlign: 'right'
       }
-    }, ev.title)), React.createElement("div", {
+    }, ev.title)), ev.format === 'multi' && selSessIds.length > 0 && React.createElement("div", {
+      style: {
+        display: 'flex',
+        justifyContent: 'space-between',
+        gap: 12
+      }
+    }, React.createElement("span", {
+      style: {
+        color: 'var(--mg-ink4, #5b7796)',
+        flexShrink: 0
+      }
+    }, lang === 'en' ? 'Days' : lang === 'easy' ? 'さんかする ひ' : '日程'), React.createElement("span", {
+      style: {
+        fontWeight: 500,
+        textAlign: 'right'
+      }
+    }, (() => {
+      const ds = registerSessions.filter(s2 => selSessIds.indexOf(s2.id) >= 0 && s2.date).map(s2 => s2.date).sort().map(y => (Number(String(y).slice(5, 7)) || '') + '.' + (Number(String(y).slice(8, 10)) || ''));
+      return (lang === 'en' ? ds.length + ' day' + (ds.length > 1 ? 's' : '') : ds.length + '日') + (ds.length ? '（' + ds.join(', ') + '）' : '');
+    })())), React.createElement("div", {
       style: {
         display: 'flex',
         justifyContent: 'space-between'
@@ -13335,6 +13540,7 @@ function OverlayRegisterComplete({
   const [reg, setReg] = useState(null);
   const [mountTime, setMountTime] = useState(0);
   const [calOpen, setCalOpen] = useState(false);
+  const [selSessions, setSelSessions] = useState([]);
   useEffect(() => {
     if (!open) return;
     const rid = _reg_hashQuery().get('regId') || '';
@@ -13352,6 +13558,17 @@ function OverlayRegisterComplete({
       } catch (e) {}
     }
     setReg(optimistic);
+    let det = [];
+    if (rid) {
+      try {
+        const raw2 = sessionStorage.getItem('connecta_reg_sessions_' + rid);
+        if (raw2) {
+          const d2 = JSON.parse(raw2);
+          if (d2 && Array.isArray(d2.sessions)) det = d2.sessions;
+        }
+      } catch (e) {}
+    }
+    setSelSessions(det);
   }, [open]);
   useEffect(() => {
     if (!open) return;
@@ -13457,7 +13674,12 @@ function OverlayRegisterComplete({
   }, [reg, regId]);
   if (!open) return null;
   const dateLine = (() => {
-    const base = _reg_shortDate(event);
+    let base = _reg_shortDate(event);
+    if (selSessions.length > 0) {
+      const ds = selSessions.filter(x => x.date).map(x => x.date).sort();
+      const md = y => (Number(String(y).slice(5, 7)) || '') + '.' + (Number(String(y).slice(8, 10)) || '');
+      if (ds.length === 1) base = md(ds[0]);else if (ds.length > 1) base = ds.length + (lang === 'en' ? ' days · ' : '日程 · ') + md(ds[0]) + '–' + md(ds[ds.length - 1]);
+    }
     const venue = event ? event.online ? L(_reg_T.online) : event.venue || '' : '';
     if (base && venue) return base + ' ／ ' + venue;
     return base || venue || reg && reg.event && reg.event.title || event && event.title || '';
@@ -13577,7 +13799,53 @@ function OverlayRegisterComplete({
       marginTop: 4,
       animation: 'mgLineUp .8s cubic-bezier(.16,1,.3,1) .6s both'
     }
-  }, dateLine))), cashPaymentInfo && React.createElement("div", {
+  }, dateLine), selSessions.length > 0 && React.createElement("div", {
+    style: {
+      marginTop: 8,
+      display: 'flex',
+      flexDirection: 'column',
+      gap: 3,
+      animation: 'mgLineUp .8s cubic-bezier(.16,1,.3,1) .7s both'
+    }
+  }, selSessions.slice().sort((a, b) => String(a.date).localeCompare(String(b.date))).map((s2, i) => {
+    const d2 = s2.date ? new Date(String(s2.date) + 'T00:00:00') : null;
+    const wd = d2 && !isNaN(d2.getTime()) ? ['日', '月', '火', '水', '木', '金', '土'][d2.getDay()] : '';
+    const md2 = d2 && !isNaN(d2.getTime()) ? d2.getMonth() + 1 + '.' + d2.getDate() : '';
+    return React.createElement("div", {
+      key: s2.id || i,
+      className: "mg-ui",
+      style: {
+        fontSize: 12,
+        color: 'var(--mg-ink3, #4c6584)',
+        display: 'flex',
+        gap: 8,
+        justifyContent: 'center',
+        alignItems: 'baseline'
+      }
+    }, React.createElement("span", {
+      style: {
+        fontWeight: 600,
+        color: 'var(--mg-accent, #35618f)'
+      }
+    }, lang === 'easy' ? (s2.order || i + 1) + 'にちめ' : 'Day ' + (s2.order || i + 1)), React.createElement("span", {
+      className: "mg-num"
+    }, md2), wd ? React.createElement("span", {
+      style: {
+        fontSize: 10.5
+      }
+    }, "(", wd, ")") : null, s2.startTime ? React.createElement("span", {
+      className: "mg-num",
+      style: {
+        fontSize: 11
+      }
+    }, s2.startTime) : null);
+  }), React.createElement("div", {
+    style: {
+      fontSize: 10.5,
+      color: 'var(--mg-ink4, #5b7796)',
+      marginTop: 3
+    }
+  }, lang === 'en' ? 'Each day has its own QR ticket — find them in My Page' : lang === 'easy' ? 'QRチケットは ひ ごとに あります。マイページで みられます' : '日ごとのQRチケットはマイページのチケットに分かれています')))), cashPaymentInfo && React.createElement("div", {
     className: "mg-card",
     style: {
       borderRadius: 26,
@@ -13810,7 +14078,7 @@ function OverlayRegisterComplete({
   }, L(_reg_T.gcal)) : null, React.createElement("button", {
     type: "button",
     className: "mg-pill mg-tap mg-ui",
-    onClick: () => _reg_downloadICal(event, extraDescription),
+    onClick: () => _reg_downloadICal(event, extraDescription, selSessions),
     style: {
       flex: 1,
       height: 44,
@@ -14190,7 +14458,12 @@ function _my_imgUrl(url, w) {
 }
 function _my_dayN(r, ev) {
   try {
-    if (!r || !r.sessionDate || !ev || !ev.date || ev.format !== 'multi') return 0;
+    if (!r || !ev || ev.format !== 'multi') return 0;
+    if (r.sessionId && Array.isArray(ev.sessions)) {
+      const hit = ev.sessions.find(x => String(x.id) === String(r.sessionId));
+      if (hit && Number(hit.order) >= 1) return Number(hit.order);
+    }
+    if (!r.sessionDate || !ev.date) return 0;
     const a2 = new Date(String(ev.date) + 'T00:00:00'),
       b2 = new Date(String(r.sessionDate) + 'T00:00:00');
     if (isNaN(a2) || isNaN(b2)) return 0;
@@ -14467,8 +14740,10 @@ function TabMyPage() {
   const surveyByEvent = React.useMemo(() => {
     const m = {};
     unanswered.forEach(s => {
-      const k = String(s.eventId || '');
-      if (k && !m[k]) m[k] = s;
+      const ek = String(s.eventId || '');
+      if (!ek) return;
+      const k = ek + '|' + String(s.sessionId || '');
+      if (!m[k]) m[k] = s;
     });
     return m;
   }, [unanswered]);
@@ -14565,8 +14840,8 @@ function TabMyPage() {
       const endDate = new Date(String(endStr) + 'T23:59:59');
       return !isNaN(endDate.getTime()) && endDate >= todayStart;
     }).sort((a, b) => {
-      const ad = new Date(a.event.date || '9999-12-31');
-      const bd = new Date(b.event.date || '9999-12-31');
+      const ad = new Date(a.sessionDate || a.event.date || '9999-12-31');
+      const bd = new Date(b.sessionDate || b.event.date || '9999-12-31');
       return ad - bd;
     });
     const upcoming = _my_groupByApplicationId(upcomingRaw, all);
@@ -14903,11 +15178,12 @@ function TabMyPage() {
     const dp = _my_dateParts(r.sessionDate || ev.date);
     const title = _my_i18nField(ev, 'title', lang) || ev.title || '';
     const evKey = String(r.eventId || ev.id || '');
-    const sv = surveyOn ? surveyByEvent[evKey] : null;
+    const sv = surveyOn ? surveyByEvent[evKey + '|' + String(r.sessionId || '')] || surveyByEvent[evKey + '|'] : null;
     const dayN2 = _my_dayN(r, ev);
     const photos = (() => {
       const sg = Array.isArray(r.sessionMementoGallery) ? r.sessionMementoGallery.filter(Boolean) : [];
       if (sg.length) return sg;
+      if (ev.format === 'multi') return [];
       const pub = ev.mementoPublishAt ? new Date(ev.mementoPublishAt) : null;
       if (pub && !isNaN(pub.getTime()) && pub > new Date()) return [];
       return ev.mementoPhotoUrl ? [ev.mementoPhotoUrl] : [];
@@ -16012,10 +16288,20 @@ function _eng_timeRange(ev) {
   if (s && e) return s + ' — ' + e;
   return s || '';
 }
-function _eng_dayN(reg) {
+function _eng_dayN(reg, siblings) {
   try {
     const ev = reg && reg.event;
-    if (!reg || !reg.sessionDate || !ev || !ev.date || ev.format !== 'multi') return 0;
+    if (!reg || !ev || ev.format !== 'multi') return 0;
+    if (reg.sessionId && Array.isArray(ev.sessions)) {
+      const hit = ev.sessions.find(x => String(x.id) === String(reg.sessionId));
+      if (hit && Number(hit.order) >= 1) return Number(hit.order);
+    }
+    if (!reg.sessionDate || !ev.date) return 0;
+    if (Array.isArray(siblings)) {
+      const ds = Array.from(new Set(siblings.filter(r => r && r.event && r.event.id === ev.id && r.sessionDate).map(r => String(r.sessionDate)))).sort();
+      const idx = ds.indexOf(String(reg.sessionDate));
+      if (idx >= 0 && ds.length > 1) return idx + 1;
+    }
     const a2 = new Date(String(ev.date) + 'T00:00:00'),
       b2 = new Date(String(reg.sessionDate) + 'T00:00:00');
     if (isNaN(a2) || isNaN(b2)) return 0;
@@ -16054,8 +16340,12 @@ function _eng_fmtDateLong(dateStr, lang) {
   return m + '月' + day + '日（' + DJ + '）';
 }
 const _eng_ACTIVE_STATUSES = ['申込済み', '決済済み', '確定', 'チェックイン済', 'チェックイン保留'];
+function _eng_todayYmd() {
+  const n = new Date();
+  return n.getFullYear() + '-' + String(n.getMonth() + 1).padStart(2, '0') + '-' + String(n.getDate()).padStart(2, '0');
+}
 function _eng_pickReg(regs) {
-  const ts = new Date().toISOString().slice(0, 10);
+  const ts = _eng_todayYmd();
   const act = (Array.isArray(regs) ? regs : []).filter(r => r && r.event && _eng_ACTIVE_STATUSES.indexOf(r.status) >= 0);
   const today = act.find(r => (r.sessionDate || r.event.date) === ts);
   if (today) return today;
@@ -16065,10 +16355,11 @@ function _eng_pickReg(regs) {
   }).sort((a, b) => String(a.sessionDate || a.event.date).localeCompare(String(b.sessionDate || b.event.date)));
   return up.length ? up[0] : null;
 }
-function _eng_gcalUrl(event, regId, lang) {
-  if (!event || !event.date) return null;
+function _eng_gcalUrl(event, regId, lang, dateStr) {
+  const baseDate = String(dateStr || event && event.date || '');
+  if (!event || !baseDate) return null;
   try {
-    const startStr = event.date.replace(/-/g, '');
+    const startStr = baseDate.replace(/-/g, '');
     const timeStr = (event.time || '00:00').replace(':', '');
     const start = startStr + 'T' + timeStr + '00';
     const startHourNum = parseInt((event.time || '00:00').substring(0, 2), 10);
@@ -16279,6 +16570,7 @@ function SheetTicket({
     } catch (e) {}
   }
   const [reg, setReg] = useState(null);
+  const [sibs, setSibs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [isOffline, setIsOffline] = useState(false);
@@ -16336,6 +16628,12 @@ function SheetTicket({
           } else {
             setReg(found);
             try {
+              const evId = found.event && found.event.id;
+              setSibs((result.registrations || []).filter(r => r && r.event && r.event.id === evId && _eng_ACTIVE_STATUSES.indexOf(r.status) >= 0));
+            } catch (e2) {
+              setSibs([]);
+            }
+            try {
               localStorage.setItem(CACHE_KEY, JSON.stringify({
                 t: Date.now(),
                 reg: found
@@ -16372,11 +16670,12 @@ function SheetTicket({
   const dateStr = reg ? reg.sessionDate || event && event.date || '' : '';
   const partyCount = 1 + (reg && Array.isArray(reg.companions) ? reg.companions.length : 0);
   const timeRange = event ? _eng_timeRange(event) : '';
-  const gcal = event && reg ? _eng_gcalUrl(event, reg.regId, lang) : null;
+  const gcal = event && reg ? _eng_gcalUrl(event, reg.regId, lang, dateStr) : null;
   const venue = event && event.venue || '';
   const mapUrl = venue ? 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(event && event.venueAddress || venue) : null;
   const amount = reg ? reg.amount : null;
-  const priceLine = amount == null || amount === '' || isNaN(Number(amount)) ? '' : Number(amount) > 0 ? '¥' + Number(amount).toLocaleString() + (reg && reg.paymentMethod ? '（' + reg.paymentMethod + '）' : '') : L(_eng_T.tFree);
+  const _paySib = event && event.format === 'multi' && Number(amount) === 0 ? sibs.find(r => Number(r.amount) > 0) || null : null;
+  const priceLine = amount == null || amount === '' || isNaN(Number(amount)) ? '' : Number(amount) > 0 ? '¥' + Number(amount).toLocaleString() + (reg && reg.paymentMethod ? '（' + reg.paymentMethod + '）' : '') : _paySib ? '¥' + Number(_paySib.amount).toLocaleString() + (lang === 'en' ? ' (billed on Day 1' : lang === 'easy' ? '（1にちめの ぶん' : '（Day1分に計上') + (_paySib.paid ? lang === 'en' ? ' · paid)' : '・支払済み）' : lang === 'en' ? ')' : '）') : L(_eng_T.tFree);
   const header = React.createElement("div", {
     style: {
       display: 'flex',
@@ -16522,7 +16821,98 @@ function SheetTicket({
       }
     }, L(_eng_T.tShow).map((ln, i) => React.createElement("div", {
       key: i
-    }, ln))), React.createElement("div", {
+    }, ln))), (() => {
+      if (!event || event.format !== 'multi' || sibs.length < 2) return null;
+      const today = _eng_todayYmd();
+      const sorted = sibs.slice().sort((a, b) => String(a.sessionDate || '').localeCompare(String(b.sessionDate || '')));
+      const todaySib = sorted.find(r => String(r.sessionDate || '') === today);
+      const showGuide = todaySib && todaySib.regId !== reg.regId;
+      return React.createElement("div", {
+        style: {
+          marginBottom: 14
+        }
+      }, showGuide && React.createElement("div", {
+        className: "mg-cream mg-ui mg-tap",
+        role: "button",
+        onClick: () => {
+          if (A) A.openSheet('ticket', {
+            regId: todaySib.regId
+          });
+        },
+        style: {
+          display: 'flex',
+          gap: 10,
+          alignItems: 'center',
+          padding: '12px 14px',
+          marginBottom: 10,
+          cursor: 'pointer'
+        }
+      }, React.createElement(Icon, {
+        name: "today",
+        size: 19,
+        style: {
+          color: '#8a6d1c',
+          flex: 'none'
+        }
+      }), React.createElement("div", {
+        style: {
+          fontSize: 12.5,
+          lineHeight: 1.6,
+          color: '#6b5f31',
+          flex: 1
+        }
+      }, lang === 'en' ? 'Today\u2019s ticket is Day ' + (_eng_dayN(todaySib, sibs) || '') + ' — tap to switch' : lang === 'easy' ? 'きょうの チケットは ' + (_eng_dayN(todaySib, sibs) || '') + 'にちめです。タップで ひらきます' : '本日のチケットは Day ' + (_eng_dayN(todaySib, sibs) || '') + ' です — タップで切替'), React.createElement(Icon, {
+        name: "arrow_forward",
+        size: 16,
+        style: {
+          color: '#8a6d1c',
+          flex: 'none'
+        }
+      })), React.createElement("div", {
+        style: {
+          display: 'flex',
+          gap: 8,
+          overflowX: 'auto',
+          WebkitOverflowScrolling: 'touch',
+          paddingBottom: 2
+        }
+      }, sorted.map(r2 => {
+        const cur = r2.regId === reg.regId;
+        const n2 = _eng_dayN(r2, sibs);
+        const isToday = String(r2.sessionDate || '') === today;
+        return React.createElement("button", {
+          key: r2.regId,
+          type: "button",
+          className: 'mg-ui' + (cur ? '' : ' mg-tap'),
+          onClick: cur ? undefined : () => {
+            if (A) A.openSheet('ticket', {
+              regId: r2.regId
+            });
+          },
+          style: {
+            flex: 'none',
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: 6,
+            height: 34,
+            padding: '0 14px',
+            borderRadius: 17,
+            fontSize: 12.5,
+            cursor: cur ? 'default' : 'pointer',
+            border: '1px solid ' + (cur ? 'var(--mg-accent, #35618f)' : 'rgba(34,49,74,.18)'),
+            background: cur ? 'linear-gradient(150deg, rgba(53,97,143,.95), rgba(39,76,115,.98))' : 'rgba(255,255,255,.8)',
+            color: cur ? '#f2f7fc' : 'var(--mg-ink2, #2b3d57)',
+            fontWeight: cur ? 600 : 400
+          }
+        }, (n2 ? lang === 'easy' ? n2 + 'にちめ' : 'Day ' + n2 : '') + (r2.sessionDate ? ' ' + _eng_fmtMD(r2.sessionDate) : ''), isToday ? React.createElement("span", {
+          style: {
+            fontSize: 9.5,
+            letterSpacing: '.08em',
+            opacity: .95
+          }
+        }, lang === 'en' ? 'TODAY' : lang === 'easy' ? 'きょう' : '本日') : null);
+      })));
+    })(), React.createElement("div", {
       style: {
         padding: 24,
         borderRadius: 30,
@@ -17141,14 +17531,14 @@ function SheetSurvey({
     }, React.createElement(Icon, {
       name: "arrow_back",
       size: 15
-    }), React.createElement("span", null, L(_eng_T.svBack))), (active.eventTitle || active.eventDate) && React.createElement("div", {
+    }), React.createElement("span", null, L(_eng_T.svBack))), (active.eventTitle || active.sessionDate) && React.createElement("div", {
       className: "mg-ui",
       style: {
         fontSize: 11.5,
         color: 'var(--mg-ink4, #5b7796)',
         marginBottom: 8
       }
-    }, [active.eventDate ? _eng_fmtMD(active.eventDate) : '', active.eventTitle || ''].filter(Boolean).join(' ／ ')), svTitle && svTitle !== active.eventTitle ? React.createElement("div", {
+    }, [active.sessionDate ? (active.sessionOrder ? (lang === 'easy' ? active.sessionOrder + 'にちめ' : 'Day ' + active.sessionOrder) + ' · ' : '') + _eng_fmtMD(active.sessionDate) : '', active.eventTitle || ''].filter(Boolean).join(' ／ ')), svTitle && svTitle !== active.eventTitle ? React.createElement("div", {
       className: "mg-serif",
       style: {
         fontSize: 24,
@@ -17270,7 +17660,14 @@ function SheetSurvey({
           color: 'var(--mg-ink4, #5b7796)',
           marginTop: 3
         }
-      }, s.eventTitle)), s.answered ? React.createElement("span", {
+      }, s.eventTitle), s.sessionId && (s.sessionDate || s.sessionOrder) ? React.createElement("div", {
+        className: "mg-ui",
+        style: {
+          fontSize: 11,
+          color: 'var(--mg-accent, #35618f)',
+          marginTop: 3
+        }
+      }, (s.sessionOrder ? lang === 'easy' ? s.sessionOrder + 'にちめ' : 'Day ' + s.sessionOrder : '') + (s.sessionDate ? ' · ' + _eng_fmtMD(s.sessionDate) : '')) : null), s.answered ? React.createElement("span", {
         className: "mg-ui",
         style: {
           flex: 'none',
