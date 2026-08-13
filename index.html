@@ -10,6 +10,13 @@
 <meta property="og:url" content="https://connectahubapp.com/">
 <meta property="og:image" content="https://connectahubapp.com/ogp.jpg">
 <meta name="twitter:card" content="summary_large_image">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="connec+a">
 <meta name="twitter:image" content="https://connectahubapp.com/ogp.jpg">
 <meta name="theme-color" content="#35618f">
 <!-- (Perf) getFrontBundle を最速で先読み(HEAD最上部・fetchFrontBundleが1回だけ消費)。GAS応答が数秒かかるため、React/Babel/フォント読込と並行してネットワークを先行させる -->
@@ -2083,6 +2090,15 @@ function mgNextSession(ev, now) {
   }
   return null;
 }
+try {
+  window.addEventListener('beforeinstallprompt', e => {
+    e.preventDefault();
+    window.__mgInstallEvt = e;
+    try {
+      window.dispatchEvent(new CustomEvent('mg-install-ready'));
+    } catch (e2) {}
+  });
+} catch (e) {}
 async function fetchStaticBundle() {
   try {
     const ctl = new AbortController();
@@ -15817,7 +15833,36 @@ function TabMyPage() {
       on: pushState === 'on',
       onChange: handlePushToggle
     }))
-  }), React.createElement(_my_Row, {
+  }), (() => {
+    const standalone = window.matchMedia && window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+    if (standalone) return null;
+    const [instReady, setInstReady] = [null, null];
+    const evt = window.__mgInstallEvt;
+    const isIOS = /iPhone|iPad|iPod/.test(navigator.userAgent || '');
+    if (!evt && !isIOS) return null;
+    const label = lang === 'en' ? 'Install as an app' : lang === 'easy' ? 'アプリとして いれる' : 'アプリとしてインストール';
+    return React.createElement(_my_Row, {
+      icon: "install_mobile",
+      iconColor: "var(--mg-accent, #35618f)",
+      label: label,
+      sub: isIOS && !evt ? lang === 'en' ? 'Share → Add to Home Screen' : lang === 'easy' ? 'きょうゆう → ホームがめんに ついか' : '共有メニュー → ホーム画面に追加' : undefined,
+      onClick: async () => {
+        const e2 = window.__mgInstallEvt;
+        if (e2) {
+          try {
+            e2.prompt();
+            const ch = await e2.userChoice;
+            if (ch && ch.outcome === 'accepted') {
+              window.__mgInstallEvt = null;
+              A.toast(lang === 'en' ? 'Installed!' : 'ホーム画面に追加しました');
+            }
+          } catch (e3) {}
+        } else {
+          A.toast(lang === 'en' ? 'Safari: Share button → "Add to Home Screen"' : lang === 'easy' ? 'したの きょうゆうボタン → 「ホームがめんに ついか」' : 'Safariの共有ボタン → 「ホーム画面に追加」を押してください');
+        }
+      }
+    });
+  })(), React.createElement(_my_Row, {
     icon: "support_agent",
     label: L(_my_T.consultRow),
     onClick: () => A.openSheet('consult')
