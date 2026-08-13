@@ -15420,9 +15420,13 @@ function TabMyPage() {
         try {
           if (typeof logAction === 'function') logAction('memento_view', evKey);
         } catch (e) {}
+        const yg = Array.isArray(r.sessionYosegaki) && r.sessionYosegaki.length ? r.sessionYosegaki : ev.format !== 'multi' && Array.isArray(r.eventYosegaki) ? r.eventYosegaki : [];
         setMviewer({
-          title: title + (dayN2 ? ' — Day' + dayN2 : ''),
-          photos
+          title,
+          dayN: dayN2,
+          dateStr: r.sessionDate || ev.date || '',
+          photos,
+          yosegaki: yg
         });
       },
       "aria-label": L(_my_T.photos),
@@ -15559,31 +15563,39 @@ function TabMyPage() {
   }))), mviewer ? React.createElement("div", {
     role: "dialog",
     "aria-label": mviewer.title,
-    onClick: () => setMviewer(null),
     style: {
       position: 'fixed',
       inset: 0,
       zIndex: 'var(--mg-z-toast, 60)',
-      background: 'rgba(20,32,50,.78)',
       display: 'flex',
-      flexDirection: 'column'
+      flexDirection: 'column',
+      background: 'linear-gradient(172deg, #22314a 0%, #16233a 46%, #0e1828 100%)'
     }
   }, React.createElement("div", {
+    "aria-hidden": "true",
+    style: {
+      position: 'absolute',
+      inset: 0,
+      pointerEvents: 'none',
+      background: 'radial-gradient(120% 60% at 82% -8%, rgba(233,208,106,.10), transparent 55%)'
+    }
+  }), React.createElement("div", {
     style: {
       flex: 'none',
       display: 'flex',
       alignItems: 'center',
-      gap: 10,
-      padding: '14px 16px',
-      color: '#f4f7fb'
+      padding: '14px 16px calc(0px)',
+      position: 'relative'
     }
   }, React.createElement("span", {
-    className: "mg-serif mg-clamp1",
+    className: "mg-ui",
     style: {
       flex: 1,
-      fontSize: 15
+      fontSize: 10.5,
+      letterSpacing: '.34em',
+      color: 'rgba(244,247,251,.55)'
     }
-  }, mviewer.title), React.createElement("button", {
+  }, "MEMENTO", lang === 'ja' ? ' ・ 参加記念' : lang === 'easy' ? ' ・ さんか きねん' : ''), React.createElement("button", {
     type: "button",
     "aria-label": "\u9589\u3058\u308B",
     onClick: () => setMviewer(null),
@@ -15591,41 +15603,173 @@ function TabMyPage() {
       width: 34,
       height: 34,
       borderRadius: 17,
-      background: 'rgba(255,255,255,.14)',
-      border: '1px solid rgba(255,255,255,.3)',
+      background: 'rgba(255,255,255,.12)',
+      border: '1px solid rgba(255,255,255,.28)',
       color: '#f4f7fb',
       display: 'inline-flex',
       alignItems: 'center',
       justifyContent: 'center',
-      cursor: 'pointer'
+      cursor: 'pointer',
+      flex: 'none'
     }
   }, React.createElement(Icon, {
     name: "close",
     size: 19
   }))), React.createElement("div", {
     className: "mg-hidebar",
-    onClick: e => e.stopPropagation(),
     style: {
       flex: 1,
       overflowY: 'auto',
       WebkitOverflowScrolling: 'touch',
-      padding: '0 14px calc(24px + env(safe-area-inset-bottom))',
+      position: 'relative',
+      padding: '10px 22px calc(34px + env(safe-area-inset-bottom))'
+    }
+  }, React.createElement("div", {
+    className: "mg-serif",
+    style: {
+      fontSize: 23,
+      lineHeight: 1.35,
+      color: '#f4f7fb',
+      marginBottom: 6
+    }
+  }, jaTitle ? jaTitle(mviewer.title) : mviewer.title), React.createElement("div", {
+    style: {
+      display: 'flex',
+      alignItems: 'baseline',
+      gap: 10,
+      marginBottom: 18
+    }
+  }, mviewer.dayN ? React.createElement("span", {
+    className: "mg-ui",
+    style: {
+      fontSize: 10.5,
+      letterSpacing: '.18em',
+      fontWeight: 600,
+      color: 'rgba(233,208,106,.9)'
+    }
+  }, lang === 'easy' ? mviewer.dayN + 'にちめ' : 'DAY ' + mviewer.dayN) : null, mviewer.dateStr ? React.createElement("span", {
+    className: "mg-num",
+    style: {
+      fontSize: 15,
+      fontStyle: 'italic',
+      color: 'rgba(244,247,251,.75)'
+    }
+  }, (() => {
+    const d2 = new Date(String(mviewer.dateStr) + 'T00:00:00');
+    if (isNaN(d2.getTime())) return String(mviewer.dateStr);
+    return d2.getMonth() + 1 + '.' + d2.getDate() + ' ' + ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'][d2.getDay()];
+  })()) : null), React.createElement("div", {
+    style: {
       display: 'flex',
       flexDirection: 'column',
-      gap: 12
+      gap: 22
     }
-  }, mviewer.photos.map((u, i2) => React.createElement("img", {
+  }, mviewer.photos.map((u, i2) => React.createElement("div", {
     key: i2,
+    style: {
+      background: '#fbfcfd',
+      padding: '10px 10px 14px',
+      borderRadius: 6,
+      boxShadow: '0 24px 50px rgba(4,10,22,.55), 0 4px 12px rgba(4,10,22,.35)',
+      transform: 'rotate(' + (i2 % 2 === 0 ? '-.4' : '.35') + 'deg)'
+    }
+  }, React.createElement("img", {
     src: _my_imgUrl(u, 1200),
     alt: "",
     loading: "lazy",
     style: {
       width: '100%',
-      borderRadius: 18,
+      borderRadius: 2,
       display: 'block',
-      background: 'rgba(255,255,255,.08)'
+      background: 'rgba(34,49,74,.08)'
     }
-  })))) : null, React.createElement(_my_Confirm, {
+  })))), Array.isArray(mviewer.yosegaki) && mviewer.yosegaki.length > 0 ? React.createElement("div", {
+    style: {
+      marginTop: 34
+    }
+  }, React.createElement("div", {
+    style: {
+      display: 'flex',
+      alignItems: 'center',
+      gap: 12,
+      marginBottom: 16
+    }
+  }, React.createElement("span", {
+    "aria-hidden": "true",
+    style: {
+      flex: 1,
+      height: 1,
+      background: 'linear-gradient(90deg, transparent, rgba(244,247,251,.3))'
+    }
+  }), React.createElement("span", {
+    className: "mg-serif",
+    style: {
+      fontSize: 15,
+      color: 'rgba(244,247,251,.9)',
+      letterSpacing: '.08em'
+    }
+  }, lang === 'en' ? 'From the team' : lang === 'easy' ? 'スタッフから' : 'スタッフより'), React.createElement("span", {
+    "aria-hidden": "true",
+    style: {
+      flex: 1,
+      height: 1,
+      background: 'linear-gradient(90deg, rgba(244,247,251,.3), transparent)'
+    }
+  })), React.createElement("div", {
+    style: {
+      display: 'flex',
+      flexDirection: 'column',
+      gap: 12
+    }
+  }, mviewer.yosegaki.map((y2, i3) => React.createElement("div", {
+    key: i3,
+    style: {
+      background: 'linear-gradient(168deg, #fdf9ec, #f7efd2)',
+      borderRadius: 4,
+      padding: '14px 16px 12px',
+      boxShadow: '0 10px 24px rgba(4,10,22,.4)',
+      transform: 'rotate(' + (i3 % 3 === 0 ? '-1.1' : i3 % 3 === 1 ? '.9' : '-.3') + 'deg)',
+      marginLeft: i3 % 2 === 0 ? 0 : 14,
+      marginRight: i3 % 2 === 0 ? 14 : 0
+    }
+  }, React.createElement("div", {
+    className: "mg-serif",
+    style: {
+      fontSize: 14,
+      lineHeight: 1.9,
+      color: '#4a3f22',
+      overflowWrap: 'anywhere'
+    }
+  }, y2.t), y2.n ? React.createElement("div", {
+    className: "mg-num",
+    style: {
+      fontSize: 12.5,
+      fontStyle: 'italic',
+      color: '#8a6d1c',
+      textAlign: 'right',
+      marginTop: 4
+    }
+  }, "\u2014 ", y2.n) : null)))) : null, React.createElement("div", {
+    style: {
+      textAlign: 'center',
+      marginTop: 40
+    }
+  }, React.createElement("div", {
+    className: "mg-serif",
+    style: {
+      fontSize: 17,
+      lineHeight: 1.8,
+      color: 'rgba(244,247,251,.92)'
+    }
+  }, lang === 'en' ? 'Thank you for joining us.' : lang === 'easy' ? 'きて くれて ありがとうございました' : 'ご参加、ありがとうございました。'), React.createElement("div", {
+    className: "mg-ui",
+    style: {
+      fontSize: 10,
+      letterSpacing: '.4em',
+      color: 'rgba(244,247,251,.45)',
+      marginTop: 10
+    }
+  }, "connec\uFF0Ba")))) : null, React.createElement(_my_Confirm, {
     open: confirmLogout,
     title: L(_my_T.logout),
     body: L(_my_T.logoutBody),
