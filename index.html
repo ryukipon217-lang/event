@@ -2531,7 +2531,7 @@ function useFavorites() {
     reorder
   };
 }
-const VAPID_PUBLIC_KEY = 'BL3hib_sW0lZi_1PK32p5lu8oSjafnNWvMYm3wq06qNTQ5NRDjNo2h7tb0J-HUfcJpSXoHpastibz-mX0j6knVg';
+const VAPID_PUBLIC_KEY = 'BBrBUfMWjUrRe4S1e336HmYYmfOQqyxNaGzljPtKrW1dWnstX5xV28sTHva30MHPcE7XD4zi4SOPd7YDTgOZc60';
 function urlBase64ToUint8Array(base64String) {
   const padding = '='.repeat((4 - base64String.length % 4) % 4);
   const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
@@ -2553,6 +2553,20 @@ async function enablePushNotifications(lang) {
   if (!existingReg) throw new Error('sw_unavailable');
   const reg = await Promise.race([navigator.serviceWorker.ready, new Promise((_, rej) => setTimeout(() => rej(new Error('sw_timeout')), 8000))]);
   let sub = await reg.pushManager.getSubscription();
+  if (sub) {
+    try {
+      const curKey = sub.options && sub.options.applicationServerKey ? btoa(String.fromCharCode.apply(null, new Uint8Array(sub.options.applicationServerKey))).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '') : '';
+      if (curKey && curKey !== VAPID_PUBLIC_KEY.replace(/=+$/, '')) {
+        await sub.unsubscribe();
+        sub = null;
+      }
+    } catch (e) {
+      try {
+        await sub.unsubscribe();
+      } catch (e2) {}
+      sub = null;
+    }
+  }
   if (!sub) {
     sub = await reg.pushManager.subscribe({
       userVisibleOnly: true,
