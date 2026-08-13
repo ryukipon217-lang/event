@@ -7,7 +7,7 @@
  *   (2) activate 時の旧バージョンキャッシュ掃除 (v3 以前の cca-cache-* も回収)
  *   を追加。GAS API (script.google.com / googleusercontent.com) は従来どおり一切キャッシュしない。
  */
-const VERSION = 'v5';
+const VERSION = 'v6';
 const CACHE_NAME = 'cca-cache-' + VERSION;   // 静的アセット (cache-first + 裏更新)
 const HTML_CACHE = 'cca-html-' + VERSION;    // ナビゲーションHTML (network-first / 圏外フォールバック専用)
 
@@ -35,7 +35,9 @@ self.addEventListener('fetch', (e) => {
   if (e.request.mode === 'navigate') {
     e.respondWith((async () => {
       try {
-        const fresh = await fetch(e.request);
+        // (v6) 端末のHTTPキャッシュ(max-age=600)を信用せず毎回サーバーへ再検証(ETag一致なら304=軽い)。
+        //   これが無いと「アプリ完全終了→再起動」しても最大10分は古いHTMLが出る。
+        const fresh = await fetch(e.request, { cache: 'no-cache' });
         if (fresh && fresh.ok) {
           const cache = await caches.open(HTML_CACHE);
           cache.put(e.request, fresh.clone());
