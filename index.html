@@ -15884,7 +15884,7 @@ function TabMyPage() {
     style: {
       position: 'fixed',
       inset: 0,
-      zIndex: 'var(--mg-z-toast, 60)',
+      zIndex: 140,
       display: 'flex',
       flexDirection: 'column',
       background: 'linear-gradient(172deg, #22314a 0%, #16233a 46%, #0e1828 100%)'
@@ -15902,7 +15902,7 @@ function TabMyPage() {
       flex: 'none',
       display: 'flex',
       alignItems: 'center',
-      padding: '14px 16px calc(0px)',
+      padding: 'calc(14px + env(safe-area-inset-top, 0px)) 16px 0',
       position: 'relative'
     }
   }, React.createElement("span", {
@@ -15918,11 +15918,11 @@ function TabMyPage() {
     "aria-label": "\u9589\u3058\u308B",
     onClick: () => setMviewer(null),
     style: {
-      width: 34,
-      height: 34,
-      borderRadius: 17,
-      background: 'rgba(255,255,255,.12)',
-      border: '1px solid rgba(255,255,255,.28)',
+      width: 42,
+      height: 42,
+      borderRadius: 21,
+      background: 'rgba(255,255,255,.14)',
+      border: '1px solid rgba(255,255,255,.3)',
       color: '#f4f7fb',
       display: 'inline-flex',
       alignItems: 'center',
@@ -15932,7 +15932,7 @@ function TabMyPage() {
     }
   }, React.createElement(Icon, {
     name: "close",
-    size: 19
+    size: 22
   }))), React.createElement("div", {
     className: "mg-hidebar",
     style: {
