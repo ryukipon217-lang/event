@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-<script>window.__MG_BUILD='20260813133109';</script>
+<script>window.__MG_BUILD='20260813133535';</script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>connec+a — 出会いが、まちを変えていく。</title>
@@ -2123,12 +2123,27 @@ function mgNextSession(ev, now) {
 })();
 try {
   if (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true) {
-    setTimeout(() => {
+    const kick = () => {
       try {
         window.scrollTo(0, 1);
         window.scrollTo(0, 0);
+        const de = document.documentElement;
+        const prev = de.style.minHeight;
+        de.style.minHeight = '100.1%';
+        void de.offsetHeight;
+        de.style.minHeight = prev || '';
+        window.dispatchEvent(new Event('resize'));
       } catch (e) {}
-    }, 350);
+    };
+    [200, 600, 1200, 2400].forEach(ms => setTimeout(kick, ms));
+    try {
+      if (window.visualViewport) window.visualViewport.addEventListener('resize', () => setTimeout(kick, 50), {
+        once: true
+      });
+    } catch (e) {}
+    document.addEventListener('visibilitychange', () => {
+      if (!document.hidden) setTimeout(kick, 250);
+    });
   }
 } catch (e) {}
 try {
