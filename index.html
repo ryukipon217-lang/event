@@ -15019,7 +15019,7 @@ function TabMyPage() {
       if (!_my_isActive(r)) return false;
       const endStr = r.sessionDate || r.event.endDate || r.event.date;
       if (!endStr) return true;
-      if (r.status === 'チェックイン済' && String(endStr).slice(0, 10) <= _my_todayYmd()) return false;
+      if ((r.status === 'チェックイン済' || r.status === 'チェックイン保留') && String(endStr).slice(0, 10) <= _my_todayYmd()) return false;
       if (r.sessionDate && typeof _eng_regOver === 'function' && _eng_regOver(r)) return false;
       const endDate = new Date(String(endStr) + 'T23:59:59');
       return !isNaN(endDate.getTime()) && endDate >= todayStart;
@@ -15033,7 +15033,7 @@ function TabMyPage() {
       if (r.status === 'キャンセル') return false;
       const endStr = r.sessionDate || r.event.endDate || r.event.date;
       if (!endStr) return false;
-      if (r.status === 'チェックイン済' && String(endStr).slice(0, 10) <= _my_todayYmd()) return true;
+      if ((r.status === 'チェックイン済' || r.status === 'チェックイン保留') && String(endStr).slice(0, 10) <= _my_todayYmd()) return true;
       if (r.sessionDate && typeof _eng_regOver === 'function' && _eng_regOver(r)) return true;
       const endDate = new Date(String(endStr) + 'T23:59:59');
       return !isNaN(endDate.getTime()) && endDate < todayStart;
@@ -16539,9 +16539,9 @@ function _eng_regOver(r) {
   try {
     const d = r.sessionDate || r.event && r.event.date || '';
     if (!d) return false;
-    let end = '';
+    let end = r.sessionEndTime || '';
     const ev = r.event;
-    if (ev && r.sessionId && Array.isArray(ev.sessions)) {
+    if (!end && ev && r.sessionId && Array.isArray(ev.sessions)) {
       const h = ev.sessions.find(x => String(x.id) === String(r.sessionId));
       if (h) end = h.endTime || '';
     }
