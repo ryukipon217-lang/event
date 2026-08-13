@@ -26419,6 +26419,7 @@ function _shell_parseHash() {
 }
 function _ShellFull({
   z,
+  bg,
   children
 }) {
   return React.createElement("div", {
@@ -26428,7 +26429,7 @@ function _ShellFull({
       zIndex: z,
       display: 'flex',
       justifyContent: 'center',
-      background: _shell_CANVAS_BG,
+      background: bg || _shell_CANVAS_BG,
       overflow: 'hidden'
     }
   }, React.createElement("div", {
@@ -27137,6 +27138,13 @@ function _ShellRoot() {
     props: _sp
   });
   const chromeHidden = !!authScreen || !!standalone;
+  React.useEffect(() => {
+    const dark = showGate || !!authScreen;
+    try {
+      document.documentElement.style.backgroundColor = dark ? '#1a2740' : '';
+      document.body.style.backgroundColor = dark ? '#1a2740' : '';
+    } catch (e) {}
+  }, [showGate, authScreen]);
   return React.createElement(MgCtx.Provider, {
     value: ctx
   }, React.createElement("div", {
@@ -27196,7 +27204,8 @@ function _ShellRoot() {
   }), standalone.screen === 'contact' && React.createElement(ScreenContact, null), standalone.screen === 'policy' && React.createElement(ScreenPolicy, {
     doc: standalone.doc
   })), showGate && React.createElement(_ShellFull, {
-    z: 70
+    z: 70,
+    bg: "#1a2740"
   }, React.createElement(ScreenGate, null)), authScreen && React.createElement(_ShellFull, {
     z: 80
   }, authScreen === 'login' && React.createElement(ScreenLogin, null), authScreen === 'signup' && React.createElement(ScreenSignup, null), authScreen === 'signup-verify' && React.createElement(ScreenSignupVerify, null), authScreen === 'forgot-password' && React.createElement(ScreenForgot, null), authScreen === 'reset-password' && React.createElement(ScreenReset, null), authScreen === 'signup-profile' && React.createElement(ScreenSignupProfile, null)), React.createElement(MgToast, {
