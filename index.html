@@ -13980,6 +13980,11 @@ const _my_T = {
     easy: 'オフに したいときは、スマホの せっていで けして ください。',
     en: 'To turn off, disable notifications in your device or browser settings.'
   },
+  pushResync: {
+    ja: '通知設定を更新しました',
+    easy: 'つうちを こうしん しました',
+    en: 'Notifications refreshed'
+  },
   pushDenied: {
     ja: '通知がブロックされています。ブラウザの設定から許可してください。',
     easy: 'おしらせが ブロックされて います。ブラウザの せっていで きょかして ください。',
@@ -14489,7 +14494,15 @@ function TabMyPage() {
   const handlePushToggle = async () => {
     if (pushState === 'configuring') return;
     if (pushState === 'on') {
-      A.toast(L(_my_T.pushOffHint));
+      setPushState('configuring');
+      try {
+        await enablePushNotifications(lang);
+        setPushState('on');
+        A.toast(L(_my_T.pushResync));
+      } catch (e) {
+        setPushState('on');
+        A.toast(L(_my_T.pushOffHint));
+      }
       return;
     }
     if (pushState === 'unsupported') {
