@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-<script>window.__MG_BUILD='20260813135213';</script>
+<script>window.__MG_BUILD='20260813140228';</script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>connec+a — 出会いが、まちを変えていく。</title>
@@ -15373,6 +15373,35 @@ function TabMyPage() {
     setConfirmLogout(false);
     A.go('/');
   };
+  const [vpDbg, setVpDbg] = useState('');
+  useEffect(() => {
+    const standalone = window.matchMedia && window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+    if (!standalone) return undefined;
+    const probe = () => {
+      try {
+        const d = document.createElement('div');
+        d.style.cssText = 'position:fixed;top:env(safe-area-inset-top,0px);bottom:env(safe-area-inset-bottom,0px);left:0;width:1px;visibility:hidden;pointer-events:none';
+        document.body.appendChild(d);
+        const r = d.getBoundingClientRect();
+        const envTop = Math.round(r.top),
+          envBottom = Math.round(window.innerHeight - r.bottom);
+        d.remove();
+        setVpDbg('scr ' + (window.screen ? screen.height : '?') + ' / inner ' + window.innerHeight + ' / vv ' + (window.visualViewport ? Math.round(window.visualViewport.height) : '?') + ' / doc ' + document.documentElement.clientHeight + ' / envT ' + envTop + ' envB ' + envBottom + ' / dvh ' + (() => {
+          const e2 = document.createElement('div');
+          e2.style.cssText = 'position:fixed;height:100dvh;width:1px;visibility:hidden';
+          document.body.appendChild(e2);
+          const h2 = e2.getBoundingClientRect().height;
+          e2.remove();
+          return Math.round(h2);
+        })());
+      } catch (e) {
+        setVpDbg('err ' + (e && e.message));
+      }
+    };
+    probe();
+    const t = setTimeout(probe, 1500);
+    return () => clearTimeout(t);
+  }, []);
   const [histOpen, setHistOpen] = useState(false);
   const derived = React.useMemo(() => {
     const today = new Date();
@@ -15444,7 +15473,19 @@ function TabMyPage() {
       height: 112
     },
     "aria-hidden": "true"
-  }), React.createElement("div", {
+  }), vpDbg ? React.createElement("div", {
+    className: "mg-num",
+    style: {
+      margin: '0 18px 10px',
+      padding: '8px 12px',
+      borderRadius: 12,
+      background: 'rgba(34,49,74,.9)',
+      color: '#fff',
+      fontSize: 11,
+      lineHeight: 1.6,
+      wordBreak: 'break-all'
+    }
+  }, "VP\u8A3A\u65AD: ", vpDbg) : null, React.createElement("div", {
     style: {
       padding: '0 18px 16px'
     }
