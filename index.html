@@ -14265,6 +14265,7 @@ function _my_groupByApplicationId(regs, allRegsWithEvent) {
   return Array.from(map.values());
 }
 function _my_isUnpaid(r) {
+  if ((Number(r.amount) || 0) <= 0) return false;
   return r.status === '申込済み' && !r.paid || r.status === '未決済';
 }
 function _my_Pill({
