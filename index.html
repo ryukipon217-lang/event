@@ -8885,94 +8885,178 @@ function TabEvents() {
         fontSize: 16.5,
         lineHeight: 1.3
       }
-    }, jaTitle(title)), React.createElement("div", {
-      style: {
-        display: 'flex',
-        gap: 12,
-        marginTop: 5,
-        fontSize: 11.5,
-        color: 'var(--mg-ink3, #4c6584)',
-        flexWrap: 'wrap'
+    }, jaTitle(title)), (() => {
+      const sess = ev.format === 'multi' && Array.isArray(ev.sessions) ? ev.sessions.filter(x => x && x.date).slice().sort((a, b) => String(a.date).localeCompare(String(b.date))) : [];
+      if (sess.length >= 2) {
+        return React.createElement("div", {
+          style: {
+            display: 'flex',
+            flexDirection: 'column',
+            gap: 4,
+            marginTop: 6
+          }
+        }, sess.slice(0, 4).map((s2, i2) => {
+          const over = typeof mgSessionOver === 'function' && mgSessionOver(s2.date, s2.endTime);
+          const n2 = Number(s2.order) || i2 + 1;
+          const sdp2 = _ev_dateParts(s2.date);
+          return React.createElement("div", {
+            key: s2.id || i2,
+            style: {
+              display: 'flex',
+              alignItems: 'baseline',
+              gap: 7,
+              fontSize: 11.5,
+              color: over ? 'var(--mg-ink5, #8ba0b6)' : 'var(--mg-ink3, #4c6584)',
+              minWidth: 0
+            }
+          }, React.createElement("span", {
+            style: {
+              fontSize: 10,
+              fontWeight: 600,
+              color: over ? 'var(--mg-ink5, #8ba0b6)' : 'var(--mg-accent, #35618f)',
+              flex: 'none',
+              letterSpacing: '.04em'
+            }
+          }, lang === 'easy' ? n2 + 'にちめ' : 'Day' + n2), sdp2 ? React.createElement("span", {
+            className: "mg-num",
+            style: {
+              fontSize: 12,
+              flex: 'none'
+            }
+          }, sdp2.m + '.' + sdp2.d, React.createElement("span", {
+            style: {
+              fontSize: 9.5,
+              marginLeft: 2,
+              color: 'var(--mg-ink4, #5b7796)'
+            }
+          }, sdp2.day)) : null, s2.startTime ? React.createElement("span", {
+            className: "mg-num",
+            style: {
+              fontSize: 11,
+              flex: 'none'
+            }
+          }, _ev_fmtTime(s2.startTime)) : null, React.createElement("span", {
+            className: "mg-clamp1",
+            style: {
+              minWidth: 0
+            }
+          }, s2.online ? lang === 'en' ? 'Online' : 'オンライン' : s2.venue || ''), over ? React.createElement("span", {
+            style: {
+              fontSize: 9.5,
+              flex: 'none'
+            }
+          }, lang === 'en' ? 'ended' : lang === 'easy' ? 'おわり' : '終了') : null);
+        }), sess.length > 4 ? React.createElement("span", {
+          style: {
+            fontSize: 10.5,
+            color: 'var(--mg-ink4, #5b7796)'
+          }
+        }, "+", sess.length - 4) : null, fee ? React.createElement("span", {
+          style: {
+            display: 'flex',
+            alignItems: 'center',
+            gap: 4,
+            fontSize: 11.5,
+            color: 'var(--mg-ink3, #4c6584)',
+            marginTop: 2
+          }
+        }, React.createElement(Icon, {
+          name: "payments",
+          size: 15,
+          style: {
+            color: 'var(--mg-accent, #35618f)'
+          }
+        }), fee) : null);
       }
-    }, time ? React.createElement("span", {
-      style: {
-        display: 'flex',
-        alignItems: 'center',
-        gap: 4
-      }
-    }, React.createElement(Icon, {
-      name: "schedule",
-      size: 15,
-      style: {
-        color: 'var(--mg-accent, #35618f)'
-      }
-    }), time) : null, venue ? React.createElement("span", {
-      className: "mg-clamp1",
-      style: {
-        display: 'flex',
-        alignItems: 'center',
-        gap: 4,
-        minWidth: 0
-      }
-    }, React.createElement(Icon, {
-      name: "place",
-      size: 15,
-      style: {
-        color: 'var(--mg-accent, #35618f)',
-        flex: 'none'
-      }
-    }), venue) : null, fee ? React.createElement("span", {
-      style: {
-        display: 'flex',
-        alignItems: 'center',
-        gap: 4
-      }
-    }, React.createElement(Icon, {
-      name: "payments",
-      size: 15,
-      style: {
-        color: 'var(--mg-accent, #35618f)'
-      }
-    }), fee) : null), ev.format === 'multi' ? (() => {
-      const days = _ev_dayItems(ev);
-      if (days.length < 2) return null;
-      return React.createElement("div", {
+      return React.createElement(React.Fragment, null, React.createElement("div", {
         style: {
           display: 'flex',
-          flexWrap: 'wrap',
-          gap: 6,
-          marginTop: 7
+          gap: 12,
+          marginTop: 5,
+          fontSize: 11.5,
+          color: 'var(--mg-ink3, #4c6584)',
+          flexWrap: 'wrap'
         }
-      }, days.slice(0, 4).map(d2 => React.createElement("span", {
-        key: d2.n,
+      }, time ? React.createElement("span", {
         style: {
-          fontSize: 10.5,
-          padding: '3px 8px',
-          borderRadius: 10,
-          background: 'rgba(53,97,143,.08)',
-          border: '1px solid rgba(53,97,143,.16)',
-          color: 'var(--mg-ink3, #3d5877)',
-          display: 'inline-flex',
+          display: 'flex',
+          alignItems: 'center',
+          gap: 4
+        }
+      }, React.createElement(Icon, {
+        name: "schedule",
+        size: 15,
+        style: {
+          color: 'var(--mg-accent, #35618f)'
+        }
+      }), time) : null, venue ? React.createElement("span", {
+        className: "mg-clamp1",
+        style: {
+          display: 'flex',
+          alignItems: 'center',
           gap: 4,
-          alignItems: 'baseline'
+          minWidth: 0
         }
-      }, React.createElement("span", {
+      }, React.createElement(Icon, {
+        name: "place",
+        size: 15,
         style: {
-          fontWeight: 600
+          color: 'var(--mg-accent, #35618f)',
+          flex: 'none'
         }
-      }, "Day", d2.n), React.createElement("span", {
-        className: "mg-num",
+      }), venue) : null, fee ? React.createElement("span", {
         style: {
-          fontSize: 11
+          display: 'flex',
+          alignItems: 'center',
+          gap: 4
         }
-      }, _ev_md(d2.date)))), days.length > 4 ? React.createElement("span", {
+      }, React.createElement(Icon, {
+        name: "payments",
+        size: 15,
         style: {
-          fontSize: 10.5,
-          color: 'var(--mg-ink4, #5b7796)',
-          alignSelf: 'center'
+          color: 'var(--mg-accent, #35618f)'
         }
-      }, "+", days.length - 4) : null);
-    })() : null), React.createElement(Icon, {
+      }), fee) : null), ev.format === 'multi' ? (() => {
+        const days = _ev_dayItems(ev);
+        if (days.length < 2) return null;
+        return React.createElement("div", {
+          style: {
+            display: 'flex',
+            flexWrap: 'wrap',
+            gap: 6,
+            marginTop: 7
+          }
+        }, days.slice(0, 4).map(d2 => React.createElement("span", {
+          key: d2.n,
+          style: {
+            fontSize: 10.5,
+            padding: '3px 8px',
+            borderRadius: 10,
+            background: 'rgba(53,97,143,.08)',
+            border: '1px solid rgba(53,97,143,.16)',
+            color: 'var(--mg-ink3, #3d5877)',
+            display: 'inline-flex',
+            gap: 4,
+            alignItems: 'baseline'
+          }
+        }, React.createElement("span", {
+          style: {
+            fontWeight: 600
+          }
+        }, "Day", d2.n), React.createElement("span", {
+          className: "mg-num",
+          style: {
+            fontSize: 11
+          }
+        }, _ev_md(d2.date)))), days.length > 4 ? React.createElement("span", {
+          style: {
+            fontSize: 10.5,
+            color: 'var(--mg-ink4, #5b7796)',
+            alignSelf: 'center'
+          }
+        }, "+", days.length - 4) : null);
+      })() : null);
+    })()), React.createElement(Icon, {
       name: "chevron_right",
       size: 20,
       style: {
@@ -9519,7 +9603,72 @@ function SheetEventDetail({
       icon: "event"
     }, isMultiEvt ? (dateLabel || '—') + '（' + (t.detail && t.detail.multiTotal || '全') + ' ' + (sessions.length || ev.sessionCount || '-') + ' ' + (t.detail && t.detail.multiSessions || 'セッション') + '）' : (dateLabel || '—') + (dp ? '' : '') + (timeLabel ? '　' + timeLabel : '')), React.createElement(_ev_MetaRow, {
       icon: "place"
-    }, React.createElement("span", null, venueValue || '—'), venueHref ? React.createElement("a", {
+    }, isMultiEvt && sessions.length > 0 ? React.createElement("div", {
+      style: {
+        display: 'flex',
+        flexDirection: 'column',
+        gap: 7,
+        minWidth: 0
+      }
+    }, sessions.slice().sort((a, b) => String(a.date || '9999').localeCompare(String(b.date || '9999'))).map((s2, i2) => {
+      const sdp2 = _ev_dateParts(s2.date);
+      const vLabel = s2.online ? t.detail && t.detail.meta && t.detail.meta.online || (lang === 'en' ? 'Online' : 'オンライン') : lang === 'easy' && s2.venue_easy || lang === 'en' && s2.venue_en || s2.venue || '—';
+      const q2 = s2.address || s2.venue || '';
+      const href2 = !s2.online && q2 ? 'https://www.google.com/maps/dir/?api=1&destination=' + encodeURIComponent(q2) : s2.online && s2.zoomURL ? s2.zoomURL : '';
+      const n2 = Number(s2.order) || i2 + 1;
+      return React.createElement("div", {
+        key: s2.id || i2,
+        style: {
+          display: 'flex',
+          alignItems: 'baseline',
+          gap: 8,
+          flexWrap: 'wrap',
+          minWidth: 0
+        }
+      }, React.createElement("span", {
+        style: {
+          fontSize: 11,
+          fontWeight: 600,
+          color: 'var(--mg-accent, #35618f)',
+          flex: 'none',
+          letterSpacing: '.04em'
+        }
+      }, lang === 'easy' ? n2 + 'にちめ' : 'Day ' + n2), sdp2 ? React.createElement("span", {
+        className: "mg-num",
+        style: {
+          fontSize: 13,
+          flex: 'none'
+        }
+      }, sdp2.m + '.' + sdp2.d, React.createElement("span", {
+        style: {
+          fontSize: 10,
+          marginLeft: 3,
+          color: 'var(--mg-ink4, #5b7796)'
+        }
+      }, sdp2.day)) : null, React.createElement("span", {
+        className: "mg-clamp1",
+        style: {
+          minWidth: 0
+        }
+      }, vLabel), href2 ? React.createElement("a", {
+        href: href2,
+        target: "_blank",
+        rel: "noopener noreferrer",
+        className: "mg-tap",
+        style: {
+          display: 'inline-flex',
+          alignItems: 'center',
+          gap: 3,
+          color: 'var(--mg-accent, #35618f)',
+          fontSize: 12,
+          textDecoration: 'none',
+          flex: 'none'
+        }
+      }, (s2.online ? t.detail && t.detail.openInZoom : t.detail && t.detail.openInMaps) || 'Map', React.createElement(Icon, {
+        name: "open_in_new",
+        size: 13
+      })) : null);
+    })) : React.createElement(React.Fragment, null, React.createElement("span", null, venueValue || '—'), venueHref ? React.createElement("a", {
       href: venueHref,
       target: "_blank",
       rel: "noopener noreferrer",
@@ -9536,7 +9685,7 @@ function SheetEventDetail({
     }, venueLinkLabel || 'Map', React.createElement(Icon, {
       name: "open_in_new",
       size: 13
-    })) : null), React.createElement(_ev_MetaRow, {
+    })) : null)), React.createElement(_ev_MetaRow, {
       icon: "payments"
     }, feeLabel), langsLabel ? React.createElement(_ev_MetaRow, {
       icon: "translate"
