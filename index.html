@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-<script>window.__MG_BUILD='20260814015429';</script>
+<script>window.__MG_BUILD='20260814020300';</script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover">
 <title>connec+a — 出会いが、まちを変えていく。</title>
@@ -7690,14 +7690,18 @@ function TabHome() {
     style: {
       fontSize: 19
     }
-  }, fSpots), L(_home_T.seatsPost))) : null)), React.createElement(PrimaryBtn, {
-    icon: "confirmation_number",
-    label: fFull ? L(_home_T.full) : t && t.card && t.card.register ? L(_home_T.register) : L(_home_T.register),
-    onClick: () => A.go('/events/' + featured.id),
-    style: {
-      marginTop: 18
-    }
-  })) : React.createElement("div", {
+  }, fSpots), L(_home_T.seatsPost))) : null)), (() => {
+    const ACT = ['申込済み', '決済済み', '確定', 'チェックイン済', 'チェックイン保留'];
+    const fRegistered = (A && A.regs || []).some(r => String(r.eventId) === String(featured.id) && ACT.indexOf(r.status) >= 0);
+    return React.createElement(PrimaryBtn, {
+      icon: fRegistered ? 'event_note' : 'confirmation_number',
+      label: fRegistered ? lang === 'en' ? 'Registered — details' : lang === 'easy' ? 'もうしこみずみ — くわしく みる' : '申込済み — 詳細はこちら' : fFull ? L(_home_T.full) : L(_home_T.register),
+      onClick: () => A.go('/events/' + featured.id),
+      style: {
+        marginTop: 18
+      }
+    });
+  })()) : React.createElement("div", {
     className: "mg-card-lg",
     style: {
       borderRadius: 32
@@ -7709,54 +7713,71 @@ function TabHome() {
   }, "auto_awesome")), L(_home_T.emptyEvents).split('\n').map((ln, i) => React.createElement("div", {
     key: i
   }, ln))))), others.length > 0 && React.createElement("div", {
-    className: "mg-hidebar",
     style: {
       display: 'flex',
+      flexDirection: 'column',
       gap: 14,
-      overflowX: 'auto',
-      padding: '26px 18px 8px',
-      WebkitOverflowScrolling: 'touch'
+      padding: '26px 18px 8px'
     }
   }, others.map(ev => {
     const _nx2 = ev.format === 'multi' && typeof mgNextSession === 'function' ? mgNextSession(ev) : null;
     const dp = _home_dateParts(_nx2 && _nx2.s.date || ev.date);
     const title = _home_i18nField(ev, 'title', lang) || ev.title || '';
+    const venue2 = _home_venueLabel(ev, lang);
+    const time2 = _home_timeRange(ev);
     return React.createElement("div", {
       key: ev.id,
       className: "mg-tap",
       onClick: () => A.go('/events/' + ev.id),
       style: {
-        flex: 'none',
-        width: 214,
+        display: 'flex',
+        gap: 14,
+        alignItems: 'stretch',
         cursor: 'pointer',
         borderRadius: 28,
         overflow: 'hidden',
-        background: 'linear-gradient(155deg,rgba(255,255,255,.72),rgba(255,255,255,.52))',
-        border: '1px solid rgba(255,255,255,.65)',
-        boxShadow: '0 18px 38px rgba(34,49,74,.18), inset 0 1px 0 rgba(255,255,255,.7)'
+        background: 'linear-gradient(155deg,rgba(255,255,255,.82),rgba(255,255,255,.6))',
+        border: '1px solid rgba(255,255,255,.7)',
+        boxShadow: '0 18px 38px rgba(34,49,74,.18), inset 0 1px 0 rgba(255,255,255,.7)',
+        padding: 12
       }
     }, React.createElement(ImageSlot, {
       src: _home_img(ev.heroImageUrl || ev.posterUrl),
       alt: title,
       style: {
-        height: 132,
-        borderRadius: 0
+        width: 118,
+        minHeight: 118,
+        alignSelf: 'stretch',
+        flex: 'none',
+        borderRadius: 20
       }
     }), React.createElement("div", {
       style: {
-        padding: '13px 15px 15px'
+        flex: 1,
+        minWidth: 0,
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'center',
+        gap: 5,
+        padding: '4px 4px 4px 0'
       }
     }, React.createElement("div", {
       className: "mg-num",
       style: {
-        fontSize: 15,
-        letterSpacing: '.08em',
-        color: 'var(--mg-ink4, #5b7796)',
+        fontSize: 20,
+        letterSpacing: '.06em',
+        color: 'var(--mg-ink2, #2b3d57)',
         display: 'flex',
         alignItems: 'baseline',
-        gap: 6
+        gap: 8
       }
-    }, React.createElement("span", null, dp ? dp.md2 : L(_home_T.multiDay)), ev.format === 'multi' && dp ? React.createElement("span", {
+    }, React.createElement("span", null, dp ? dp.md2 : L(_home_T.multiDay)), dp ? React.createElement("span", {
+      style: {
+        fontSize: 11,
+        letterSpacing: '.14em',
+        color: 'var(--mg-ink4, #5b7796)'
+      }
+    }, dp.day) : null, ev.format === 'multi' ? React.createElement("span", {
       className: "mg-ui",
       style: {
         fontSize: 9.5,
@@ -7767,11 +7788,62 @@ function TabHome() {
     }, ev.sessionCount ? ev.sessionCount + ' DAYS' : L(_home_T.multiDay)) : null), React.createElement("div", {
       className: "mg-serif mg-clamp2",
       style: {
-        fontSize: 16.5,
-        lineHeight: 1.35,
-        marginTop: 3
+        fontSize: 17.5,
+        lineHeight: 1.32
       }
-    }, title)));
+    }, jaTitle ? jaTitle(title) : title), React.createElement("div", {
+      style: {
+        display: 'flex',
+        flexDirection: 'column',
+        gap: 3,
+        fontSize: 11.5,
+        color: 'var(--mg-ink3, #4c6584)'
+      }
+    }, time2 ? React.createElement("span", {
+      style: {
+        display: 'flex',
+        alignItems: 'center',
+        gap: 5,
+        minWidth: 0
+      }
+    }, React.createElement(Icon, {
+      name: "schedule",
+      size: 14,
+      style: {
+        color: 'var(--mg-accent, #35618f)',
+        flex: 'none'
+      }
+    }), React.createElement("span", {
+      className: "mg-num",
+      style: {
+        fontSize: 12
+      }
+    }, time2)) : null, venue2 ? React.createElement("span", {
+      className: "mg-clamp1",
+      style: {
+        display: 'flex',
+        alignItems: 'center',
+        gap: 5,
+        minWidth: 0
+      }
+    }, React.createElement(Icon, {
+      name: "place",
+      size: 14,
+      style: {
+        color: 'var(--mg-accent, #35618f)',
+        flex: 'none'
+      }
+    }), React.createElement("span", {
+      className: "mg-clamp1"
+    }, venue2)) : null)), React.createElement(Icon, {
+      name: "chevron_right",
+      size: 20,
+      style: {
+        color: 'var(--mg-ink5, #8ba0b6)',
+        flex: 'none',
+        alignSelf: 'center'
+      }
+    }));
   })), React.createElement("div", {
     style: {
       padding: '22px 18px 0'
