@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-<script>window.__MG_BUILD='20260814005451';</script>
+<script>window.__MG_BUILD='20260814010242';</script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>connec+a — 出会いが、まちを変えていく。</title>
@@ -5737,7 +5737,7 @@ function ScreenLogin() {
     }
     setSubmitting(true);
     try {
-      await A.auth.login(email, password);
+      await Promise.race([A.auth.login(email, password), new Promise((_, rej) => setTimeout(() => rej(new Error(A.lang === 'en' ? 'Connection timed out. Please check your signal and try again.' : A.lang === 'easy' ? 'つうしんが とまりました。でんぱを かくにんして もういちど おしてください' : '通信がタイムアウトしました。電波状況を確認して、もう一度お試しください')), 20000))]);
       let redirect = '/mypage';
       try {
         const saved = sessionStorage.getItem('connecta_redirect_after_login');
