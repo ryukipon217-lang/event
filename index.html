@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-<script>window.__MG_BUILD='20260814135126';</script>
+<script>window.__MG_BUILD='20260814141809';</script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover">
 <title>connec+a — 出会いが、まちを変えていく。</title>
@@ -289,14 +289,21 @@ html{ background:#e9edfc; }
   height:54px;
   padding:0 24px;
   border-radius:var(--mg-r-btn);
-  background:linear-gradient(150deg,rgba(110,134,224,.93),rgba(79,99,196,.97));
-  border:1px solid rgba(255,255,255,.35);
-  box-shadow:0 14px 30px rgba(79,99,196,.32);
-  color:#f2f7fc;
+  /* (パステル) 空色→ペリウィンクル→藤→淡ローズの多段オーロラ。上に白い光沢のにじみ。 */
+  background:
+    radial-gradient(130% 120% at 0% -10%, rgba(255,255,255,.30), rgba(255,255,255,0) 46%),
+    linear-gradient(122deg, #8fa4ee 0%, #7789e7 34%, #8b81e1 64%, #bb8ed2 100%);
+  border:1px solid rgba(255,255,255,.42);
+  box-shadow:0 12px 26px rgba(123,131,224,.34), 0 6px 16px rgba(187,142,210,.22), inset 0 1px 0 rgba(255,255,255,.55);
+  color:#fff;
   font-size:15.5px;
-  font-weight:500;
+  font-weight:600;
+  letter-spacing:.01em;
+  text-shadow:0 1px 6px rgba(70,84,160,.28);
   cursor:pointer;
+  transition:box-shadow .25s ease, transform .12s ease, filter .2s ease;
 }
+.mg-btn-primary:active{ transform:translateY(1px) scale(.995); filter:brightness(1.03); }
 .mg-btn-primary:disabled,
 .mg-btn-primary[data-disabled],
 .mg-btn-primary.is-disabled{
@@ -3841,7 +3848,7 @@ function PWAInstallBanner({
       width: 44,
       height: 44,
       flexShrink: 0,
-      background: 'linear-gradient(150deg, rgba(110,134,224,.93), rgba(79,99,196,.97))',
+      background: 'linear-gradient(122deg, #8fa4ee 0%, #7789e7 34%, #8b81e1 64%, #bb8ed2 100%)',
       borderRadius: 10,
       display: 'flex',
       alignItems: 'center',
@@ -4507,7 +4514,7 @@ function Chip({
       cursor: 'pointer',
       whiteSpace: 'nowrap',
       ...(on ? {
-        background: 'linear-gradient(150deg, rgba(110,134,224,.93), rgba(79,99,196,.97))',
+        background: 'linear-gradient(122deg, #8fa4ee 0%, #7789e7 34%, #8b81e1 64%, #bb8ed2 100%)',
         color: '#f2f7fc',
         border: '1px solid rgba(255,255,255,.35)',
         boxShadow: '0 8px 18px rgba(79,99,196,.28)'
@@ -5257,7 +5264,7 @@ function MgSwitch({
       padding: 2,
       border: 0,
       flex: 'none',
-      background: on ? 'linear-gradient(150deg, rgba(110,134,224,.95), rgba(79,99,196,.98))' : 'rgba(34,49,74,.18)',
+      background: on ? 'linear-gradient(122deg, #8fa4ee 0%, #7789e7 34%, #8b81e1 64%, #bb8ed2 100%)' : 'rgba(34,49,74,.18)',
       boxShadow: on ? 'inset 0 1px 2px rgba(20,32,50,.2)' : 'inset 0 1px 2px rgba(20,32,50,.14)',
       transition: 'background .3s ease',
       cursor: 'pointer'
@@ -9921,7 +9928,7 @@ function _ev_Guide({
       style: {
         appearance: 'none',
         border: act ? '1px solid transparent' : '1px solid rgba(110,134,224,.28)',
-        background: act ? 'linear-gradient(150deg, rgba(110,134,224,.95), rgba(79,99,196,.98))' : 'rgba(255,255,255,.6)',
+        background: act ? 'linear-gradient(122deg, #8fa4ee 0%, #7789e7 34%, #8b81e1 64%, #bb8ed2 100%)' : 'rgba(255,255,255,.6)',
         color: act ? '#f2f7fc' : 'var(--mg-ink3, #3d5877)',
         borderRadius: 999,
         padding: '6px 13px',
@@ -10008,7 +10015,7 @@ function _ev_Guide({
         fontWeight: 600,
         letterSpacing: '.1em',
         color: '#f2f7fc',
-        background: 'linear-gradient(150deg, rgba(110,134,224,.95), rgba(79,99,196,.98))',
+        background: 'linear-gradient(122deg, #8fa4ee 0%, #7789e7 34%, #8b81e1 64%, #bb8ed2 100%)',
         padding: '3px 10px',
         borderRadius: 11,
         flex: 'none'
@@ -10070,7 +10077,7 @@ function _ev_Guide({
           height: isEdge ? 12 : 8,
           marginLeft: isEdge ? 2 : 4,
           borderRadius: '50%',
-          background: isEdge ? 'linear-gradient(150deg, rgba(110,134,224,.95), rgba(79,99,196,.98))' : 'rgba(255,255,255,.95)',
+          background: isEdge ? 'linear-gradient(122deg, #8fa4ee 0%, #7789e7 34%, #8b81e1 64%, #bb8ed2 100%)' : 'rgba(255,255,255,.95)',
           border: isEdge ? '2px solid rgba(255,255,255,.85)' : '2px solid rgba(110,134,224,.55)',
           boxShadow: '0 2px 6px rgba(34,49,74,.25)'
         }
@@ -11376,7 +11383,7 @@ function SheetEventDetail({
           gap: 6,
           padding: '10px 18px',
           borderRadius: 20,
-          background: 'linear-gradient(150deg, rgba(110,134,224,.93), rgba(79,99,196,.97))',
+          background: 'linear-gradient(122deg, #8fa4ee 0%, #7789e7 34%, #8b81e1 64%, #bb8ed2 100%)',
           color: '#f2f7fc',
           fontSize: 13,
           fontWeight: 500,
@@ -11935,7 +11942,7 @@ function SheetEventDetail({
           flex: 'none',
           borderRadius: 7,
           border: '2px solid ' + (selected ? 'var(--mg-accent, #6e86e0)' : 'rgba(34,49,74,.25)'),
-          background: selected ? 'linear-gradient(150deg, rgba(110,134,224,.95), rgba(79,99,196,.98))' : 'transparent',
+          background: selected ? 'linear-gradient(122deg, #8fa4ee 0%, #7789e7 34%, #8b81e1 64%, #bb8ed2 100%)' : 'transparent',
           color: '#fbfcfd',
           display: 'inline-flex',
           alignItems: 'center',
@@ -12956,7 +12963,7 @@ function _reg_Dialog({
       fontSize: 13.5,
       fontWeight: 500,
       cursor: 'pointer',
-      background: 'linear-gradient(150deg, rgba(110,134,224,.93), rgba(79,99,196,.97))',
+      background: 'linear-gradient(122deg, #8fa4ee 0%, #7789e7 34%, #8b81e1 64%, #bb8ed2 100%)',
       color: '#f2f7fc',
       border: '1px solid rgba(255,255,255,.35)',
       boxShadow: '0 10px 22px rgba(79,99,196,.3)'
@@ -13134,7 +13141,7 @@ function _reg_PayPayNameOverlay({
       fontSize: 13.5,
       fontWeight: 500,
       border: '1px solid rgba(255,255,255,.35)',
-      background: submitting || !name.trim() ? 'rgba(91,119,150,.5)' : 'linear-gradient(150deg, rgba(110,134,224,.93), rgba(79,99,196,.97))',
+      background: submitting || !name.trim() ? 'rgba(91,119,150,.5)' : 'linear-gradient(122deg, #8fa4ee 0%, #7789e7 34%, #8b81e1 64%, #bb8ed2 100%)',
       color: '#f2f7fc',
       cursor: submitting || !name.trim() ? 'not-allowed' : 'pointer',
       boxShadow: '0 10px 22px rgba(79,99,196,.28)'
@@ -13544,7 +13551,7 @@ function _reg_CompanionSection({
       fontSize: 12.5,
       fontWeight: 500,
       cursor: 'pointer',
-      background: 'linear-gradient(150deg, rgba(110,134,224,.93), rgba(79,99,196,.97))',
+      background: 'linear-gradient(122deg, #8fa4ee 0%, #7789e7 34%, #8b81e1 64%, #bb8ed2 100%)',
       color: '#f2f7fc',
       border: '1px solid rgba(255,255,255,.35)',
       boxShadow: '0 8px 18px rgba(79,99,196,.28)'
@@ -14250,7 +14257,7 @@ function SheetRegister({
             alignItems: 'center',
             justifyContent: 'center',
             flexShrink: 0,
-            background: 'linear-gradient(150deg, rgba(110,134,224,.93), rgba(79,99,196,.97))',
+            background: 'linear-gradient(122deg, #8fa4ee 0%, #7789e7 34%, #8b81e1 64%, #bb8ed2 100%)',
             color: '#f2f7fc'
           }
         }, i + 1), React.createElement("div", {
@@ -14713,7 +14720,7 @@ function SheetRegister({
       fontWeight: 500,
       flexShrink: 0,
       whiteSpace: 'nowrap',
-      background: couponValidating || !couponCode.trim() ? 'rgba(91,119,150,.4)' : 'linear-gradient(150deg, rgba(110,134,224,.93), rgba(79,99,196,.97))',
+      background: couponValidating || !couponCode.trim() ? 'rgba(91,119,150,.4)' : 'linear-gradient(122deg, #8fa4ee 0%, #7789e7 34%, #8b81e1 64%, #bb8ed2 100%)',
       color: '#f2f7fc',
       border: '1px solid rgba(255,255,255,.35)',
       cursor: couponValidating || !couponCode.trim() ? 'not-allowed' : 'pointer'
@@ -14775,7 +14782,7 @@ function SheetRegister({
         display: 'inline-flex',
         alignItems: 'center',
         justifyContent: 'center',
-        background: selected ? 'linear-gradient(150deg, rgba(110,134,224,.93), rgba(79,99,196,.97))' : 'rgba(110,134,224,.08)',
+        background: selected ? 'linear-gradient(122deg, #8fa4ee 0%, #7789e7 34%, #8b81e1 64%, #bb8ed2 100%)' : 'rgba(110,134,224,.08)',
         color: selected ? '#f2f7fc' : 'var(--mg-accent, #6e86e0)',
         transition: 'all .25s ease'
       }
@@ -15140,7 +15147,7 @@ function SheetRegister({
         alignItems: 'center',
         justifyContent: 'center',
         border: agreedPolicy ? '1px solid rgba(255,255,255,.35)' : '1px solid rgba(34,49,74,.3)',
-        background: agreedPolicy ? 'linear-gradient(150deg, rgba(110,134,224,.95), rgba(79,99,196,.98))' : 'rgba(255,255,255,.85)',
+        background: agreedPolicy ? 'linear-gradient(122deg, #8fa4ee 0%, #7789e7 34%, #8b81e1 64%, #bb8ed2 100%)' : 'rgba(255,255,255,.85)',
         color: '#f2f7fc',
         transition: 'all .25s ease',
         boxShadow: agreedPolicy ? '0 6px 14px rgba(79,99,196,.28)' : 'none'
@@ -16212,7 +16219,7 @@ function OverlayRegisterComplete({
       cursor: 'pointer',
       fontSize: 14,
       fontWeight: 500,
-      background: 'linear-gradient(150deg, rgba(110,134,224,.95), rgba(79,99,196,.98))',
+      background: 'linear-gradient(122deg, #8fa4ee 0%, #7789e7 34%, #8b81e1 64%, #bb8ed2 100%)',
       color: '#f2f7fc',
       border: '1px solid rgba(255,255,255,.3)',
       boxShadow: '0 14px 30px rgba(79,99,196,.32), inset 0 1px 0 rgba(255,255,255,.3)'
@@ -19459,7 +19466,7 @@ function SheetTicket({
       display: 'inline-flex',
       alignItems: 'center',
       justifyContent: 'center',
-      background: bright ? 'linear-gradient(150deg, rgba(110,134,224,.93), rgba(79,99,196,.97))' : 'rgba(34,49,74,.06)',
+      background: bright ? 'linear-gradient(122deg, #8fa4ee 0%, #7789e7 34%, #8b81e1 64%, #bb8ed2 100%)' : 'rgba(34,49,74,.06)',
       border: bright ? '1px solid rgba(255,255,255,.35)' : '1px solid transparent',
       color: bright ? '#f2f7fc' : 'var(--mg-ink3, #4c6584)'
     }
@@ -19659,7 +19666,7 @@ function SheetTicket({
             fontSize: 12.5,
             cursor: cur ? 'default' : 'pointer',
             border: '1px solid ' + (cur ? 'var(--mg-accent, #6e86e0)' : 'rgba(34,49,74,.18)'),
-            background: cur ? 'linear-gradient(150deg, rgba(110,134,224,.95), rgba(79,99,196,.98))' : 'rgba(255,255,255,.8)',
+            background: cur ? 'linear-gradient(122deg, #8fa4ee 0%, #7789e7 34%, #8b81e1 64%, #bb8ed2 100%)' : 'rgba(255,255,255,.8)',
             color: cur ? '#f2f7fc' : 'var(--mg-ink2, #2b3d57)',
             fontWeight: cur ? 600 : 400
           }
@@ -20086,7 +20093,7 @@ function SheetSurvey({
           display: 'inline-flex',
           alignItems: 'center',
           justifyContent: 'center',
-          background: sel ? 'linear-gradient(150deg, rgba(110,134,224,.93), rgba(79,99,196,.97))' : 'rgba(255,255,255,.9)',
+          background: sel ? 'linear-gradient(122deg, #8fa4ee 0%, #7789e7 34%, #8b81e1 64%, #bb8ed2 100%)' : 'rgba(255,255,255,.9)',
           color: sel ? '#f2f7fc' : 'var(--mg-ink2, #2b3d57)',
           border: sel ? '1px solid rgba(255,255,255,.35)' : '1px solid rgba(34,49,74,.12)'
         }
@@ -20170,7 +20177,7 @@ function SheetSurvey({
           borderRadius: 11,
           flex: 'none',
           border: sel ? '0' : '2px solid rgba(34,49,74,.25)',
-          background: sel ? 'linear-gradient(150deg, rgba(110,134,224,.95), rgba(79,99,196,.98))' : 'transparent',
+          background: sel ? 'linear-gradient(122deg, #8fa4ee 0%, #7789e7 34%, #8b81e1 64%, #bb8ed2 100%)' : 'transparent',
           display: 'inline-flex',
           alignItems: 'center',
           justifyContent: 'center',
@@ -20256,7 +20263,7 @@ function SheetSurvey({
         height: 78,
         borderRadius: 39,
         margin: '0 auto 20px',
-        background: 'linear-gradient(150deg, rgba(110,134,224,.95), rgba(79,99,196,.98))',
+        background: 'linear-gradient(122deg, #8fa4ee 0%, #7789e7 34%, #8b81e1 64%, #bb8ed2 100%)',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
@@ -22472,7 +22479,7 @@ function TabLife() {
       padding: '10px 8px',
       borderRadius: 20,
       textDecoration: 'none',
-      background: 'linear-gradient(150deg, rgba(110,134,224,.93), rgba(79,99,196,.97))',
+      background: 'linear-gradient(122deg, #8fa4ee 0%, #7789e7 34%, #8b81e1 64%, #bb8ed2 100%)',
       border: '1px solid rgba(255,255,255,.35)',
       color: '#f2f7fc',
       boxShadow: '0 10px 22px rgba(79,99,196,.28)'
@@ -23610,7 +23617,7 @@ function _cs_Bubble({
       fontSize: 13.5,
       lineHeight: 1.85,
       borderRadius: isUser ? '20px 20px 6px 20px' : '20px 20px 20px 6px',
-      background: isUser ? 'linear-gradient(150deg, rgba(110,134,224,.95), rgba(79,99,196,.98))' : 'var(--mg-paper, rgba(255,255,255,.90))',
+      background: isUser ? 'linear-gradient(122deg, #8fa4ee 0%, #7789e7 34%, #8b81e1 64%, #bb8ed2 100%)' : 'var(--mg-paper, rgba(255,255,255,.90))',
       color: isUser ? '#f2f7fc' : 'var(--mg-ink, #22314a)',
       border: isUser ? '1px solid rgba(255,255,255,.28)' : '1px solid rgba(34,49,74,.10)',
       boxShadow: isUser ? '0 8px 18px rgba(79,99,196,.22)' : '0 6px 14px rgba(34,49,74,.08)',
@@ -24005,7 +24012,7 @@ function SheetConsult({
       alignItems: 'center',
       justifyContent: 'center',
       padding: 0,
-      background: input.trim() ? 'linear-gradient(150deg, rgba(110,134,224,.95), rgba(79,99,196,.98))' : 'rgba(34,49,74,.10)',
+      background: input.trim() ? 'linear-gradient(122deg, #8fa4ee 0%, #7789e7 34%, #8b81e1 64%, #bb8ed2 100%)' : 'rgba(34,49,74,.10)',
       border: input.trim() ? '1px solid rgba(255,255,255,.3)' : '1px solid transparent',
       color: input.trim() ? '#f2f7fc' : 'var(--mg-ink5, #8ba0b6)',
       transition: 'background .2s, color .2s'
@@ -27863,7 +27870,7 @@ function ScreenContact() {
         height: 64,
         borderRadius: 32,
         margin: '0 auto 18px',
-        background: 'linear-gradient(150deg, rgba(110,134,224,.93), rgba(79,99,196,.97))',
+        background: 'linear-gradient(122deg, #8fa4ee 0%, #7789e7 34%, #8b81e1 64%, #bb8ed2 100%)',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
@@ -28915,7 +28922,7 @@ class _ShellErrorBoundary extends React.Component {
           padding: '0 34px',
           borderRadius: 27,
           border: '1px solid rgba(255,255,255,.35)',
-          background: 'linear-gradient(150deg, rgba(110,134,224,.93), rgba(79,99,196,.97))',
+          background: 'linear-gradient(122deg, #8fa4ee 0%, #7789e7 34%, #8b81e1 64%, #bb8ed2 100%)',
           color: '#f2f7fc',
           fontSize: 14,
           letterSpacing: '.08em',
