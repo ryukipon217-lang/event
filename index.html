@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-<script>window.__MG_BUILD='20260814031223';</script>
+<script>window.__MG_BUILD='20260814110231';</script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover">
 <title>connec+a — 出会いが、まちを変えていく。</title>
@@ -9289,7 +9289,7 @@ function _ev_Guide({
     endTime: evEnd,
     venue: ev.venue,
     geo: ev.geo || '',
-    timetable: '',
+    timetable: ev.timetable || '',
     order: 1,
     name: ''
   }] : [];
@@ -10742,6 +10742,7 @@ function SheetEventDetail({
   const alreadyRegistered = !!myReg;
   const guideHasContent = React.useMemo(() => {
     if (String(ev && ev.belongings || '').trim()) return true;
+    if (String(ev && ev.timetable || '').trim()) return true;
     if ((sessions || []).some(s => String(s.timetable || '').trim())) return true;
     const n = new Date();
     const t = n.getFullYear() + '-' + String(n.getMonth() + 1).padStart(2, '0') + '-' + String(n.getDate()).padStart(2, '0');
