@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-<script>window.__MG_BUILD='20260814124030';</script>
+<script>window.__MG_BUILD='20260814131306';</script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover">
 <title>connec+a — 出会いが、まちを変えていく。</title>
@@ -875,6 +875,10 @@ select.mg-field,
 @keyframes mgRipple{ from{ transform:scale(0); opacity:.9; } to{ transform:scale(40); opacity:0; } }
 /* タブ選択時のアイコンぽよん */
 @keyframes mgTabPop{ 0%{ transform:scale(1); } 45%{ transform:scale(1.22) translateY(-1px); } 100%{ transform:scale(1); } }
+
+/* 天気カードの時刻スロット切替(3時間毎を自動巡回) */
+@keyframes mgWxFade{ from{ opacity:0; } to{ opacity:1; } }
+@keyframes mgWxSlide{ from{ opacity:0; transform:translateY(6px) scale(.985); } to{ opacity:1; transform:translateY(0) scale(1); } }
 
 /* 記念ビューアの入場モーション */
 @keyframes mgMvFade{ from{ opacity:0; } to{ opacity:1; } }
@@ -9220,8 +9224,297 @@ const _ev_WMO = code => {
     en: 'Thunderstorm'
   };
 };
-async function _ev_weatherFor(placeCandidates, dateStr, geoStr) {
-  const key = 'mg_wx_' + String(geoStr || placeCandidates[0] || '') + '_' + dateStr;
+function _ev_WxCard({
+  w,
+  lang,
+  dateMd
+}) {
+  const H = (jaT, easyT, enT) => lang === 'easy' ? easyT : lang === 'en' ? enT : jaT;
+  const hours = Array.isArray(w && w.hours) ? w.hours : [];
+  const [idx, setIdx] = React.useState(0);
+  const [paused, setPaused] = React.useState(false);
+  React.useEffect(() => {
+    setIdx(0);
+  }, [w && w.place, hours.length]);
+  React.useEffect(() => {
+    if (paused || hours.length <= 1) return undefined;
+    const id = setInterval(() => setIdx(i => (i + 1) % hours.length), 2200);
+    return () => clearInterval(id);
+  }, [paused, hours.length]);
+  const wmDay = _ev_WMO(w && w.code);
+  if (!hours.length) {
+    return React.createElement("div", {
+      className: "mg-card",
+      style: {
+        borderRadius: 24,
+        padding: '18px 20px 17px',
+        position: 'relative',
+        overflow: 'hidden'
+      }
+    }, wmDay ? React.createElement("div", {
+      "aria-hidden": "true",
+      style: {
+        position: 'absolute',
+        inset: 0,
+        background: 'linear-gradient(160deg, ' + wmDay.bg + ', transparent 70%)'
+      }
+    }) : null, React.createElement("div", {
+      style: {
+        position: 'relative',
+        display: 'flex',
+        alignItems: 'center',
+        gap: 12
+      }
+    }, React.createElement("span", {
+      "aria-hidden": "true",
+      style: {
+        width: 58,
+        height: 58,
+        flex: 'none',
+        margin: '-6px -4px -6px -8px',
+        display: 'inline-block',
+        filter: 'drop-shadow(0 2px 4px rgba(20,40,70,.10))'
+      },
+      dangerouslySetInnerHTML: {
+        __html: _ev_WX_SVG[wmDay.mi] || ''
+      }
+    }), React.createElement("div", {
+      style: {
+        minWidth: 0
+      }
+    }, React.createElement("div", {
+      className: "mg-ui",
+      style: {
+        fontSize: 12,
+        fontWeight: 600,
+        color: 'var(--mg-ink2, #2b3d57)'
+      }
+    }, wmDay[lang] || wmDay.ja), React.createElement("div", {
+      style: {
+        display: 'flex',
+        alignItems: 'baseline',
+        gap: 8,
+        marginTop: 2
+      }
+    }, React.createElement("span", {
+      className: "mg-num",
+      style: {
+        fontSize: 21
+      }
+    }, w.tmax, "\xB0", React.createElement("span", {
+      style: {
+        fontSize: 13,
+        color: 'var(--mg-ink4, #5b7796)'
+      }
+    }, " / ", w.tmin, "\xB0")), w.pop != null ? React.createElement("span", {
+      className: "mg-num",
+      style: {
+        fontSize: 12,
+        color: '#4a7bd0',
+        display: 'inline-flex',
+        alignItems: 'center',
+        gap: 2
+      }
+    }, React.createElement(Icon, {
+      name: "water_drop",
+      size: 13,
+      style: {
+        color: '#4a7bd0'
+      }
+    }), w.pop, "%") : null)), dateMd ? React.createElement("span", {
+      className: "mg-num",
+      style: {
+        marginLeft: 'auto',
+        fontSize: 13,
+        fontStyle: 'italic',
+        color: 'var(--mg-ink4, #5b7796)',
+        alignSelf: 'flex-start'
+      }
+    }, dateMd) : null));
+  }
+  const cur = hours[Math.min(idx, hours.length - 1)];
+  const cm = _ev_WMO(cur.code);
+  const win = w.win || {};
+  return React.createElement("div", {
+    className: "mg-card",
+    style: {
+      borderRadius: 24,
+      padding: '18px 20px 17px',
+      position: 'relative',
+      overflow: 'hidden'
+    },
+    onPointerDown: () => setPaused(true),
+    onPointerUp: () => setPaused(false),
+    onPointerLeave: () => setPaused(false)
+  }, React.createElement("div", {
+    key: 'bg' + idx,
+    "aria-hidden": "true",
+    style: {
+      position: 'absolute',
+      inset: 0,
+      background: 'linear-gradient(160deg, ' + cm.bg + ', transparent 72%)',
+      animation: 'mgWxFade .6s ease'
+    }
+  }), React.createElement("div", {
+    style: {
+      position: 'relative'
+    }
+  }, win.s ? React.createElement("div", {
+    className: "mg-ui",
+    style: {
+      fontSize: 10,
+      letterSpacing: '.06em',
+      color: 'var(--mg-ink4, #5b7796)',
+      marginBottom: 6
+    }
+  }, H('イベントの時間帯 ', 'イベントの じかん ', 'During the event ') + win.s + (win.e ? '–' + win.e : '')) : null, React.createElement("div", {
+    key: 'cur' + idx,
+    style: {
+      display: 'flex',
+      alignItems: 'center',
+      gap: 12,
+      animation: 'mgWxSlide .55s cubic-bezier(.2,.7,.2,1)'
+    }
+  }, React.createElement("span", {
+    "aria-hidden": "true",
+    style: {
+      width: 60,
+      height: 60,
+      flex: 'none',
+      margin: '-6px -3px -6px -8px',
+      display: 'inline-block',
+      filter: 'drop-shadow(0 2px 5px rgba(20,40,70,.12))'
+    },
+    dangerouslySetInnerHTML: {
+      __html: _ev_WX_SVG[cm.mi] || ''
+    }
+  }), React.createElement("div", {
+    style: {
+      minWidth: 0
+    }
+  }, React.createElement("div", {
+    style: {
+      display: 'flex',
+      alignItems: 'baseline',
+      gap: 8
+    }
+  }, React.createElement("span", {
+    className: "mg-num",
+    style: {
+      fontSize: 17,
+      fontStyle: 'italic',
+      color: 'var(--mg-ink3, #3d5877)'
+    }
+  }, cur.hm), React.createElement("span", {
+    className: "mg-ui",
+    style: {
+      fontSize: 12,
+      fontWeight: 600,
+      color: 'var(--mg-ink2, #2b3d57)'
+    }
+  }, cm[lang] || cm.ja)), React.createElement("div", {
+    style: {
+      display: 'flex',
+      alignItems: 'baseline',
+      gap: 8,
+      marginTop: 1
+    }
+  }, React.createElement("span", {
+    className: "mg-num",
+    style: {
+      fontSize: 25
+    }
+  }, cur.temp, "\xB0"), cur.pop != null ? React.createElement("span", {
+    className: "mg-num",
+    style: {
+      fontSize: 12,
+      color: '#4a7bd0',
+      display: 'inline-flex',
+      alignItems: 'center',
+      gap: 2
+    }
+  }, React.createElement(Icon, {
+    name: "water_drop",
+    size: 13,
+    style: {
+      color: '#4a7bd0'
+    }
+  }), cur.pop, "%") : null)), dateMd ? React.createElement("span", {
+    className: "mg-num",
+    style: {
+      marginLeft: 'auto',
+      fontSize: 13,
+      fontStyle: 'italic',
+      color: 'var(--mg-ink4, #5b7796)',
+      alignSelf: 'flex-start'
+    }
+  }, dateMd) : null), React.createElement("div", {
+    style: {
+      display: 'flex',
+      gap: 6,
+      marginTop: 12
+    }
+  }, hours.map((h, i) => {
+    const hm2 = _ev_WMO(h.code);
+    const on = i === idx;
+    return React.createElement("button", {
+      key: i,
+      type: "button",
+      onClick: () => {
+        setIdx(i);
+      },
+      className: "mg-tap",
+      style: {
+        flex: 1,
+        minWidth: 0,
+        appearance: 'none',
+        border: on ? '1px solid ' + hm2.tint + '55' : '1px solid transparent',
+        background: on ? 'rgba(255,255,255,.72)' : 'rgba(255,255,255,.34)',
+        borderRadius: 12,
+        padding: '7px 3px 6px',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        gap: 2,
+        cursor: 'pointer',
+        boxShadow: on ? '0 3px 9px rgba(34,49,74,.12)' : 'none',
+        transition: 'background .3s, border-color .3s, box-shadow .3s'
+      }
+    }, React.createElement("span", {
+      className: "mg-num",
+      style: {
+        fontSize: 10.5,
+        color: on ? 'var(--mg-ink2, #2b3d57)' : 'var(--mg-ink4, #5b7796)'
+      }
+    }, h.hm), React.createElement("span", {
+      "aria-hidden": "true",
+      style: {
+        width: 26,
+        height: 26,
+        display: 'inline-block',
+        opacity: on ? 1 : 0.7,
+        transition: 'opacity .3s'
+      },
+      dangerouslySetInnerHTML: {
+        __html: _ev_WX_SVG[hm2.mi] || ''
+      }
+    }), React.createElement("span", {
+      className: "mg-num",
+      style: {
+        fontSize: 12,
+        color: on ? 'var(--mg-ink, #22314a)' : 'var(--mg-ink4, #5b7796)'
+      }
+    }, h.temp, "\xB0"), h.pop != null && h.pop >= 30 ? React.createElement("span", {
+      className: "mg-num",
+      style: {
+        fontSize: 9,
+        color: '#4a7bd0'
+      }
+    }, h.pop, "%") : null);
+  }))));
+}
+async function _ev_weatherFor(placeCandidates, dateStr, geoStr, startTime, endTime) {
+  const key = 'mg_wx2_' + String(geoStr || placeCandidates[0] || '') + '_' + dateStr + '_' + (startTime || '') + '_' + (endTime || '');
   try {
     const c = sessionStorage.getItem(key);
     if (c) return JSON.parse(c);
@@ -9250,7 +9543,7 @@ async function _ev_weatherFor(placeCandidates, dateStr, geoStr) {
   }
   if (!geo) return null;
   try {
-    const u = 'https://api.open-meteo.com/v1/forecast?latitude=' + geo.latitude + '&longitude=' + geo.longitude + '&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max&timezone=Asia%2FTokyo' + '&start_date=' + dateStr + '&end_date=' + dateStr;
+    const u = 'https://api.open-meteo.com/v1/forecast?latitude=' + geo.latitude + '&longitude=' + geo.longitude + '&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max' + '&hourly=weather_code,temperature_2m,precipitation_probability&timezone=Asia%2FTokyo' + '&start_date=' + dateStr + '&end_date=' + dateStr;
     const r2 = await fetch(u);
     const j2 = await r2.json();
     const d = j2 && j2.daily;
@@ -9261,6 +9554,35 @@ async function _ev_weatherFor(placeCandidates, dateStr, geoStr) {
       tmin: Math.round(d.temperature_2m_min[0]),
       pop: d.precipitation_probability_max ? d.precipitation_probability_max[0] : null,
       place: geo.name || ''
+    };
+    const hourly = j2 && j2.hourly;
+    const toMin = hm => {
+      const m = String(hm || '').match(/(\d{1,2}):(\d{2})/);
+      return m ? Number(m[1]) * 60 + Number(m[2]) : null;
+    };
+    let sMin = toMin(startTime);
+    let eMin = toMin(endTime);
+    if (sMin == null) sMin = 9 * 60;
+    if (eMin == null || eMin <= sMin) eMin = Math.min(sMin + 6 * 60, 21 * 60);
+    if (hourly && hourly.time && hourly.time.length) {
+      const inWin = [];
+      hourly.time.forEach((t, i) => {
+        const mn = toMin(String(t).slice(11, 16));
+        if (mn != null && mn >= sMin - 1 && mn <= eMin + 1) inWin.push(i);
+      });
+      const pick = [];
+      for (let k = 0; k < inWin.length; k += 3) pick.push(inWin[k]);
+      if (inWin.length && pick[pick.length - 1] !== inWin[inWin.length - 1]) pick.push(inWin[inWin.length - 1]);
+      out.hours = pick.slice(0, 6).map(i => ({
+        hm: String(hourly.time[i]).slice(11, 16),
+        code: hourly.weather_code[i],
+        temp: Math.round(hourly.temperature_2m[i]),
+        pop: hourly.precipitation_probability ? hourly.precipitation_probability[i] : null
+      }));
+    }
+    out.win = {
+      s: startTime || '',
+      e: endTime || ''
     };
     try {
       sessionStorage.setItem(key, JSON.stringify(out));
@@ -9285,9 +9607,11 @@ function _ev_Guide({
   const belongings = String(ev.belongings || '').split('\n').map(x => x.trim()).filter(Boolean);
   const sorted = (sessions || []).filter(x => x && x.date).slice().sort((a, b) => String(a.date).localeCompare(String(b.date)));
   const evEnd = (String(ev.time || '').match(/(\d{1,2}:\d{2})\s*[-〜~‐–]\s*(\d{1,2}:\d{2})/) || [])[2] || '';
+  const evStart = (String(ev.time || '').match(/(\d{1,2}:\d{2})/) || [])[1] || '';
   const days = sorted.length ? sorted : ev.date ? [{
     id: '_EV0',
     date: String(ev.date).slice(0, 10),
+    startTime: evStart,
     endTime: evEnd,
     venue: ev.venue,
     geo: ev.geo || '',
@@ -9306,7 +9630,7 @@ function _ev_Guide({
     let dead = false;
     (async () => {
       for (const s2 of wxDays) {
-        const w = await _ev_weatherFor([s2.venue, ev.address, ev.venue], s2.date, s2.geo || ev.geo || '');
+        const w = await _ev_weatherFor([s2.venue, ev.address, ev.venue], s2.date, s2.geo || ev.geo || '', s2.startTime || '', s2.endTime || '');
         if (dead) return;
         if (w) setWx(p => ({
           ...p,
@@ -9444,7 +9768,6 @@ function _ev_Guide({
   }, liveDays.map((s2, i2) => {
     const lines = String(s2.timetable || '').split('\n').map(x => x.trim()).filter(Boolean);
     const w = wx[s2.id];
-    const wm = w ? _ev_WMO(w.code) : null;
     return React.createElement("div", {
       key: s2.id,
       style: {
@@ -9479,8 +9802,8 @@ function _ev_Guide({
     }), H('タイムテーブル', 'じかんの よてい', 'Timetable')), React.createElement("div", {
       className: "mg-card",
       style: {
-        borderRadius: 22,
-        padding: '16px 18px 14px',
+        borderRadius: 24,
+        padding: '22px 24px 20px',
         overflow: 'hidden',
         position: 'relative'
       }
@@ -9489,7 +9812,7 @@ function _ev_Guide({
         display: 'flex',
         alignItems: 'baseline',
         gap: 10,
-        marginBottom: 12
+        marginBottom: 16
       }
     }, React.createElement("span", {
       className: "mg-ui",
@@ -9519,7 +9842,7 @@ function _ev_Guide({
     }, s2.name) : null), React.createElement("div", {
       style: {
         position: 'relative',
-        paddingLeft: 24
+        paddingLeft: 28
       }
     }, React.createElement("div", {
       "aria-hidden": "true",
@@ -9599,103 +9922,23 @@ function _ev_Guide({
       style: {
         color: 'var(--mg-accent, #35618f)'
       }
-    }), H('開催地の天気', 'てんき', 'Weather')), React.createElement("div", {
+    }), H('開催地の天気', 'てんき', 'Weather')), w ? React.createElement(_ev_WxCard, {
+      w: w,
+      lang: lang,
+      dateMd: md(s2.date)
+    }) : React.createElement("div", {
       className: "mg-card",
       style: {
         borderRadius: 20,
-        padding: '14px 14px 12px',
-        position: 'relative',
-        overflow: 'hidden'
-      }
-    }, wm ? React.createElement("div", {
-      "aria-hidden": "true",
-      style: {
-        position: 'absolute',
-        inset: 0,
-        background: 'linear-gradient(160deg, ' + wm.bg + ', transparent 70%)'
-      }
-    }) : null, React.createElement("div", {
-      style: {
-        position: 'relative'
-      }
-    }, w ? React.createElement("div", {
-      style: {
-        display: 'flex',
-        alignItems: 'center',
-        gap: 12
-      }
-    }, React.createElement("span", {
-      "aria-hidden": "true",
-      style: {
-        width: 58,
-        height: 58,
-        flex: 'none',
-        margin: '-6px -4px -6px -8px',
-        display: 'inline-block',
-        filter: 'drop-shadow(0 2px 4px rgba(20,40,70,.10))'
-      },
-      dangerouslySetInnerHTML: {
-        __html: _ev_WX_SVG[wm.mi] || ''
-      }
-    }), React.createElement("div", {
-      style: {
-        minWidth: 0
+        padding: '14px 14px 12px'
       }
     }, React.createElement("div", {
-      className: "mg-ui",
-      style: {
-        fontSize: 12,
-        fontWeight: 600,
-        color: 'var(--mg-ink2, #2b3d57)'
-      }
-    }, wm[lang] || wm.ja), React.createElement("div", {
-      style: {
-        display: 'flex',
-        alignItems: 'baseline',
-        gap: 8,
-        marginTop: 2
-      }
-    }, React.createElement("span", {
-      className: "mg-num",
-      style: {
-        fontSize: 21
-      }
-    }, w.tmax, "\xB0", React.createElement("span", {
-      style: {
-        fontSize: 13,
-        color: 'var(--mg-ink4, #5b7796)'
-      }
-    }, " / ", w.tmin, "\xB0")), w.pop != null ? React.createElement("span", {
-      className: "mg-num",
-      style: {
-        fontSize: 12,
-        color: '#4a7bd0',
-        display: 'inline-flex',
-        alignItems: 'center',
-        gap: 2
-      }
-    }, React.createElement(Icon, {
-      name: "water_drop",
-      size: 13,
-      style: {
-        color: '#4a7bd0'
-      }
-    }), w.pop, "%") : null)), React.createElement("span", {
-      className: "mg-num",
-      style: {
-        marginLeft: 'auto',
-        fontSize: 13,
-        fontStyle: 'italic',
-        color: 'var(--mg-ink4, #5b7796)',
-        alignSelf: 'flex-start'
-      }
-    }, md(s2.date))) : React.createElement("div", {
       style: {
         fontSize: 12,
         color: 'var(--mg-ink5, #8ba0b6)',
         padding: '10px 0'
       }
-    }, H('取得中…', 'よみこみちゅう…', 'Loading…'))))) : null, anyDayBelong ? (() => {
+    }, H('取得中…', 'よみこみちゅう…', 'Loading…')))) : null, anyDayBelong ? (() => {
       const bl = _belongOf(s2);
       return bl.length ? React.createElement("div", {
         style: {
@@ -18683,17 +18926,18 @@ function _eng_pickReg(regs) {
   }).sort((a, b) => String(a.sessionDate || a.event.date).localeCompare(String(b.sessionDate || b.event.date)));
   return up.length ? up[0] : null;
 }
-function _eng_gcalUrl(event, regId, lang, dateStr) {
+function _eng_gcalUrl(event, regId, lang, dateStr, timeOverride, venueOverride) {
   const baseDate = String(dateStr || event && event.date || '');
   if (!event || !baseDate) return null;
   try {
+    const timeSrc = timeOverride && String(timeOverride).match(/\d{1,2}:\d{2}/) ? String(timeOverride).match(/\d{1,2}:\d{2}/)[0] : event.time || '00:00';
     const startStr = baseDate.replace(/-/g, '');
-    const timeStr = (event.time || '00:00').replace(':', '');
+    const timeStr = timeSrc.replace(':', '');
     const start = startStr + 'T' + timeStr + '00';
-    const startHourNum = parseInt((event.time || '00:00').substring(0, 2), 10);
+    const startHourNum = parseInt(timeSrc.substring(0, 2), 10);
     const endHourNum = (startHourNum + 2) % 24;
     const endHourStr = endHourNum.toString().padStart(2, '0');
-    const endMinStr = (event.time || '00:00').substring(3, 5);
+    const endMinStr = timeSrc.substring(3, 5);
     const end = startStr + 'T' + endHourStr + endMinStr + '00';
     const detail = lang === 'en' ? 'connec+a event' : 'connec+a イベント';
     const params = new URLSearchParams({
@@ -18701,7 +18945,7 @@ function _eng_gcalUrl(event, regId, lang, dateStr) {
       text: event.title || '',
       dates: start + '/' + end,
       details: detail + '\nID: ' + regId + '\nQRチケット: ' + window.location.href,
-      location: event.venue || ''
+      location: venueOverride || event.venue || ''
     });
     return 'https://www.google.com/calendar/render?' + params.toString();
   } catch (e) {
@@ -18997,11 +19241,12 @@ function SheetTicket({
   const isCheckedIn = !!reg && reg.status === 'チェックイン済';
   const dateStr = reg ? reg.sessionDate || event && event.date || '' : '';
   const partyCount = 1 + (reg && Array.isArray(reg.companions) ? reg.companions.length : 0);
-  const _isMultiTix = !!event && event.format === 'multi';
-  const timeRange = _isMultiTix && reg && reg.sessionStartTime ? reg.sessionStartTime + (reg.sessionEndTime ? ' — ' + reg.sessionEndTime : '') : event ? _eng_timeRange(event) : '';
-  const gcal = event && reg ? _eng_gcalUrl(event, reg.regId, lang, dateStr) : null;
-  const venue = (_isMultiTix && reg && reg.sessionVenue ? reg.sessionVenue : event && event.venue) || '';
-  const _venueAddr = _isMultiTix && reg && reg.sessionAddress ? reg.sessionAddress : event && event.venueAddress;
+  const _sVenue = reg && String(reg.sessionVenue || '').trim() ? reg.sessionVenue : '';
+  const _sStart = reg && String(reg.sessionStartTime || '').trim() ? reg.sessionStartTime : '';
+  const timeRange = _sStart ? _sStart + (reg.sessionEndTime ? ' — ' + reg.sessionEndTime : '') : event ? _eng_timeRange(event) : '';
+  const gcal = event && reg ? _eng_gcalUrl(event, reg.regId, lang, dateStr, _sStart, _sVenue) : null;
+  const venue = _sVenue || event && event.venue || '';
+  const _venueAddr = reg && String(reg.sessionAddress || '').trim() ? reg.sessionAddress : _sVenue ? _sVenue : event && event.venueAddress;
   const mapUrl = venue ? 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(_venueAddr || venue) : null;
   const amount = reg ? reg.amount : null;
   const _paySib = event && event.format === 'multi' && Number(amount) === 0 ? sibs.find(r => Number(r.amount) > 0) || null : null;
