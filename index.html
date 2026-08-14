@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-<script>window.__MG_BUILD='20260814012705';</script>
+<script>window.__MG_BUILD='20260814013555';</script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>connec+a — 出会いが、まちを変えていく。</title>
@@ -2154,6 +2154,16 @@ function mgNextSession(ev, now) {
     });
   } catch (e) {}
 })();
+try {
+  const _kbRestore = () => {
+    try {
+      const se = document.scrollingElement || document.documentElement;
+      if (se.scrollTop !== 0 || window.scrollY !== 0) window.scrollTo(0, 0);
+    } catch (e) {}
+  };
+  document.addEventListener('focusout', () => setTimeout(_kbRestore, 80));
+  if (window.visualViewport) window.visualViewport.addEventListener('resize', () => setTimeout(_kbRestore, 140));
+} catch (e) {}
 (function () {
   try {
     const standalone = window.matchMedia && window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
@@ -5614,7 +5624,7 @@ function ScreenGate() {
       top: 0,
       left: 0,
       right: 0,
-      bottom: '-280px',
+      bottom: 'calc(-2px - var(--mg-vp-gap, 0px))',
       background: '#1a2740',
       zIndex: 0
     }
@@ -5626,7 +5636,7 @@ function ScreenGate() {
       top: 0,
       left: 0,
       right: 0,
-      bottom: '-280px',
+      bottom: 'calc(-2px - var(--mg-vp-gap, 0px))',
       width: 'auto',
       height: 'auto',
       maxWidth: 'none',
@@ -5640,8 +5650,8 @@ function ScreenGate() {
       top: 0,
       left: 0,
       right: 0,
-      bottom: '-280px',
-      background: 'linear-gradient(180deg, rgba(20,32,50,.30) 0%, rgba(20,32,50,.10) 30%, rgba(20,32,50,.62) 64%, rgba(15,24,38,.88) 88%, rgba(15,24,38,.9) 100%)',
+      bottom: 'calc(-2px - var(--mg-vp-gap, 0px))',
+      background: 'linear-gradient(180deg, rgba(20,32,50,.30) 0%, rgba(20,32,50,.10) 34%, rgba(20,32,50,.62) 74%, rgba(15,24,38,.88) 100%)',
       zIndex: 0
     }
   }), React.createElement("div", {
@@ -26739,10 +26749,10 @@ function _ShellIntro({
     alt: "",
     style: {
       position: 'absolute',
-      top: '-9%',
-      left: '-6%',
-      right: '-6%',
-      bottom: '-280px',
+      top: '-2%',
+      left: '-2%',
+      right: '-2%',
+      bottom: 'calc(-14px - var(--mg-vp-gap, 0px))',
       width: 'auto',
       maxWidth: 'none',
       height: 'auto',
@@ -26757,8 +26767,8 @@ function _ShellIntro({
       top: 0,
       left: 0,
       right: 0,
-      bottom: '-280px',
-      background: 'linear-gradient(180deg, rgba(20,32,50,.34) 0%, rgba(20,32,50,.08) 30%, rgba(20,32,50,.52) 60%, rgba(15,24,38,.86) 92%, rgba(15,24,38,.9) 100%)'
+      bottom: 'calc(-14px - var(--mg-vp-gap, 0px))',
+      background: 'linear-gradient(180deg, rgba(20,32,50,.34) 0%, rgba(20,32,50,.08) 30%, rgba(20,32,50,.52) 66%, rgba(15,24,38,.86) 100%)'
     }
   }), React.createElement("div", {
     style: {
