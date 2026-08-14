@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-<script>window.__MG_BUILD='20260814143632';</script>
+<script>window.__MG_BUILD='20260814144740';</script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover">
 <title>connec+a — 出会いが、まちを変えていく。</title>
@@ -98,13 +98,7 @@ window.__earlyBundlePromise = fetch('https://script.google.com/macros/s/AKfycbxL
 
   /* キャンバス地(モネの春: 桜ピンク/藤/若葉/空色/クリームのにじみ+シャボン玉の虹彩) */
   --mg-canvas-bg:
-    radial-gradient(58% 42% at 12% 8%, #dfe4f6 0%, rgba(223,228,246,0) 52%),
-    radial-gradient(52% 40% at 88% 6%, #f2dbe8 0%, rgba(242,219,232,0) 52%),
-    radial-gradient(56% 46% at 84% 90%, #e3d8f2 0%, rgba(227,216,242,0) 55%),
-    radial-gradient(54% 44% at 8% 94%, #d8e8d8 0%, rgba(216,232,216,0) 54%),
-    radial-gradient(44% 34% at 46% 54%, #f7efe0 0%, rgba(247,239,224,0) 62%),
-    radial-gradient(38% 30% at 66% 26%, #f2dde8 0%, rgba(242,221,232,0) 58%),
-    linear-gradient(168deg, #edeff9 0%, #efe9f4 52%, #ecf1ec 100%);
+    radial-gradient(60% 46% at 12% 8%, #d8e6f0 0%, rgba(216,230,240,0) 54%), radial-gradient(56% 44% at 88% 6%, #f2d2df 0%, rgba(242,210,223,0) 54%), radial-gradient(58% 48% at 84% 90%, #ddcfee 0%, rgba(221,207,238,0) 56%), radial-gradient(58% 46% at 8% 94%, #cfe6cf 0%, rgba(207,230,207,0) 56%), radial-gradient(46% 36% at 44% 56%, #f8ecd6 0%, rgba(248,236,214,0) 62%), radial-gradient(42% 34% at 68% 30%, #f3d6e2 0%, rgba(243,214,226,0) 58%), radial-gradient(40% 32% at 30% 42%, #e6dfc6 0%, rgba(230,223,198,0) 56%), linear-gradient(165deg, #edf0f6 0%, #efe6ef 48%, #e9f1e7 100%);
   /* シャボン玉の虹彩(surfaceのにじむ光沢に使う低透明の虹) */
   --mg-iris: conic-gradient(from 200deg at 32% 22%, rgba(255,214,235,.55), rgba(214,224,255,.5), rgba(208,240,224,.5), rgba(247,235,208,.5), rgba(240,214,235,.55), rgba(255,214,235,.55));
 
@@ -896,14 +890,12 @@ select.mg-field,
 /* タブ選択時のアイコンぽよん */
 @keyframes mgTabPop{ 0%{ transform:scale(1); } 45%{ transform:scale(1.22) translateY(-1px); } 100%{ transform:scale(1); } }
 
-/* シャボン玉(透明な虹彩オーブ)のゆっくり浮遊 */
-@keyframes mgBubble{ 0%{ transform:translate3d(0,0,0) scale(1); } 50%{ transform:translate3d(6px,-14px,0) scale(1.03); } 100%{ transform:translate3d(0,0,0) scale(1); } }
+/* 春の光のにじみ(かつてのシャボン玉を雰囲気だけに)。輪郭のない淡い虹彩のもや。 */
+@keyframes mgBubble{ 0%{ transform:translate3d(0,0,0) scale(1); } 50%{ transform:translate3d(10px,-20px,0) scale(1.05); } 100%{ transform:translate3d(0,0,0) scale(1); } }
 .mg-bubble{ position:absolute; border-radius:50%; pointer-events:none; will-change:transform;
   background:
-    radial-gradient(38% 34% at 32% 28%, rgba(255,255,255,.55), rgba(255,255,255,0) 60%),
-    conic-gradient(from 200deg at 40% 36%, rgba(255,210,234,.42), rgba(206,222,255,.4), rgba(206,240,222,.4), rgba(248,236,206,.42), rgba(240,208,232,.42), rgba(255,210,234,.42));
-  box-shadow:inset 0 0 26px rgba(255,255,255,.5), inset 0 -8px 22px rgba(150,170,230,.28), 0 10px 30px -10px rgba(150,160,220,.3);
-  border:1px solid rgba(255,255,255,.45); opacity:.7; mix-blend-mode:normal;
+    radial-gradient(closest-side, rgba(255,214,232,.5), rgba(214,224,255,.28) 46%, rgba(210,238,220,.14) 68%, rgba(255,255,255,0) 82%);
+  filter:blur(26px); opacity:.5; mix-blend-mode:normal;
 }
 
 /* 天気カードの時刻スロット切替(3時間毎を自動巡回) */
@@ -6190,35 +6182,23 @@ function _auth_LangRow({
 }
 function _auth_Bubbles() {
   const orbs = [{
-    s: 190,
-    l: '-6%',
-    t: '8%',
-    d: 13,
+    s: 340,
+    l: '-16%',
+    t: '0%',
+    d: 22,
     delay: 0
   }, {
-    s: 120,
-    l: '72%',
-    t: '4%',
-    d: 16,
-    delay: -4
+    s: 380,
+    l: '62%',
+    t: '56%',
+    d: 26,
+    delay: -10
   }, {
-    s: 250,
-    l: '58%',
-    t: '52%',
-    d: 19,
-    delay: -8
-  }, {
-    s: 90,
-    l: '12%',
-    t: '40%',
-    d: 15,
-    delay: -2
-  }, {
-    s: 150,
-    l: '80%',
-    t: '78%',
-    d: 17,
-    delay: -6
+    s: 260,
+    l: '76%',
+    t: '-8%',
+    d: 24,
+    delay: -5
   }];
   return React.createElement("div", {
     "aria-hidden": "true",
@@ -6262,7 +6242,7 @@ function ScreenGate() {
       right: 0,
       bottom: 'calc(0px - var(--mg-vp-gap, 0px))',
       zIndex: 0,
-      background: 'radial-gradient(58% 42% at 12% 8%, #dfe4f6 0%, rgba(223,228,246,0) 52%), radial-gradient(52% 40% at 88% 6%, #f2dbe8 0%, rgba(242,219,232,0) 52%), radial-gradient(56% 46% at 84% 90%, #e3d8f2 0%, rgba(227,216,242,0) 55%), radial-gradient(54% 44% at 8% 94%, #d8e8d8 0%, rgba(216,232,216,0) 54%), radial-gradient(44% 34% at 46% 54%, #f7efe0 0%, rgba(247,239,224,0) 62%), radial-gradient(38% 30% at 66% 26%, #f2dde8 0%, rgba(242,221,232,0) 58%), linear-gradient(168deg, #edeff9 0%, #efe9f4 52%, #ecf1ec 100%)'
+      background: 'radial-gradient(60% 46% at 12% 8%, #d8e6f0 0%, rgba(216,230,240,0) 54%), radial-gradient(56% 44% at 88% 6%, #f2d2df 0%, rgba(242,210,223,0) 54%), radial-gradient(58% 48% at 84% 90%, #ddcfee 0%, rgba(221,207,238,0) 56%), radial-gradient(58% 46% at 8% 94%, #cfe6cf 0%, rgba(207,230,207,0) 56%), radial-gradient(46% 36% at 44% 56%, #f8ecd6 0%, rgba(248,236,214,0) 62%), radial-gradient(42% 34% at 68% 30%, #f3d6e2 0%, rgba(243,214,226,0) 58%), radial-gradient(40% 32% at 30% 42%, #e6dfc6 0%, rgba(230,223,198,0) 56%), linear-gradient(165deg, #edf0f6 0%, #efe6ef 48%, #e9f1e7 100%)'
     }
   }), img && React.createElement("img", {
     src: img,
@@ -22524,9 +22504,14 @@ function TabLife() {
       padding: '0 18px 16px'
     }
   }, React.createElement("div", {
-    className: "mg-cream",
     style: {
-      padding: '14px 16px'
+      padding: '14px 16px',
+      borderRadius: 22,
+      background: 'rgba(255,255,255,.30)',
+      border: '1px solid rgba(255,255,255,.5)',
+      backdropFilter: 'blur(14px) saturate(160%)',
+      WebkitBackdropFilter: 'blur(14px) saturate(160%)',
+      boxShadow: 'inset 0 1px 0 rgba(255,255,255,.55), 0 10px 26px -14px rgba(60,64,120,.2)'
     }
   }, React.createElement("div", {
     style: {
@@ -22539,7 +22524,7 @@ function TabLife() {
     name: "emergency",
     size: 19,
     style: {
-      color: '#8a6d1c'
+      color: 'var(--mg-accent, #6e86e0)'
     }
   }), React.createElement("span", {
     style: {
@@ -22597,7 +22582,7 @@ function TabLife() {
       marginTop: 10,
       cursor: 'pointer',
       fontSize: 11.5,
-      color: '#6b5f31'
+      color: 'var(--mg-ink3, #3d5877)'
     }
   }, React.createElement("span", {
     style: {
@@ -22608,7 +22593,7 @@ function TabLife() {
     name: "chevron_right",
     size: 16,
     style: {
-      color: '#8a6d1c',
+      color: 'var(--mg-ink4, #5b7796)',
       flex: 'none'
     }
   })) : null)), D.categories.length === 0 ? React.createElement("div", {
@@ -28415,7 +28400,7 @@ const _shell_EMPTY_BUNDLE = {
   heroSlidesMobile: [],
   settings: {}
 };
-const _shell_CANVAS_BG = 'radial-gradient(58% 42% at 12% 8%, #dfe4f6 0%, rgba(223,228,246,0) 52%), radial-gradient(52% 40% at 88% 6%, #f2dbe8 0%, rgba(242,219,232,0) 52%), radial-gradient(56% 46% at 84% 90%, #e3d8f2 0%, rgba(227,216,242,0) 55%), radial-gradient(54% 44% at 8% 94%, #d8e8d8 0%, rgba(216,232,216,0) 54%), radial-gradient(44% 34% at 46% 54%, #f7efe0 0%, rgba(247,239,224,0) 62%), radial-gradient(38% 30% at 66% 26%, #f2dde8 0%, rgba(242,221,232,0) 58%), linear-gradient(168deg, #edeff9 0%, #efe9f4 52%, #ecf1ec 100%)';
+const _shell_CANVAS_BG = 'radial-gradient(60% 46% at 12% 8%, #d8e6f0 0%, rgba(216,230,240,0) 54%), radial-gradient(56% 44% at 88% 6%, #f2d2df 0%, rgba(242,210,223,0) 54%), radial-gradient(58% 48% at 84% 90%, #ddcfee 0%, rgba(221,207,238,0) 56%), radial-gradient(58% 46% at 8% 94%, #cfe6cf 0%, rgba(207,230,207,0) 56%), radial-gradient(46% 36% at 44% 56%, #f8ecd6 0%, rgba(248,236,214,0) 62%), radial-gradient(42% 34% at 68% 30%, #f3d6e2 0%, rgba(243,214,226,0) 58%), radial-gradient(40% 32% at 30% 42%, #e6dfc6 0%, rgba(230,223,198,0) 56%), linear-gradient(165deg, #edf0f6 0%, #efe6ef 48%, #e9f1e7 100%)';
 const _shell_EASE = 'cubic-bezier(.16,1,.3,1)';
 function _shell_imgUrl(url) {
   try {
