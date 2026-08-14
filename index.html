@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-<script>window.__MG_BUILD='20260814144740';</script>
+<script>window.__MG_BUILD='20260814145740';</script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover">
 <title>connec+a — 出会いが、まちを変えていく。</title>
@@ -6110,30 +6110,34 @@ function _auth_LangRow({
         gap: 8,
         padding: '2px 22px 14px'
       }
-    }, langs.map(([code, label]) => React.createElement("button", {
-      key: code,
-      type: "button",
-      className: "mg-ui mg-tap",
-      onClick: () => A.setLang(code),
-      style: {
-        flex: 1,
-        height: 36,
-        borderRadius: 999,
-        cursor: 'pointer',
-        padding: '0 4px',
-        display: 'inline-flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        textAlign: 'center',
-        border: '1px solid ' + (A.lang === code ? 'var(--mg-accent, #6e86e0)' : 'rgba(34,49,74,.22)'),
-        background: A.lang === code ? 'var(--mg-accent, #6e86e0)' : 'rgba(255,255,255,.6)',
-        color: A.lang === code ? '#fff' : 'var(--mg-ink2, #2b3d57)',
-        fontSize: 12,
-        fontWeight: A.lang === code ? 700 : 500,
-        whiteSpace: 'nowrap',
-        transition: 'background .25s ease, color .25s ease, border-color .25s ease'
-      }
-    }, label)));
+    }, langs.map(([code, label]) => {
+      const on = A.lang === code;
+      return React.createElement("button", {
+        key: code,
+        type: "button",
+        className: "mg-ui mg-tap",
+        onClick: () => A.setLang(code),
+        style: {
+          flex: 1,
+          height: 36,
+          borderRadius: 999,
+          cursor: 'pointer',
+          padding: '0 4px',
+          display: 'inline-flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          textAlign: 'center',
+          border: on ? '1px solid transparent' : '1px solid rgba(110,134,224,.3)',
+          background: on ? 'linear-gradient(122deg, #93a6ef 0%, #8b82e2 58%, #bb8ed2 100%)' : 'rgba(255,255,255,.62)',
+          color: on ? '#fff' : 'var(--mg-ink2, #2b3d57)',
+          fontSize: 12,
+          fontWeight: on ? 700 : 500,
+          whiteSpace: 'nowrap',
+          boxShadow: on ? '0 6px 14px -7px rgba(123,131,224,.5)' : 'none',
+          transition: 'background .25s ease, color .25s ease, border-color .25s ease'
+        }
+      }, label);
+    }));
   }
   return React.createElement("div", {
     style: {
@@ -6145,40 +6149,44 @@ function _auth_LangRow({
     style: {
       fontSize: 11,
       letterSpacing: '.22em',
-      color: 'rgba(251,252,253,.85)',
-      marginBottom: 9,
-      textShadow: '0 1px 6px rgba(20,32,50,.4)'
+      color: '#6e86e0',
+      marginBottom: 9
     }
   }, "\u3053\u3068\u3070 / LANGUAGE"), React.createElement("div", {
     style: {
       display: 'flex',
       gap: 9
     }
-  }, langs.map(([code, label]) => React.createElement("button", {
-    key: code,
-    type: "button",
-    className: "mg-ui mg-tap",
-    onClick: () => A.setLang(code),
-    style: {
-      flex: 1,
-      height: 46,
-      borderRadius: 999,
-      cursor: 'pointer',
-      padding: '0 4px',
-      display: 'inline-flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      textAlign: 'center',
-      border: '1.5px solid rgba(255,255,255,' + (A.lang === code ? '.95' : '.55') + ')',
-      background: A.lang === code ? 'rgba(255,255,255,.95)' : 'rgba(20,32,50,.28)',
-      color: A.lang === code ? '#22314a' : '#fbfcfd',
-      fontSize: 13,
-      fontWeight: A.lang === code ? 700 : 600,
-      whiteSpace: 'nowrap',
-      boxShadow: A.lang === code ? '0 6px 18px rgba(15,24,38,.35)' : 'none',
-      transition: 'background .25s ease, color .25s ease, border-color .25s ease'
-    }
-  }, label))));
+  }, langs.map(([code, label]) => {
+    const on = A.lang === code;
+    return React.createElement("button", {
+      key: code,
+      type: "button",
+      className: "mg-ui mg-tap",
+      onClick: () => A.setLang(code),
+      style: {
+        flex: 1,
+        height: 46,
+        borderRadius: 999,
+        cursor: 'pointer',
+        padding: '0 4px',
+        display: 'inline-flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        textAlign: 'center',
+        border: on ? '1px solid transparent' : '1px solid rgba(110,134,224,.32)',
+        background: on ? 'linear-gradient(122deg, #93a6ef 0%, #8b82e2 58%, #bb8ed2 100%)' : 'rgba(255,255,255,.62)',
+        color: on ? '#fff' : 'var(--mg-ink2, #2b3d57)',
+        fontSize: 13,
+        fontWeight: on ? 700 : 600,
+        whiteSpace: 'nowrap',
+        boxShadow: on ? '0 8px 18px -8px rgba(123,131,224,.5), inset 0 1px 0 rgba(255,255,255,.5)' : 'inset 0 1px 0 rgba(255,255,255,.6)',
+        backdropFilter: on ? 'none' : 'blur(8px)',
+        WebkitBackdropFilter: on ? 'none' : 'blur(8px)',
+        transition: 'background .25s ease, color .25s ease, border-color .25s ease'
+      }
+    }, label);
+  })));
 }
 function _auth_Bubbles() {
   const orbs = [{
@@ -8552,12 +8560,14 @@ function TabHome() {
       padding: '22px 18px 0'
     }
   }, React.createElement("div", {
-    className: "mg-navy",
     style: {
-      borderRadius: 30,
+      borderRadius: 16,
       padding: 20,
       display: 'grid',
-      gridTemplateColumns: '1fr 1fr 1fr'
+      gridTemplateColumns: '1fr 1fr 1fr',
+      background: 'linear-gradient(150deg, #b7cef2 0%, #c6d8f5 50%, #d5e2f8 100%)',
+      border: '1px solid rgba(255,255,255,.6)',
+      boxShadow: '0 16px 36px -18px rgba(90,110,190,.4), inset 0 1px 0 rgba(255,255,255,.7)'
     }
   }, stats.map((s, i) => React.createElement("div", {
     key: s.icon,
@@ -8567,15 +8577,15 @@ function TabHome() {
       alignItems: 'center',
       gap: 3,
       ...(i === 1 ? {
-        borderLeft: '1px solid rgba(255,255,255,.16)',
-        borderRight: '1px solid rgba(255,255,255,.16)'
+        borderLeft: '1px solid rgba(90,110,180,.2)',
+        borderRight: '1px solid rgba(90,110,180,.2)'
       } : {})
     }
   }, React.createElement(Icon, {
     name: s.icon,
     size: 20,
     style: {
-      color: 'rgba(244,247,251,.85)'
+      color: '#5f7fe0'
     }
   }), React.createElement(Counter, {
     to: s.to,
@@ -8583,12 +8593,12 @@ function TabHome() {
     style: {
       fontSize: 30,
       lineHeight: 1,
-      color: '#f4f7fb'
+      color: '#33488a'
     }
   }), React.createElement("span", {
     style: {
       fontSize: 10.5,
-      color: 'rgba(244,247,251,.62)'
+      color: 'rgba(60,78,140,.75)'
     }
   }, s.label))))), React.createElement("div", {
     style: {
@@ -13005,7 +13015,8 @@ function _reg_Dialog({
   }, d.message), React.createElement("div", {
     style: {
       display: 'flex',
-      gap: 10
+      gap: 10,
+      justifyContent: d.kind === 'alert' ? 'center' : 'stretch'
     }
   }, d.kind === 'confirm' && React.createElement("button", {
     type: "button",
@@ -13024,7 +13035,20 @@ function _reg_Dialog({
     type: "button",
     className: "mg-tap mg-ui",
     onClick: () => onClose(true),
-    style: {
+    style: d.kind === 'alert' ? {
+      flex: 'none',
+      height: 40,
+      minWidth: 128,
+      padding: '0 30px',
+      borderRadius: 999,
+      fontSize: 13.5,
+      fontWeight: 600,
+      cursor: 'pointer',
+      background: 'linear-gradient(122deg, #93a6ef 0%, #8b82e2 58%, #bb8ed2 100%)',
+      color: '#fff',
+      border: '1px solid transparent',
+      boxShadow: '0 8px 18px -8px rgba(123,131,224,.5), inset 0 1px 0 rgba(255,255,255,.5)'
+    } : {
       flex: 1,
       height: 46,
       borderRadius: 23,
