@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-<script>window.__MG_BUILD='20260814145740';</script>
+<script>window.__MG_BUILD='20260814150325';</script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover">
 <title>connec+a — 出会いが、まちを変えていく。</title>
@@ -28648,6 +28648,54 @@ function _ShellCover({
     }
   }));
 }
+function _ShellBubbles() {
+  const orbs = [{
+    s: 300,
+    l: '-12%',
+    t: '4%',
+    d: 26,
+    delay: 0
+  }, {
+    s: 360,
+    l: '66%',
+    t: '30%',
+    d: 30,
+    delay: -11
+  }, {
+    s: 260,
+    l: '18%',
+    t: '64%',
+    d: 28,
+    delay: -6
+  }, {
+    s: 300,
+    l: '78%',
+    t: '80%',
+    d: 32,
+    delay: -16
+  }];
+  return React.createElement("div", {
+    "aria-hidden": "true",
+    style: {
+      position: 'fixed',
+      inset: 0,
+      zIndex: 0,
+      overflow: 'hidden',
+      pointerEvents: 'none',
+      opacity: 0.42
+    }
+  }, orbs.map((o, i) => React.createElement("span", {
+    key: i,
+    className: "mg-bubble",
+    style: {
+      width: o.s,
+      height: o.s,
+      left: o.l,
+      top: o.t,
+      animation: 'mgBubble ' + o.d + 's ease-in-out ' + o.delay + 's infinite'
+    }
+  })));
+}
 function _shell_setTxt(settings, bases, lang, fallback) {
   const suf = lang === 'en' ? '_en' : lang === 'easy' ? '_easy' : '_ja';
   const s = settings || {};
@@ -29331,7 +29379,7 @@ function _ShellRoot() {
   }, React.createElement(_ShellCover, {
     srcs: coverSrcs,
     innerRef: _coverInner
-  }), React.createElement("div", {
+  }), React.createElement(_ShellBubbles, null), React.createElement("div", {
     style: {
       position: 'absolute',
       inset: 0,
