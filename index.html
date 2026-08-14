@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-<script>window.__MG_BUILD='20260814003126';</script>
+<script>window.__MG_BUILD='20260814003612';</script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>connec+a — 出会いが、まちを変えていく。</title>
@@ -871,6 +871,11 @@ select.mg-field,
   from{ opacity:0; transform:translateY(110%); }
   to{ opacity:1; transform:none; }
 }
+/* オープニング退場のリップル(タップ位置から波紋) */
+@keyframes mgRipple{ from{ transform:scale(0); opacity:.9; } to{ transform:scale(40); opacity:0; } }
+/* タブ選択時のアイコンぽよん */
+@keyframes mgTabPop{ 0%{ transform:scale(1); } 45%{ transform:scale(1.22) translateY(-1px); } 100%{ transform:scale(1); } }
+
 /* 記念ビューアの入場モーション */
 @keyframes mgMvFade{ from{ opacity:0; } to{ opacity:1; } }
 @keyframes mgMvRise{
@@ -26665,12 +26670,19 @@ function _ShellIntro({
   settings
 }) {
   const [leaving, setLeaving] = React.useState(false);
+  const [ripple, setRipple] = React.useState(null);
   const _done = React.useRef(false);
-  const leave = React.useCallback(() => {
+  const leave = React.useCallback(e => {
     if (_done.current) return;
     _done.current = true;
+    try {
+      if (e && e.clientX != null) setRipple({
+        x: e.clientX,
+        y: e.clientY
+      });
+    } catch (e2) {}
     setLeaving(true);
-    setTimeout(onDone, 950);
+    setTimeout(onDone, 1150);
   }, [onDone]);
   React.useEffect(() => {
     const t = setTimeout(leave, 3400);
@@ -26704,7 +26716,7 @@ function _ShellIntro({
       zIndex: 9000,
       cursor: 'pointer',
       background: '#1a2740',
-      animation: leaving ? 'mgIntroOut .9s ease both' : 'mgIntroOut .9s ease 6.5s both'
+      animation: leaving ? 'mgIntroOut .92s ease .22s both' : 'mgIntroOut .9s ease 6.5s both'
     }
   }, img && React.createElement("img", {
     src: img,
@@ -26718,7 +26730,10 @@ function _ShellIntro({
       width: 'auto',
       maxWidth: 'none',
       height: 'auto',
-      objectFit: 'cover'
+      objectFit: 'cover',
+      transform: leaving ? 'scale(1.09)' : 'scale(1)',
+      filter: leaving ? 'blur(5px) brightness(1.06)' : 'none',
+      transition: 'transform 1.15s cubic-bezier(.22,1,.36,1), filter 1.15s ease'
     }
   }), React.createElement("div", {
     style: {
@@ -26741,7 +26756,10 @@ function _ShellIntro({
       width: 'var(--mg-shell-max)',
       height: '100%',
       position: 'relative',
-      overflow: 'hidden'
+      overflow: 'hidden',
+      opacity: leaving ? 0 : 1,
+      transform: leaving ? 'translateY(-26px)' : 'none',
+      transition: 'opacity .5s ease, transform .6s cubic-bezier(.4,0,.2,1)'
     }
   }, React.createElement("div", {
     className: "mg-num",
@@ -26787,7 +26805,22 @@ function _ShellIntro({
       textShadow: '0 3px 18px rgba(34,49,74,.42)',
       animation: 'mgLineUp 1s ' + _shell_EASE + ' ' + (0.35 + i * 0.2) + 's both'
     }
-  }, ln)))), React.createElement("div", {
+  }, ln)))), ripple && React.createElement("span", {
+    "aria-hidden": "true",
+    style: {
+      position: 'fixed',
+      left: ripple.x,
+      top: ripple.y,
+      width: 14,
+      height: 14,
+      marginLeft: -7,
+      marginTop: -7,
+      borderRadius: '50%',
+      pointerEvents: 'none',
+      background: 'radial-gradient(circle, rgba(255,255,255,.55) 0%, rgba(255,255,255,.12) 70%, transparent 100%)',
+      animation: 'mgRipple .85s ease-out both'
+    }
+  }), React.createElement("div", {
     className: "mg-ui",
     style: {
       position: 'absolute',
@@ -26881,7 +26914,7 @@ function MgTabBar({
     style: {
       position: 'fixed',
       left: '50%',
-      bottom: 'calc(14px + env(safe-area-inset-bottom))',
+      bottom: 'calc(14px + env(safe-area-inset-bottom) - var(--mg-vp-gap, 0px))',
       width: 'min(390px, calc(100vw - 40px))',
       height: 64,
       borderRadius: 32,
@@ -26935,7 +26968,8 @@ function MgTabBar({
     style: {
       fontSize: 23,
       color: tab === i ? '#2b3d57' : '#8ba0b6',
-      transition: 'color .3s'
+      transition: 'color .3s',
+      animation: tab === i ? 'mgTabPop .5s cubic-bezier(.34,1.56,.64,1)' : 'none'
     }
   }, it.icon), React.createElement("span", {
     className: "mg-ui",
@@ -27340,7 +27374,8 @@ function _ShellRoot() {
         overscrollBehavior: 'contain',
         opacity: active ? 1 : 0,
         visibility: active ? 'visible' : 'hidden',
-        transition: 'opacity .38s ease, visibility .38s',
+        transform: active ? 'none' : 'translateY(12px)',
+        transition: 'opacity .38s ease, visibility .38s, transform .52s ' + _shell_EASE,
         pointerEvents: active ? 'auto' : 'none',
         paddingBottom: 'calc(112px + var(--mg-cookie-h, 0px) + env(safe-area-inset-bottom))'
       }
