@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-<script>window.__MG_BUILD='20260814122419';</script>
+<script>window.__MG_BUILD='20260814124030';</script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover">
 <title>connec+a — 出会いが、まちを変えていく。</title>
@@ -8025,18 +8025,20 @@ function TabHome() {
   if (featured) {
     const isMultiF = featured.format === 'multi';
     let fDate = featured.date,
-      fCurDayN = 0;
+      fCurDayN = 0,
+      fNextSess = null;
     if (isMultiF && typeof mgNextSession === 'function') {
       const nx = mgNextSession(featured);
       if (nx) {
         fDate = nx.s.date;
         fCurDayN = nx.n;
+        fNextSess = nx.s;
       }
     }
     fDp = _home_dateParts(fDate);
     fTitle = _home_i18nField(featured, 'title', lang) || featured.title || '';
-    fTime = _home_timeRange(featured);
-    fVenue = _home_venueLabel(featured, lang);
+    fTime = fNextSess && fNextSess.startTime ? fNextSess.startTime + (fNextSess.endTime ? ' — ' + fNextSess.endTime : '') : _home_timeRange(featured);
+    fVenue = fNextSess && !fNextSess.online && fNextSess.venue ? fNextSess.venue : _home_venueLabel(featured, lang);
     const cap = Number(featured.capacity) || 0;
     const reg = Number(featured.registered) || 0;
     fSpots = !isMultiF && cap > 0 ? Math.max(0, cap - reg) : null;
@@ -9338,8 +9340,10 @@ function _ev_Guide({
     const i = Math.round(el.scrollLeft / Math.max(1, el.clientWidth));
     if (i !== dayIdx && i >= 0 && i < liveDays.length) setDayIdx(i);
   };
-  if (!belongings.length && !withTT.length && !wxDays.length) return null;
-  const hasPager = liveDays.length > 0 && (withTT.length > 0 || wxDays.length > 0);
+  const _belongOf = s2 => String(s2 && String(s2.belongings || '').trim() ? s2.belongings : ev.belongings || '').split('\n').map(x => x.trim()).filter(Boolean);
+  const anyDayBelong = liveDays.some(s2 => String(s2.belongings || '').trim());
+  if (!belongings.length && !anyDayBelong && !withTT.length && !wxDays.length) return null;
+  const hasPager = liveDays.length > 0 && (withTT.length > 0 || wxDays.length > 0 || anyDayBelong);
   return React.createElement("div", {
     style: {
       marginTop: 22,
@@ -9691,7 +9695,72 @@ function _ev_Guide({
         color: 'var(--mg-ink5, #8ba0b6)',
         padding: '10px 0'
       }
-    }, H('取得中…', 'よみこみちゅう…', 'Loading…'))))) : null, !lines.length && !wxOk(s2) ? React.createElement("div", {
+    }, H('取得中…', 'よみこみちゅう…', 'Loading…'))))) : null, anyDayBelong ? (() => {
+      const bl = _belongOf(s2);
+      return bl.length ? React.createElement("div", {
+        style: {
+          marginTop: 14
+        }
+      }, React.createElement("div", {
+        className: "mg-ui",
+        style: {
+          fontSize: 12,
+          fontWeight: 600,
+          color: 'var(--mg-ink3, #3d5877)',
+          marginBottom: 8,
+          display: 'flex',
+          alignItems: 'center',
+          gap: 6
+        }
+      }, React.createElement(Icon, {
+        name: "backpack",
+        size: 16,
+        style: {
+          color: 'var(--mg-accent, #35618f)'
+        }
+      }), H('持ち物', 'もってくる もの', 'What to bring')), React.createElement("div", {
+        style: {
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fill, minmax(150px, 1fr))',
+          gap: 9
+        }
+      }, bl.map((b, k) => React.createElement("div", {
+        key: k,
+        className: "mg-card",
+        style: {
+          borderRadius: 18,
+          padding: '11px 12px',
+          display: 'flex',
+          alignItems: 'center',
+          gap: 10
+        }
+      }, React.createElement("span", {
+        style: {
+          width: 36,
+          height: 36,
+          flex: 'none',
+          borderRadius: 12,
+          display: 'inline-flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          background: 'linear-gradient(150deg, rgba(53,97,143,.14), rgba(53,97,143,.05))',
+          border: '1px solid rgba(53,97,143,.18)'
+        }
+      }, React.createElement(Icon, {
+        name: _ev_belongIcon(b),
+        size: 19,
+        style: {
+          color: 'var(--mg-accent, #35618f)'
+        }
+      })), React.createElement("span", {
+        className: "mg-ui",
+        style: {
+          fontSize: 12.5,
+          lineHeight: 1.45,
+          minWidth: 0
+        }
+      }, b))))) : null;
+    })() : null, !lines.length && !wxOk(s2) && !anyDayBelong ? React.createElement("div", {
       style: {
         fontSize: 12,
         color: 'var(--mg-ink5, #8ba0b6)',
@@ -9704,7 +9773,7 @@ function _ev_Guide({
       color: 'var(--mg-ink5, #8ba0b6)',
       marginTop: 6
     }
-  }, H('予報: Open-Meteo(変わることがあります)', 'てんきよほうです。かわるかも しれません', 'Forecast by Open-Meteo — may change')) : null), !allOver && belongings.length > 0 && React.createElement("div", {
+  }, H('予報: Open-Meteo(変わることがあります)', 'てんきよほうです。かわるかも しれません', 'Forecast by Open-Meteo — may change')) : null), !allOver && !anyDayBelong && belongings.length > 0 && React.createElement("div", {
     style: {
       marginBottom: 16
     }
@@ -18928,10 +18997,12 @@ function SheetTicket({
   const isCheckedIn = !!reg && reg.status === 'チェックイン済';
   const dateStr = reg ? reg.sessionDate || event && event.date || '' : '';
   const partyCount = 1 + (reg && Array.isArray(reg.companions) ? reg.companions.length : 0);
-  const timeRange = event ? _eng_timeRange(event) : '';
+  const _isMultiTix = !!event && event.format === 'multi';
+  const timeRange = _isMultiTix && reg && reg.sessionStartTime ? reg.sessionStartTime + (reg.sessionEndTime ? ' — ' + reg.sessionEndTime : '') : event ? _eng_timeRange(event) : '';
   const gcal = event && reg ? _eng_gcalUrl(event, reg.regId, lang, dateStr) : null;
-  const venue = event && event.venue || '';
-  const mapUrl = venue ? 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(event && event.venueAddress || venue) : null;
+  const venue = (_isMultiTix && reg && reg.sessionVenue ? reg.sessionVenue : event && event.venue) || '';
+  const _venueAddr = _isMultiTix && reg && reg.sessionAddress ? reg.sessionAddress : event && event.venueAddress;
+  const mapUrl = venue ? 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(_venueAddr || venue) : null;
   const amount = reg ? reg.amount : null;
   const _paySib = event && event.format === 'multi' && Number(amount) === 0 ? sibs.find(r => Number(r.amount) > 0) || null : null;
   const priceLine = amount == null || amount === '' || isNaN(Number(amount)) ? '' : Number(amount) > 0 ? '¥' + Number(amount).toLocaleString() + (reg && reg.paymentMethod ? '（' + reg.paymentMethod + '）' : '') : _paySib ? '¥' + Number(_paySib.amount).toLocaleString() + (lang === 'en' ? ' (billed on Day 1' : lang === 'easy' ? '（1にちめの ぶん' : '（Day1分に計上') + (_paySib.paid ? lang === 'en' ? ' · paid)' : '・支払済み）' : lang === 'en' ? ')' : '）') : L(_eng_T.tFree);
