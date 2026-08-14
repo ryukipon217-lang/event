@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-<script>window.__MG_BUILD='20260814110231';</script>
+<script>window.__MG_BUILD='20260814122419';</script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover">
 <title>connec+a — 出会いが、まちを変えていく。</title>
@@ -26195,7 +26195,8 @@ function SheetNewsDetail({
     label: "share",
     onClick: share
   }) : null);
-  const imgSrc = news ? _ni_imgUrl(news.imageUrl || news.coverImageUrl || news.thumbnailImageUrl, 1200) : '';
+  const isMemento = !!news && (/[?&#]memento=/.test(String(news.ctaLink || '')) || /記念写真|Photos from/.test(String((news.title || '') + ' ' + (news.title_en || ''))));
+  const imgSrc = news && !isMemento ? _ni_imgUrl(news.imageUrl || news.coverImageUrl || news.thumbnailImageUrl, 1200) : '';
   const bodyText = news ? _ni_i18nField(news, 'body', lang) || news.body || news.content || news.description || news.shortDescription || '(本文なし)' : '';
   const easyBody = news && lang !== 'easy' && news.body_easy && String(news.body_easy).trim() ? news.body_easy : '';
   const cat = news ? _ni_newsCat(news.category, lang) : '';
@@ -26278,7 +26279,7 @@ function SheetNewsDetail({
       color: 'var(--mg-ink, #22314a)',
       marginBottom: 18
     }
-  }, _ni_i18nField(news, 'title', lang) || news.title), React.createElement(ImageSlot, {
+  }, _ni_i18nField(news, 'title', lang) || news.title), isMemento ? null : React.createElement(ImageSlot, {
     src: imgSrc,
     alt: "",
     style: {
