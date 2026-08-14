@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-<script>window.__MG_BUILD='20260814152512';</script>
+<script>window.__MG_BUILD='20260814153227';</script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover">
 <title>connec+a — 出会いが、まちを変えていく。</title>
@@ -2814,6 +2814,12 @@ function MgQrSvg(text, sizePx) {
     });
     if (sizePx) {
       svg = svg.replace(/width="[^"]*"/, 'width="' + sizePx + 'px"').replace(/height="[^"]*"/, 'height="' + sizePx + 'px"');
+    }
+    const FUJI = '#6a5cb0';
+    if (/fill\s*=\s*"(#000000|#000|black)"/i.test(svg)) {
+      svg = svg.replace(/fill\s*=\s*"(#000000|#000|black)"/gi, 'fill="' + FUJI + '"');
+    } else {
+      svg = svg.replace(/<svg\b/i, '<svg fill="' + FUJI + '"');
     }
     return svg;
   } catch (err) {
