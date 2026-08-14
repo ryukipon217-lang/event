@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-<script>window.__MG_BUILD='20260814010433';</script>
+<script>window.__MG_BUILD='20260814012705';</script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>connec+a — 出会いが、まちを変えていく。</title>
@@ -888,6 +888,13 @@ select.mg-field,
 #mg-app.mg-mv-open .mg-cookiebar{ visibility:hidden !important; }
 
 @keyframes mgIntroOut{
+  0%{ opacity:1; visibility:visible; }
+  99%{ opacity:0; visibility:visible; }
+  100%{ opacity:0; visibility:hidden; }
+}
+/* タップ退場専用(mgIntroOutと同内容の別名)。同名を使い回すとアニメ開始時刻がマウント時のまま再計算され、
+   タップ時点で「再生済み」扱い→fill:bothの最終状態(opacity:0)へ即ジャンプする=「ぱっと消える」の正体だった */
+@keyframes mgIntroOutTap{
   0%{ opacity:1; visibility:visible; }
   99%{ opacity:0; visibility:visible; }
   100%{ opacity:0; visibility:hidden; }
@@ -26725,7 +26732,7 @@ function _ShellIntro({
       zIndex: 9000,
       cursor: 'pointer',
       background: '#1a2740',
-      animation: leaving ? 'mgIntroOut .92s ease .22s both' : 'mgIntroOut .9s ease 6.5s both'
+      animation: leaving ? 'mgIntroOutTap .95s ease .25s both' : 'mgIntroOut .9s ease 6.5s both'
     }
   }, img && React.createElement("img", {
     src: img,
