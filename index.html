@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-<script>window.__MG_BUILD='20260814002700';</script>
+<script>window.__MG_BUILD='20260814003126';</script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>connec+a — 出会いが、まちを変えていく。</title>
@@ -871,6 +871,17 @@ select.mg-field,
   from{ opacity:0; transform:translateY(110%); }
   to{ opacity:1; transform:none; }
 }
+/* 記念ビューアの入場モーション */
+@keyframes mgMvFade{ from{ opacity:0; } to{ opacity:1; } }
+@keyframes mgMvRise{
+  from{ opacity:0; transform:translateY(26px) scale(.965) rotate(var(--mv-rot, 0deg)); }
+  to{ opacity:1; transform:translateY(0) scale(1) rotate(var(--mv-rot, 0deg)); }
+}
+/* ビューア表示中は下部UI(タブバー/チケットピル/Cookieバー)を出さない */
+#mg-app.mg-mv-open .mg-tabbar,
+#mg-app.mg-mv-open .mg-ticket-pill,
+#mg-app.mg-mv-open .mg-cookiebar{ visibility:hidden !important; }
+
 @keyframes mgIntroOut{
   0%{ opacity:1; visibility:visible; }
   99%{ opacity:0; visibility:visible; }
@@ -15407,6 +15418,12 @@ function TabMyPage() {
     setConfirmLogout(false);
     A.go('/');
   };
+  useEffect(() => {
+    const el = document.getElementById('mg-app');
+    if (!el) return undefined;
+    if (mviewer) el.classList.add('mg-mv-open');else el.classList.remove('mg-mv-open');
+    return () => el.classList.remove('mg-mv-open');
+  }, [mviewer]);
   const [histOpen, setHistOpen] = useState(false);
   const derived = React.useMemo(() => {
     const today = new Date();
@@ -16003,7 +16020,8 @@ function TabMyPage() {
       zIndex: 140,
       display: 'flex',
       flexDirection: 'column',
-      background: 'linear-gradient(172deg, #22314a 0%, #16233a 46%, #0e1828 100%)'
+      background: 'linear-gradient(172deg, #22314a 0%, #16233a 46%, #0e1828 100%)',
+      animation: 'mgMvFade .42s ease both'
     }
   }, React.createElement("div", {
     "aria-hidden": "true",
@@ -16064,14 +16082,16 @@ function TabMyPage() {
       fontSize: 23,
       lineHeight: 1.35,
       color: '#f4f7fb',
-      marginBottom: 6
+      marginBottom: 6,
+      animation: 'mgMvRise .7s cubic-bezier(.16,1,.3,1) .08s both'
     }
   }, jaTitle ? jaTitle(mviewer.title) : mviewer.title), React.createElement("div", {
     style: {
       display: 'flex',
       alignItems: 'baseline',
       gap: 10,
-      marginBottom: 18
+      marginBottom: 18,
+      animation: 'mgMvRise .7s cubic-bezier(.16,1,.3,1) .16s both'
     }
   }, mviewer.dayN ? React.createElement("span", {
     className: "mg-ui",
@@ -16105,7 +16125,9 @@ function TabMyPage() {
       padding: '10px 10px 14px',
       borderRadius: 6,
       boxShadow: '0 24px 50px rgba(4,10,22,.55), 0 4px 12px rgba(4,10,22,.35)',
-      transform: 'rotate(' + (i2 % 2 === 0 ? '-.4' : '.35') + 'deg)'
+      '--mv-rot': i2 % 2 === 0 ? '-.4deg' : '.35deg',
+      transform: 'rotate(var(--mv-rot))',
+      animation: 'mgMvRise .85s cubic-bezier(.16,1,.3,1) ' + (0.24 + Math.min(i2, 4) * 0.12) + 's both'
     }
   }, React.createElement("div", {
     style: {
@@ -16159,7 +16181,8 @@ function TabMyPage() {
       display: 'flex',
       alignItems: 'center',
       gap: 12,
-      marginBottom: 16
+      marginBottom: 16,
+      animation: 'mgMvFade .7s ease .45s both'
     }
   }, React.createElement("span", {
     "aria-hidden": "true",
@@ -16195,9 +16218,11 @@ function TabMyPage() {
       borderRadius: 4,
       padding: '14px 16px 12px',
       boxShadow: '0 10px 24px rgba(4,10,22,.4)',
-      transform: 'rotate(' + (i3 % 3 === 0 ? '-1.1' : i3 % 3 === 1 ? '.9' : '-.3') + 'deg)',
+      '--mv-rot': i3 % 3 === 0 ? '-1.1deg' : i3 % 3 === 1 ? '.9deg' : '-.3deg',
+      transform: 'rotate(var(--mv-rot))',
       marginLeft: i3 % 2 === 0 ? 0 : 14,
-      marginRight: i3 % 2 === 0 ? 14 : 0
+      marginRight: i3 % 2 === 0 ? 14 : 0,
+      animation: 'mgMvRise .8s cubic-bezier(.16,1,.3,1) ' + (0.55 + Math.min(i3, 6) * 0.09) + 's both'
     }
   }, y2.img ? React.createElement("img", {
     src: y2.img,
@@ -16230,7 +16255,8 @@ function TabMyPage() {
   }, "\u2014 ", y2.n) : null)))) : null, React.createElement("div", {
     style: {
       textAlign: 'center',
-      marginTop: 40
+      marginTop: 40,
+      animation: 'mgMvFade .9s ease .7s both'
     }
   }, React.createElement("div", {
     className: "mg-serif",
