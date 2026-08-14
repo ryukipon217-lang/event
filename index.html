@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-<script>window.__MG_BUILD='20260814020539';</script>
+<script>window.__MG_BUILD='20260814021214';</script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover">
 <title>connec+a — 出会いが、まちを変えていく。</title>
@@ -4507,6 +4507,545 @@ function Chip({
     }
   }, label);
 }
+const MG_OPT_I18N = {
+  '在留外国人': {
+    easy: 'がいこくの ひと',
+    en: 'Foreign resident'
+  },
+  '日本人': {
+    easy: 'にほんじん',
+    en: 'Japanese'
+  },
+  'その他': {
+    easy: 'そのほか',
+    en: 'Other'
+  },
+  '北海道': {
+    easy: 'ほっかいどう',
+    en: 'Hokkaido'
+  },
+  '青森県': {
+    easy: 'あおもりけん',
+    en: 'Aomori'
+  },
+  '岩手県': {
+    easy: 'いわてけん',
+    en: 'Iwate'
+  },
+  '宮城県': {
+    easy: 'みやぎけん',
+    en: 'Miyagi'
+  },
+  '秋田県': {
+    easy: 'あきたけん',
+    en: 'Akita'
+  },
+  '山形県': {
+    easy: 'やまがたけん',
+    en: 'Yamagata'
+  },
+  '福島県': {
+    easy: 'ふくしまけん',
+    en: 'Fukushima'
+  },
+  '茨城県': {
+    easy: 'いばらきけん',
+    en: 'Ibaraki'
+  },
+  '栃木県': {
+    easy: 'とちぎけん',
+    en: 'Tochigi'
+  },
+  '群馬県': {
+    easy: 'ぐんまけん',
+    en: 'Gunma'
+  },
+  '埼玉県': {
+    easy: 'さいたまけん',
+    en: 'Saitama'
+  },
+  '千葉県': {
+    easy: 'ちばけん',
+    en: 'Chiba'
+  },
+  '東京都': {
+    easy: 'とうきょうと',
+    en: 'Tokyo'
+  },
+  '神奈川県': {
+    easy: 'かながわけん',
+    en: 'Kanagawa'
+  },
+  '新潟県': {
+    easy: 'にいがたけん',
+    en: 'Niigata'
+  },
+  '富山県': {
+    easy: 'とやまけん',
+    en: 'Toyama'
+  },
+  '石川県': {
+    easy: 'いしかわけん',
+    en: 'Ishikawa'
+  },
+  '福井県': {
+    easy: 'ふくいけん',
+    en: 'Fukui'
+  },
+  '山梨県': {
+    easy: 'やまなしけん',
+    en: 'Yamanashi'
+  },
+  '長野県': {
+    easy: 'ながのけん',
+    en: 'Nagano'
+  },
+  '岐阜県': {
+    easy: 'ぎふけん',
+    en: 'Gifu'
+  },
+  '静岡県': {
+    easy: 'しずおかけん',
+    en: 'Shizuoka'
+  },
+  '愛知県': {
+    easy: 'あいちけん',
+    en: 'Aichi'
+  },
+  '三重県': {
+    easy: 'みえけん',
+    en: 'Mie'
+  },
+  '滋賀県': {
+    easy: 'しがけん',
+    en: 'Shiga'
+  },
+  '京都府': {
+    easy: 'きょうとふ',
+    en: 'Kyoto'
+  },
+  '大阪府': {
+    easy: 'おおさかふ',
+    en: 'Osaka'
+  },
+  '兵庫県': {
+    easy: 'ひょうごけん',
+    en: 'Hyogo'
+  },
+  '奈良県': {
+    easy: 'ならけん',
+    en: 'Nara'
+  },
+  '和歌山県': {
+    easy: 'わかやまけん',
+    en: 'Wakayama'
+  },
+  '鳥取県': {
+    easy: 'とっとりけん',
+    en: 'Tottori'
+  },
+  '島根県': {
+    easy: 'しまねけん',
+    en: 'Shimane'
+  },
+  '岡山県': {
+    easy: 'おかやまけん',
+    en: 'Okayama'
+  },
+  '広島県': {
+    easy: 'ひろしまけん',
+    en: 'Hiroshima'
+  },
+  '山口県': {
+    easy: 'やまぐちけん',
+    en: 'Yamaguchi'
+  },
+  '徳島県': {
+    easy: 'とくしまけん',
+    en: 'Tokushima'
+  },
+  '香川県': {
+    easy: 'かがわけん',
+    en: 'Kagawa'
+  },
+  '愛媛県': {
+    easy: 'えひめけん',
+    en: 'Ehime'
+  },
+  '高知県': {
+    easy: 'こうちけん',
+    en: 'Kochi'
+  },
+  '福岡県': {
+    easy: 'ふくおかけん',
+    en: 'Fukuoka'
+  },
+  '佐賀県': {
+    easy: 'さがけん',
+    en: 'Saga'
+  },
+  '長崎県': {
+    easy: 'ながさきけん',
+    en: 'Nagasaki'
+  },
+  '熊本県': {
+    easy: 'くまもとけん',
+    en: 'Kumamoto'
+  },
+  '大分県': {
+    easy: 'おおいたけん',
+    en: 'Oita'
+  },
+  '宮崎県': {
+    easy: 'みやざきけん',
+    en: 'Miyazaki'
+  },
+  '鹿児島県': {
+    easy: 'かごしまけん',
+    en: 'Kagoshima'
+  },
+  '沖縄県': {
+    easy: 'おきなわけん',
+    en: 'Okinawa'
+  },
+  '海外': {
+    easy: 'かいがい',
+    en: 'Overseas'
+  },
+  '日本': {
+    easy: 'にほん',
+    en: 'Japan'
+  },
+  '中国': {
+    easy: 'ちゅうごく',
+    en: 'China'
+  },
+  '韓国': {
+    easy: 'かんこく',
+    en: 'South Korea'
+  },
+  '台湾': {
+    easy: 'たいわん',
+    en: 'Taiwan'
+  },
+  'ベトナム': {
+    en: 'Vietnam'
+  },
+  'タイ': {
+    en: 'Thailand'
+  },
+  'インドネシア': {
+    en: 'Indonesia'
+  },
+  'フィリピン': {
+    en: 'Philippines'
+  },
+  'マレーシア': {
+    en: 'Malaysia'
+  },
+  'シンガポール': {
+    en: 'Singapore'
+  },
+  'インド': {
+    en: 'India'
+  },
+  'ネパール': {
+    en: 'Nepal'
+  },
+  'スリランカ': {
+    en: 'Sri Lanka'
+  },
+  'バングラデシュ': {
+    en: 'Bangladesh'
+  },
+  'モンゴル': {
+    en: 'Mongolia'
+  },
+  'ミャンマー': {
+    en: 'Myanmar'
+  },
+  'カンボジア': {
+    en: 'Cambodia'
+  },
+  'ラオス': {
+    en: 'Laos'
+  },
+  'アメリカ': {
+    en: 'United States'
+  },
+  'カナダ': {
+    en: 'Canada'
+  },
+  'メキシコ': {
+    en: 'Mexico'
+  },
+  'ブラジル': {
+    en: 'Brazil'
+  },
+  'アルゼンチン': {
+    en: 'Argentina'
+  },
+  'イギリス': {
+    en: 'United Kingdom'
+  },
+  'フランス': {
+    en: 'France'
+  },
+  'ドイツ': {
+    en: 'Germany'
+  },
+  'イタリア': {
+    en: 'Italy'
+  },
+  'スペイン': {
+    en: 'Spain'
+  },
+  'オランダ': {
+    en: 'Netherlands'
+  },
+  'スウェーデン': {
+    en: 'Sweden'
+  },
+  'デンマーク': {
+    en: 'Denmark'
+  },
+  'ノルウェー': {
+    en: 'Norway'
+  },
+  'フィンランド': {
+    en: 'Finland'
+  },
+  'ポーランド': {
+    en: 'Poland'
+  },
+  'ロシア': {
+    en: 'Russia'
+  },
+  'ウクライナ': {
+    en: 'Ukraine'
+  },
+  'ルーマニア': {
+    en: 'Romania'
+  },
+  'ハンガリー': {
+    en: 'Hungary'
+  },
+  'チェコ': {
+    en: 'Czechia'
+  },
+  'スイス': {
+    en: 'Switzerland'
+  },
+  'オーストリア': {
+    en: 'Austria'
+  },
+  'ベルギー': {
+    en: 'Belgium'
+  },
+  'アイルランド': {
+    en: 'Ireland'
+  },
+  'オーストラリア': {
+    en: 'Australia'
+  },
+  'ニュージーランド': {
+    en: 'New Zealand'
+  },
+  'エジプト': {
+    en: 'Egypt'
+  },
+  '南アフリカ': {
+    easy: 'みなみアフリカ',
+    en: 'South Africa'
+  },
+  'ナイジェリア': {
+    en: 'Nigeria'
+  },
+  'ケニア': {
+    en: 'Kenya'
+  },
+  'モロッコ': {
+    en: 'Morocco'
+  },
+  'トルコ': {
+    en: 'T\u00fcrkiye'
+  },
+  'イラン': {
+    en: 'Iran'
+  },
+  'イスラエル': {
+    en: 'Israel'
+  },
+  'サウジアラビア': {
+    en: 'Saudi Arabia'
+  },
+  'UAE': {
+    en: 'UAE'
+  },
+  'スポーツ': {
+    en: 'Sports'
+  },
+  '文化交流': {
+    easy: 'ぶんか こうりゅう',
+    en: 'Cultural exchange'
+  },
+  '言語学習': {
+    easy: 'ことばの べんきょう',
+    en: 'Language learning'
+  },
+  'アート': {
+    en: 'Art'
+  },
+  '音楽': {
+    easy: 'おんがく',
+    en: 'Music'
+  },
+  '映画': {
+    easy: 'えいが',
+    en: 'Movies'
+  },
+  '食べ歩き': {
+    easy: 'たべあるき',
+    en: 'Food tours'
+  },
+  '料理': {
+    easy: 'りょうり',
+    en: 'Cooking'
+  },
+  '旅行': {
+    easy: 'りょこう',
+    en: 'Travel'
+  },
+  '読書': {
+    easy: 'どくしょ',
+    en: 'Reading'
+  },
+  'カフェ巡り': {
+    easy: 'カフェめぐり',
+    en: 'Caf\u00e9 hopping'
+  },
+  '写真': {
+    easy: 'しゃしん',
+    en: 'Photography'
+  },
+  'ファッション': {
+    en: 'Fashion'
+  },
+  'テクノロジー': {
+    en: 'Technology'
+  },
+  'ビジネス': {
+    en: 'Business'
+  },
+  'ボランティア': {
+    en: 'Volunteering'
+  },
+  'アウトドア': {
+    en: 'Outdoors'
+  },
+  'ゲーム': {
+    en: 'Games'
+  },
+  'アニメ・マンガ': {
+    en: 'Anime & Manga'
+  },
+  '歴史': {
+    easy: 'れきし',
+    en: 'History'
+  },
+  '建築': {
+    easy: 'けんちく',
+    en: 'Architecture'
+  },
+  'ダンス': {
+    en: 'Dance'
+  },
+  '茶道': {
+    easy: 'さどう',
+    en: 'Tea ceremony'
+  },
+  '華道': {
+    easy: 'かどう(おはな)',
+    en: 'Flower arrangement'
+  },
+  '書道': {
+    easy: 'しょどう',
+    en: 'Calligraphy'
+  },
+  '着物': {
+    easy: 'きもの',
+    en: 'Kimono'
+  },
+  '祭り': {
+    easy: 'まつり',
+    en: 'Festivals'
+  },
+  '日本語': {
+    easy: 'にほんご',
+    en: 'Japanese'
+  },
+  '英語': {
+    easy: 'えいご',
+    en: 'English'
+  },
+  '中国語': {
+    easy: 'ちゅうごくご',
+    en: 'Chinese'
+  },
+  '韓国語': {
+    easy: 'かんこくご',
+    en: 'Korean'
+  },
+  'スペイン語': {
+    easy: 'スペインご',
+    en: 'Spanish'
+  },
+  'フランス語': {
+    easy: 'フランスご',
+    en: 'French'
+  },
+  'ドイツ語': {
+    easy: 'ドイツご',
+    en: 'German'
+  },
+  'ベトナム語': {
+    easy: 'ベトナムご',
+    en: 'Vietnamese'
+  },
+  'タイ語': {
+    easy: 'タイご',
+    en: 'Thai'
+  },
+  'インドネシア語': {
+    easy: 'インドネシアご',
+    en: 'Indonesian'
+  },
+  'フィリピン語': {
+    easy: 'フィリピンご',
+    en: 'Filipino'
+  },
+  'イタリア語': {
+    easy: 'イタリアご',
+    en: 'Italian'
+  },
+  'ポルトガル語': {
+    easy: 'ポルトガルご',
+    en: 'Portuguese'
+  },
+  'ロシア語': {
+    easy: 'ロシアご',
+    en: 'Russian'
+  },
+  'アラビア語': {
+    easy: 'アラビアご',
+    en: 'Arabic'
+  }
+};
+function mgOptLabel(value, lang) {
+  const m = MG_OPT_I18N[String(value)];
+  if (!m) return String(value);
+  return lang === 'easy' && m.easy || lang === 'en' && m.en || String(value);
+}
 function ChipRow({
   options,
   value,
@@ -6908,7 +7447,7 @@ function ScreenSignupProfile() {
       label: at.selectPlaceholder
     }].concat(_auth_PREFECTURES.map(p => ({
       value: p,
-      label: p
+      label: mgOptLabel(p, A.lang)
     })))
   }), React.createElement(_auth_ErrBox, {
     msg: error
@@ -6967,7 +7506,7 @@ function ScreenSignupProfile() {
       label: at.selectPlaceholder
     }].concat(_auth_COUNTRIES.map(c => ({
       value: c,
-      label: c
+      label: mgOptLabel(c, A.lang)
     })))
   }), isForeign && React.createElement("div", null, React.createElement("div", {
     style: {
@@ -16605,13 +17144,13 @@ function SheetProfileEdit({
       label: L(_my_T.select)
     }]).concat([{
       value: '在留外国人',
-      label: '在留外国人'
+      label: mgOptLabel('在留外国人', lang)
     }, {
       value: '日本人',
-      label: '日本人'
+      label: mgOptLabel('日本人', lang)
     }, {
       value: 'その他',
-      label: 'その他'
+      label: mgOptLabel('その他', lang)
     }])
   }), React.createElement(MgSelect, {
     label: L(_my_T.fNationality),
@@ -16622,7 +17161,7 @@ function SheetProfileEdit({
       label: L(_my_T.select)
     }]).concat(_my_COUNTRIES.map(c => ({
       value: c,
-      label: c
+      label: mgOptLabel(c, lang)
     })))
   }), React.createElement(MgSelect, {
     label: L(_my_T.fPrefecture),
@@ -16633,7 +17172,7 @@ function SheetProfileEdit({
       label: L(_my_T.select)
     }]).concat(_my_PREFECTURES.map(p => ({
       value: p,
-      label: p
+      label: mgOptLabel(p, lang)
     })))
   }), React.createElement(MgSelect, {
     label: L(_my_T.fDisplayLang),
@@ -16692,7 +17231,10 @@ function SheetProfileEdit({
       marginBottom: 18
     }
   }, React.createElement(SectionLabel, null, L(_my_T.fInterests)), React.createElement(ChipRow, {
-    options: _my_INTEREST_CATEGORIES,
+    options: _my_INTEREST_CATEGORIES.map(v => ({
+      value: v,
+      label: mgOptLabel(v, lang)
+    })),
     value: f.interests,
     onChange: set('interests'),
     multi: true
@@ -16701,7 +17243,10 @@ function SheetProfileEdit({
       marginBottom: 18
     }
   }, React.createElement(SectionLabel, null, L(_my_T.fLangSkills)), React.createElement(ChipRow, {
-    options: _my_LANGUAGE_SKILLS,
+    options: _my_LANGUAGE_SKILLS.map(v => ({
+      value: v,
+      label: mgOptLabel(v, lang)
+    })),
     value: f.languageSkills,
     onChange: set('languageSkills'),
     multi: true
