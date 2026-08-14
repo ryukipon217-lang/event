@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-<script>window.__MG_BUILD='20260814133100';</script>
+<script>window.__MG_BUILD='20260814135126';</script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover">
 <title>connec+a — 出会いが、まちを変えていく。</title>
@@ -19,7 +19,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="connec+a">
 <meta name="twitter:image" content="https://connectahubapp.com/ogp.jpg">
-<meta name="theme-color" content="#35618f">
+<meta name="theme-color" content="#e9edfc">
 <!-- (Perf) getFrontBundle を最速で先読み(HEAD最上部・fetchFrontBundleが1回だけ消費)。GAS応答が数秒かかるため、React/Babel/フォント読込と並行してネットワークを先行させる -->
 <link rel="preconnect" href="https://script.google.com" crossorigin>
 <script>
@@ -27,7 +27,7 @@ window.__earlyBundlePromise = fetch('https://script.google.com/macros/s/AKfycbxL
   .then(function (r) { return r.ok ? r.json() : null; })
   .catch(function () { return null; });
 </script>
-<link rel="manifest" href='data:application/manifest+json,%7B%22name%22%3A%22connec%2Ba%22%2C%22short_name%22%3A%22connec%2Ba%22%2C%22description%22%3A%22%E5%9C%A8%E6%97%A5%E5%A4%96%E5%9B%BD%E4%BA%BA%E7%95%99%E5%AD%A6%E7%94%9F%E3%81%A8%E6%97%A5%E6%9C%AC%E4%BA%BA%E3%82%92%E3%81%A4%E3%81%AA%E3%81%90%E5%9B%BD%E9%9A%9B%E4%BA%A4%E6%B5%81%E3%83%97%E3%83%A9%E3%83%83%E3%83%88%E3%83%95%E3%82%A9%E3%83%BC%E3%83%A0%22%2C%22start_url%22%3A%22.%2F%22%2C%22display%22%3A%22standalone%22%2C%22orientation%22%3A%22portrait-primary%22%2C%22background_color%22%3A%22%23e9f0f7%22%2C%22theme_color%22%3A%22%2335618f%22%2C%22lang%22%3A%22ja%22%2C%22categories%22%3A%5B%22events%22%2C%22social%22%2C%22education%22%5D%7D'>
+<link rel="manifest" href='data:application/manifest+json,%7B%22name%22%3A%22connec%2Ba%22%2C%22short_name%22%3A%22connec%2Ba%22%2C%22description%22%3A%22%E5%9C%A8%E6%97%A5%E5%A4%96%E5%9B%BD%E4%BA%BA%E7%95%99%E5%AD%A6%E7%94%9F%E3%81%A8%E6%97%A5%E6%9C%AC%E4%BA%BA%E3%82%92%E3%81%A4%E3%81%AA%E3%81%90%E5%9B%BD%E9%9A%9B%E4%BA%A4%E6%B5%81%E3%83%97%E3%83%A9%E3%83%83%E3%83%88%E3%83%95%E3%82%A9%E3%83%BC%E3%83%A0%22%2C%22start_url%22%3A%22.%2F%22%2C%22display%22%3A%22standalone%22%2C%22orientation%22%3A%22portrait-primary%22%2C%22background_color%22%3A%22%23e9edfc%22%2C%22theme_color%22%3A%22%23e9edfc%22%2C%22lang%22%3A%22ja%22%2C%22categories%22%3A%5B%22events%22%2C%22social%22%2C%22education%22%5D%7D'>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="preconnect" href="https://unpkg.com" crossorigin>
@@ -75,11 +75,11 @@ window.__earlyBundlePromise = fetch('https://script.google.com/macros/s/AKfycbxL
   --mg-ink5:#8ba0b6;
 
   /* アクセント(モネの藍) */
-  --mg-accent:#35618f;
-  --mg-deep:rgba(39,76,115,.98);
-  --mg-base:rgba(53,97,143,.95);
-  --mg-tint:rgba(53,97,143,.07);
-  --mg-tint-border:rgba(53,97,143,.18);
+  --mg-accent:#6e86e0;
+  --mg-deep:rgba(79,99,196,.98);
+  --mg-base:rgba(110,134,224,.95);
+  --mg-tint:rgba(110,134,224,.07);
+  --mg-tint-border:rgba(110,134,224,.18);
 
   /* ペーパー/シート */
   --mg-paper:rgba(255,255,255,.90);
@@ -96,8 +96,14 @@ window.__earlyBundlePromise = fetch('https://script.google.com/macros/s/AKfycbxL
   --mg-blot-yellow:rgba(233,208,106,.42);
   --mg-blot-fuji:rgba(195,185,216,.42);
 
-  /* キャンバス地 */
-  --mg-canvas-bg:radial-gradient(120% 80% at 20% 0%, #e9f0f7, #cfdbe7 60%, #c3cfdd);
+  /* キャンバス地(水彩パステル: 空色/藤/桃/ミントのにじみを淡いペリウィンクル地に重ねる) */
+  --mg-canvas-bg:
+    radial-gradient(85% 55% at 14% 6%, #cdd9f6 0%, rgba(205,217,246,0) 55%),
+    radial-gradient(80% 55% at 90% 10%, #e4d8f2 0%, rgba(228,216,242,0) 55%),
+    radial-gradient(85% 60% at 84% 94%, #f3dee4 0%, rgba(243,222,228,0) 58%),
+    radial-gradient(80% 55% at 8% 96%, #d8e8df 0%, rgba(216,232,223,0) 56%),
+    radial-gradient(70% 50% at 50% 48%, #eef2fc 0%, rgba(238,242,252,0) 72%),
+    linear-gradient(178deg, #eef1fb 0%, #e7ecfa 100%);
 
   /* プレースホルダ縞(周期14px ≥ 9px 規約内) */
   --mg-ph:repeating-linear-gradient(135deg,#dbe4ee 0 7px,#cfdae7 7px 14px);
@@ -115,7 +121,7 @@ window.__earlyBundlePromise = fetch('https://script.google.com/macros/s/AKfycbxL
   --mg-sh-card:0 16px 34px rgba(34,49,74,.18), inset 0 1px 0 rgba(255,255,255,.9);
   --mg-sh-card-lg:0 22px 46px rgba(34,49,74,.22);
   --mg-sh-sheet:0 -24px 60px rgba(34,49,74,.28);
-  --mg-sh-btn:0 14px 30px rgba(39,76,115,.32);
+  --mg-sh-btn:0 14px 30px rgba(79,99,196,.32);
   --mg-sh-pill:0 8px 20px rgba(34,49,74,.16), inset 0 1px 0 rgba(255,255,255,.9);
   --mg-ts:0 1px 8px rgba(20,32,50,.42);          /* 写真上文字 */
   --mg-ts-strong:0 3px 18px rgba(34,49,74,.42);  /* 写真上文字(強) */
@@ -150,7 +156,7 @@ window.__earlyBundlePromise = fetch('https://script.google.com/macros/s/AKfycbxL
 html, body{ margin:0; padding:0; }
 html{ -webkit-text-size-adjust:100%; }
 body{
-  background:#dfe7ef;   /* 通常はアプリ内の明るい面と同系。オープニング/認証中はJSが一時的に紺へ切替(帯を紺化) */
+  background:#e9ecf9;   /* 水彩パステル地と同系。オープニング/認証中はJSが一時的に切替 */
   font-family:var(--mg-font-ui);
   color:var(--mg-ink);
   -webkit-font-smoothing:antialiased;
@@ -175,8 +181,8 @@ body::-webkit-scrollbar{ display:none; width:0; height:0; }
    3. キャンバス+アプリ枠
    ============================================================ */
 /* (iOSスタンドアロン帯対策・恒久) ビューポート外(下端インセット/オーバースクロール)はhtmlの背景色で塗られる。
-   薄色だと起動画面の下に帯として見えるため、根の背景は常時 紺。可視領域は #mg-canvas 以下が全て覆うため通常表示には影響しない。 */
-html{ background:#1a2740; }
+   パステル地(#e9edfc)に統一。可視領域は #mg-canvas 以下が全て覆うため通常表示には影響しない。 */
+html{ background:#e9edfc; }
 
 #mg-canvas{
   min-height:calc(100dvh + var(--mg-vp-gap));
@@ -221,7 +227,7 @@ html{ background:#1a2740; }
 }
 /* (2026-08-12 代表指定) 紺パネル: 白ガラス一辺倒のリズムを破る反転面(紺地+白文字)。数字バンド・CTAの強調面に使う */
 .mg-navy{
-  background:linear-gradient(160deg, rgba(34,49,74,.94), rgba(53,97,143,.88));
+  background:linear-gradient(160deg, rgba(34,49,74,.94), rgba(110,134,224,.88));
   border:1px solid rgba(255,255,255,.16);
   box-shadow:0 20px 44px -14px rgba(20,32,50,.55), inset 0 1px 0 rgba(255,255,255,.12);
   color:#f4f7fb;
@@ -283,9 +289,9 @@ html{ background:#1a2740; }
   height:54px;
   padding:0 24px;
   border-radius:var(--mg-r-btn);
-  background:linear-gradient(150deg,rgba(53,97,143,.93),rgba(39,76,115,.97));
+  background:linear-gradient(150deg,rgba(110,134,224,.93),rgba(79,99,196,.97));
   border:1px solid rgba(255,255,255,.35);
-  box-shadow:0 14px 30px rgba(39,76,115,.32);
+  box-shadow:0 14px 30px rgba(79,99,196,.32);
   color:#f2f7fc;
   font-size:15.5px;
   font-weight:500;
@@ -569,7 +575,7 @@ select.mg-field,
 }
 .mg-chip[data-on]:not([data-on="0"]):not([data-on="false"]),
 .mg-chip.is-on{
-  background:rgba(53,97,143,.93);
+  background:rgba(110,134,224,.93);
   color:#f2f7fc;
   border-color:rgba(255,255,255,.3);
 }
@@ -648,7 +654,7 @@ select.mg-field,
   transition:transform .25s var(--mg-ease-tap);
 }
 .mg-switch[data-on]:not([data-on="0"]):not([data-on="false"]),
-.mg-switch.is-on{ background:rgba(53,97,143,.92); }
+.mg-switch.is-on{ background:rgba(110,134,224,.92); }
 .mg-switch[data-on]:not([data-on="0"]):not([data-on="false"])::after,
 .mg-switch.is-on::after{ transform:translateX(17px); }
 
@@ -848,7 +854,7 @@ select.mg-field,
   line-height:1.6;
   text-align:center;
   color:#f2f7fc;
-  background:rgba(39,76,115,.96);
+  background:rgba(79,99,196,.96);
   box-shadow:0 14px 30px rgba(34,49,74,.30);
   opacity:0;
   visibility:hidden;
@@ -2557,7 +2563,7 @@ function linkifyNodes(text, linkColor) {
         e.stopPropagation();
       },
       style: {
-        color: linkColor || 'var(--mg-accent, #35618f)',
+        color: linkColor || 'var(--mg-accent, #6e86e0)',
         textDecoration: 'underline',
         wordBreak: 'break-all'
       }
@@ -3020,7 +3026,7 @@ function NotifOnboarding({
   if (!view) return null;
   const steps = isIOS ? L.ios_steps : L.android_steps;
   const deniedBody = isIOS ? L.denied_body_ios : /android/i.test(ua) ? L.denied_body_android : L.denied_body_other;
-  const navy = '#35618f';
+  const navy = '#6e86e0';
   const stepArt = (ios, i) => {
     const muted = '#aab2c6',
       line = '#dfe4ee',
@@ -3835,7 +3841,7 @@ function PWAInstallBanner({
       width: 44,
       height: 44,
       flexShrink: 0,
-      background: 'linear-gradient(150deg, rgba(53,97,143,.93), rgba(39,76,115,.97))',
+      background: 'linear-gradient(150deg, rgba(110,134,224,.93), rgba(79,99,196,.97))',
       borderRadius: 10,
       display: 'flex',
       alignItems: 'center',
@@ -3868,7 +3874,7 @@ function PWAInstallBanner({
     onClick: handleInstall,
     style: {
       padding: '8px 14px',
-      background: 'var(--mg-accent, #35618f)',
+      background: 'var(--mg-accent, #6e86e0)',
       color: '#f2f7fc',
       border: 'none',
       borderRadius: 6,
@@ -3943,7 +3949,7 @@ function CookieConsent({
       bottom: 'calc(92px + env(safe-area-inset-bottom, 0px) - var(--mg-vp-gap, 0px))',
       maxWidth: 480,
       margin: '0 auto',
-      background: 'var(--mg-accent, #35618f)',
+      background: 'var(--mg-accent, #6e86e0)',
       color: '#f2f7fc',
       padding: '10px 14px',
       zIndex: 39,
@@ -3977,7 +3983,7 @@ function CookieConsent({
       height: 32,
       padding: '0 16px',
       background: '#ffffff',
-      color: 'var(--mg-accent, #35618f)',
+      color: 'var(--mg-accent, #6e86e0)',
       border: 'none',
       borderRadius: 16,
       fontSize: 12.5,
@@ -4501,10 +4507,10 @@ function Chip({
       cursor: 'pointer',
       whiteSpace: 'nowrap',
       ...(on ? {
-        background: 'linear-gradient(150deg, rgba(53,97,143,.93), rgba(39,76,115,.97))',
+        background: 'linear-gradient(150deg, rgba(110,134,224,.93), rgba(79,99,196,.97))',
         color: '#f2f7fc',
         border: '1px solid rgba(255,255,255,.35)',
-        boxShadow: '0 8px 18px rgba(39,76,115,.28)'
+        boxShadow: '0 8px 18px rgba(79,99,196,.28)'
       } : {
         color: 'var(--mg-ink2, #2b3d57)'
       })
@@ -5098,7 +5104,7 @@ function _uk_Label({
     }
   }, label, required ? React.createElement("span", {
     style: {
-      color: 'var(--mg-accent, #35618f)',
+      color: 'var(--mg-accent, #6e86e0)',
       marginLeft: 3
     }
   }, "*") : null);
@@ -5224,8 +5230,8 @@ function MgTextArea({
       fontSize: 14.5,
       lineHeight: 1.8,
       color: 'var(--mg-ink, #22314a)',
-      background: 'rgba(53,97,143,.07)',
-      border: '1px solid rgba(53,97,143,.18)',
+      background: 'rgba(110,134,224,.07)',
+      border: '1px solid rgba(110,134,224,.18)',
       borderRadius: 14,
       padding: '12px 14px',
       outline: 'none',
@@ -5251,7 +5257,7 @@ function MgSwitch({
       padding: 2,
       border: 0,
       flex: 'none',
-      background: on ? 'linear-gradient(150deg, rgba(53,97,143,.95), rgba(39,76,115,.98))' : 'rgba(34,49,74,.18)',
+      background: on ? 'linear-gradient(150deg, rgba(110,134,224,.95), rgba(79,99,196,.98))' : 'rgba(34,49,74,.18)',
       boxShadow: on ? 'inset 0 1px 2px rgba(20,32,50,.2)' : 'inset 0 1px 2px rgba(20,32,50,.14)',
       transition: 'background .3s ease',
       cursor: 'pointer'
@@ -5282,7 +5288,7 @@ function ProgressSeg({
         flex: 1,
         height: 3,
         borderRadius: 2,
-        background: i < step ? 'var(--mg-accent, #35618f)' : 'rgba(34,49,74,.14)',
+        background: i < step ? 'var(--mg-accent, #6e86e0)' : 'rgba(34,49,74,.14)',
         transition: 'background .3s ease'
       }
     }));
@@ -5929,7 +5935,7 @@ function _auth_Spin({
       height: size,
       alignItems: 'center',
       justifyContent: 'center',
-      color: 'var(--mg-accent, #35618f)'
+      color: 'var(--mg-accent, #6e86e0)'
     }
   }, React.createElement(Icon, {
     name: "progress_activity",
@@ -5990,7 +5996,7 @@ function _auth_OkBox({
     name: icon || 'check_circle',
     size: 20,
     style: {
-      color: 'var(--mg-accent, #35618f)',
+      color: 'var(--mg-accent, #6e86e0)',
       flexShrink: 0,
       marginTop: 3
     }
@@ -6026,7 +6032,7 @@ function _auth_Check({
     name: on ? 'check_box' : 'check_box_outline_blank',
     size: 21,
     style: {
-      color: on ? 'var(--mg-accent, #35618f)' : 'var(--mg-ink5, #8ba0b6)',
+      color: on ? 'var(--mg-accent, #6e86e0)' : 'var(--mg-ink5, #8ba0b6)',
       flexShrink: 0,
       marginTop: 1
     }
@@ -6053,7 +6059,7 @@ function _auth_TextLink({
       border: 0,
       padding: '8px 4px',
       fontSize: 12.5,
-      color: 'var(--mg-accent, #35618f)',
+      color: 'var(--mg-accent, #6e86e0)',
       cursor: 'pointer',
       letterSpacing: '.02em',
       ...(style || {})
@@ -6103,8 +6109,8 @@ function _auth_LangRow({
         alignItems: 'center',
         justifyContent: 'center',
         textAlign: 'center',
-        border: '1px solid ' + (A.lang === code ? 'var(--mg-accent, #35618f)' : 'rgba(34,49,74,.22)'),
-        background: A.lang === code ? 'var(--mg-accent, #35618f)' : 'rgba(255,255,255,.6)',
+        border: '1px solid ' + (A.lang === code ? 'var(--mg-accent, #6e86e0)' : 'rgba(34,49,74,.22)'),
+        background: A.lang === code ? 'var(--mg-accent, #6e86e0)' : 'rgba(255,255,255,.6)',
         color: A.lang === code ? '#fff' : 'var(--mg-ink2, #2b3d57)',
         fontSize: 12,
         fontWeight: A.lang === code ? 700 : 500,
@@ -6168,7 +6174,7 @@ function ScreenGate() {
       minHeight: '100%',
       display: 'flex',
       flexDirection: 'column',
-      background: '#1a2740'
+      background: '#eaedfb'
     }
   }, React.createElement("div", {
     "aria-hidden": "true",
@@ -6178,8 +6184,8 @@ function ScreenGate() {
       left: 0,
       right: 0,
       bottom: 'calc(0px - var(--mg-vp-gap, 0px))',
-      background: '#1a2740',
-      zIndex: 0
+      zIndex: 0,
+      background: 'radial-gradient(70% 42% at 16% 10%, #c6d4f6 0%, rgba(198,212,246,0) 55%), radial-gradient(66% 42% at 88% 14%, #e6d6f2 0%, rgba(230,214,242,0) 55%), radial-gradient(72% 46% at 84% 88%, #f4dce2 0%, rgba(244,220,226,0) 58%), radial-gradient(68% 44% at 10% 92%, #d6e8de 0%, rgba(214,232,222,0) 56%), radial-gradient(90% 60% at 50% 46%, #eef2fd 0%, rgba(238,242,253,0) 74%), linear-gradient(176deg, #e9edfc 0%, #e3e8f8 100%)'
     }
   }), img && React.createElement("img", {
     src: img,
@@ -6192,17 +6198,8 @@ function ScreenGate() {
       maxWidth: 'none',
       height: 'calc(100% + var(--mg-vp-gap, 0px))',
       objectFit: 'cover',
-      zIndex: 0
-    }
-  }), React.createElement("div", {
-    "aria-hidden": "true",
-    style: {
-      position: 'fixed',
-      top: 0,
-      left: 0,
-      right: 0,
-      bottom: 'calc(0px - var(--mg-vp-gap, 0px))',
-      background: 'linear-gradient(180deg, rgba(20,32,50,.30) 0%, rgba(20,32,50,.10) 34%, rgba(20,32,50,.62) 74%, rgba(15,24,38,.88) 100%)',
+      opacity: 0.14,
+      mixBlendMode: 'luminosity',
       zIndex: 0
     }
   }), React.createElement("div", {
@@ -6219,9 +6216,8 @@ function ScreenGate() {
     style: {
       fontSize: 16,
       letterSpacing: '.12em',
-      color: '#fbfcfd',
+      color: '#6e86e0',
       marginBottom: 2,
-      textShadow: '0 1px 8px rgba(20,32,50,.42)',
       animation: 'mgLineUp .9s cubic-bezier(.16,1,.3,1) both'
     }
   }, "connec+a"), React.createElement("div", {
@@ -6231,8 +6227,8 @@ function ScreenGate() {
   }, React.createElement(LineUp, {
     lines: [at.gateHead1].concat(String(at.gateHead2).split('\n')),
     size: 33,
-    color: "#fbfcfd",
-    shadow: "0 3px 18px rgba(20,32,50,.5)",
+    color: "#28324f",
+    shadow: "0 1px 2px rgba(255,255,255,.5)",
     startDelay: 0.15,
     delayStep: 0.2
   })), React.createElement("div", {
@@ -6241,7 +6237,7 @@ function ScreenGate() {
       whiteSpace: 'pre-line',
       fontSize: 12.5,
       lineHeight: 1.9,
-      color: 'rgba(251,252,253,.82)',
+      color: 'rgba(52,66,102,.85)',
       marginBottom: 14,
       animation: 'mgLineUp .9s cubic-bezier(.16,1,.3,1) .5s both'
     }
@@ -6254,7 +6250,7 @@ function ScreenGate() {
     icon: "login",
     onClick: () => A.go('/login'),
     style: {
-      background: 'linear-gradient(150deg, rgba(255,255,255,.62), rgba(255,255,255,.34))'
+      background: 'linear-gradient(150deg, rgba(255,255,255,.9), rgba(255,255,255,.72))'
     }
   }), React.createElement("button", {
     type: "button",
@@ -6266,7 +6262,7 @@ function ScreenGate() {
       textAlign: 'center',
       padding: 12,
       fontSize: 12.5,
-      color: 'rgba(251,252,253,.8)',
+      color: 'rgba(64,80,140,.8)',
       cursor: 'pointer'
     }
   }, at.gateLook)));
@@ -6667,15 +6663,15 @@ function ScreenVerifySent({
       borderRadius: 36,
       display: 'grid',
       placeItems: 'center',
-      background: showFailed ? 'rgba(191,150,32,.12)' : 'rgba(53,97,143,.10)',
-      border: '1px solid ' + (showFailed ? 'rgba(191,150,32,.32)' : 'rgba(53,97,143,.25)'),
+      background: showFailed ? 'rgba(191,150,32,.12)' : 'rgba(110,134,224,.10)',
+      border: '1px solid ' + (showFailed ? 'rgba(191,150,32,.32)' : 'rgba(110,134,224,.25)'),
       animation: 'mgLineUp .8s cubic-bezier(.16,1,.3,1) both'
     }
   }, React.createElement(Icon, {
     name: showFailed ? 'error' : 'mark_email_read',
     size: 32,
     style: {
-      color: showFailed ? '#8a6d1c' : 'var(--mg-accent, #35618f)'
+      color: showFailed ? '#8a6d1c' : 'var(--mg-accent, #6e86e0)'
     }
   })), React.createElement("div", {
     style: {
@@ -6828,15 +6824,15 @@ function ScreenSignupVerify() {
         borderRadius: 36,
         display: 'grid',
         placeItems: 'center',
-        background: 'rgba(53,97,143,.10)',
-        border: '1px solid rgba(53,97,143,.25)',
+        background: 'rgba(110,134,224,.10)',
+        border: '1px solid rgba(110,134,224,.25)',
         animation: 'mgLineUp .8s cubic-bezier(.16,1,.3,1) both'
       }
     }, React.createElement(Icon, {
       name: "verified",
       size: 32,
       style: {
-        color: 'var(--mg-accent, #35618f)'
+        color: 'var(--mg-accent, #6e86e0)'
       }
     })), React.createElement("div", {
       style: {
@@ -7312,7 +7308,7 @@ function ScreenSignupProfile() {
       fontSize: 11,
       letterSpacing: '.18em',
       fontWeight: 500,
-      color: 'var(--mg-accent, #35618f)',
+      color: 'var(--mg-accent, #6e86e0)',
       marginBottom: 14
     }
   }, txt);
@@ -7375,8 +7371,8 @@ function ScreenSignupProfile() {
       marginBottom: 22,
       padding: '16px 18px',
       borderRadius: 22,
-      background: 'rgba(53,97,143,.07)',
-      border: '1px solid rgba(53,97,143,.20)'
+      background: 'rgba(110,134,224,.07)',
+      border: '1px solid rgba(110,134,224,.20)'
     }
   }, React.createElement("div", {
     style: {
@@ -7389,7 +7385,7 @@ function ScreenSignupProfile() {
     name: "translate",
     size: 20,
     style: {
-      color: 'var(--mg-accent, #35618f)'
+      color: 'var(--mg-accent, #6e86e0)'
     }
   }), React.createElement("span", {
     className: "mg-serif",
@@ -7485,7 +7481,7 @@ function ScreenSignupProfile() {
     }
   }, at.residencyLabel, React.createElement("span", {
     style: {
-      color: 'var(--mg-accent, #35618f)',
+      color: 'var(--mg-accent, #6e86e0)',
       marginLeft: 3
     }
   }, "*")), React.createElement(ChipRow, {
@@ -7527,7 +7523,7 @@ function ScreenSignupProfile() {
     }
   }, at.jpSchoolLabel, React.createElement("span", {
     style: {
-      color: 'var(--mg-accent, #35618f)',
+      color: 'var(--mg-accent, #6e86e0)',
       marginLeft: 3
     }
   }, "*")), React.createElement(ChipRow, {
@@ -7555,7 +7551,7 @@ function ScreenSignupProfile() {
     }
   }, at.jlptLabel, React.createElement("span", {
     style: {
-      color: 'var(--mg-accent, #35618f)',
+      color: 'var(--mg-accent, #6e86e0)',
       marginLeft: 3
     }
   }, "*")), React.createElement(ChipRow, {
@@ -8203,7 +8199,7 @@ function TabHome() {
             fontSize: 10,
             fontWeight: 600,
             letterSpacing: '.06em',
-            color: over ? 'var(--mg-ink5, #8ba0b6)' : 'var(--mg-accent, #35618f)',
+            color: over ? 'var(--mg-ink5, #8ba0b6)' : 'var(--mg-accent, #6e86e0)',
             flex: 'none'
           }
         }, lang === 'easy' ? n2 + 'にちめ' : 'Day' + n2), React.createElement("span", {
@@ -8242,7 +8238,7 @@ function TabHome() {
       name: "schedule",
       size: 18,
       style: {
-        color: 'var(--mg-accent, #35618f)'
+        color: 'var(--mg-accent, #6e86e0)'
       }
     }), fTime) : null, React.createElement("div", {
       style: {
@@ -8255,7 +8251,7 @@ function TabHome() {
       name: "place",
       size: 18,
       style: {
-        color: 'var(--mg-accent, #35618f)',
+        color: 'var(--mg-accent, #6e86e0)',
         flex: 'none'
       }
     }), React.createElement("span", {
@@ -8272,7 +8268,7 @@ function TabHome() {
     name: "group",
     size: 18,
     style: {
-      color: 'var(--mg-accent, #35618f)'
+      color: 'var(--mg-accent, #6e86e0)'
     }
   }), React.createElement("span", {
     style: {
@@ -8290,7 +8286,7 @@ function TabHome() {
     name: "group",
     size: 18,
     style: {
-      color: 'var(--mg-accent, #35618f)'
+      color: 'var(--mg-accent, #6e86e0)'
     }
   }), React.createElement("span", null, L(_home_T.seatsPre), React.createElement("span", {
     className: "mg-num",
@@ -8391,7 +8387,7 @@ function TabHome() {
       style: {
         fontSize: 9.5,
         letterSpacing: '.12em',
-        color: 'var(--mg-accent, #35618f)',
+        color: 'var(--mg-accent, #6e86e0)',
         fontWeight: 600
       }
     }, ev.sessionCount ? ev.sessionCount + ' DAYS' : L(_home_T.multiDay)) : null), React.createElement("div", {
@@ -8442,7 +8438,7 @@ function TabHome() {
       name: "schedule",
       size: 14,
       style: {
-        color: 'var(--mg-accent, #35618f)',
+        color: 'var(--mg-accent, #6e86e0)',
         flex: 'none'
       }
     }), React.createElement("span", {
@@ -8462,7 +8458,7 @@ function TabHome() {
       name: "place",
       size: 14,
       style: {
-        color: 'var(--mg-accent, #35618f)',
+        color: 'var(--mg-accent, #6e86e0)',
         flex: 'none'
       }
     }), React.createElement("span", {
@@ -8630,13 +8626,13 @@ function TabHome() {
       padding: '9px 15px',
       borderRadius: 20,
       fontSize: 12.5,
-      background: 'rgba(53,97,143,.95)',
+      background: 'rgba(110,134,224,.95)',
       color: '#f2f7fc'
     }
   }, L(_home_T.surveyAnswer), unanswered.length > 1 ? React.createElement("span", {
     style: {
       background: '#f2f7fc',
-      color: '#35618f',
+      color: '#6e86e0',
       borderRadius: 9,
       fontSize: 10.5,
       padding: '0 6px',
@@ -8675,7 +8671,7 @@ function TabHome() {
       height: 26,
       padding: '0 11px',
       borderRadius: 13,
-      background: 'rgba(53,97,143,.95)',
+      background: 'rgba(110,134,224,.95)',
       color: '#f2f7fc',
       fontSize: 11,
       letterSpacing: '.06em'
@@ -8726,7 +8722,7 @@ function TabHome() {
         width: 7,
         height: 7,
         borderRadius: '50%',
-        background: isNew ? 'var(--mg-accent, #35618f)' : 'rgba(34,49,74,.18)',
+        background: isNew ? 'var(--mg-accent, #6e86e0)' : 'rgba(34,49,74,.18)',
         flex: 'none',
         marginTop: 7
       }
@@ -8759,8 +8755,8 @@ function TabHome() {
       style: {
         padding: '1px 8px',
         borderRadius: 9,
-        background: isNew ? 'rgba(53,97,143,.12)' : 'rgba(34,49,74,.07)',
-        color: isNew ? 'var(--mg-accent, #35618f)' : 'inherit'
+        background: isNew ? 'rgba(110,134,224,.12)' : 'rgba(34,49,74,.07)',
+        color: isNew ? 'var(--mg-accent, #6e86e0)' : 'inherit'
       }
     }, cat) : null)), React.createElement(Icon, {
       name: "chevron_right",
@@ -8782,9 +8778,9 @@ function TabHome() {
       gap: 7,
       padding: 14,
       fontSize: 12.5,
-      color: 'var(--mg-accent, #35618f)',
+      color: 'var(--mg-accent, #6e86e0)',
       borderTop: '1px solid rgba(34,49,74,.08)',
-      background: 'rgba(53,97,143,.05)'
+      background: 'rgba(110,134,224,.05)'
     }
   }, L(_home_T.newsAll), React.createElement(Icon, {
     name: "arrow_forward",
@@ -9087,7 +9083,7 @@ function _ev_seatColor(symbol) {
     case '◎':
       return '#16a34a';
     case '〇':
-      return 'var(--mg-accent, #35618f)';
+      return 'var(--mg-accent, #6e86e0)';
     case '△':
       return '#b98a1c';
     case '✕':
@@ -9870,7 +9866,7 @@ function _ev_Guide({
     style: {
       fontSize: 10.5,
       letterSpacing: '.3em',
-      color: 'var(--mg-accent, #35618f)',
+      color: 'var(--mg-accent, #6e86e0)',
       marginBottom: 4
     }
   }, "EVENT GUIDE"), React.createElement("div", {
@@ -9924,8 +9920,8 @@ function _ev_Guide({
       className: "mg-ui",
       style: {
         appearance: 'none',
-        border: act ? '1px solid transparent' : '1px solid rgba(53,97,143,.28)',
-        background: act ? 'linear-gradient(150deg, rgba(53,97,143,.95), rgba(39,76,115,.98))' : 'rgba(255,255,255,.6)',
+        border: act ? '1px solid transparent' : '1px solid rgba(110,134,224,.28)',
+        background: act ? 'linear-gradient(150deg, rgba(110,134,224,.95), rgba(79,99,196,.98))' : 'rgba(255,255,255,.6)',
         color: act ? '#f2f7fc' : 'var(--mg-ink3, #3d5877)',
         borderRadius: 999,
         padding: '6px 13px',
@@ -9988,7 +9984,7 @@ function _ev_Guide({
       name: "schedule",
       size: 16,
       style: {
-        color: 'var(--mg-accent, #35618f)'
+        color: 'var(--mg-accent, #6e86e0)'
       }
     }), H('タイムテーブル', 'じかんの よてい', 'Timetable')), React.createElement("div", {
       className: "mg-card",
@@ -10012,7 +10008,7 @@ function _ev_Guide({
         fontWeight: 600,
         letterSpacing: '.1em',
         color: '#f2f7fc',
-        background: 'linear-gradient(150deg, rgba(53,97,143,.95), rgba(39,76,115,.98))',
+        background: 'linear-gradient(150deg, rgba(110,134,224,.95), rgba(79,99,196,.98))',
         padding: '3px 10px',
         borderRadius: 11,
         flex: 'none'
@@ -10043,7 +10039,7 @@ function _ev_Guide({
         top: 10,
         bottom: 10,
         width: 2,
-        background: 'linear-gradient(180deg, rgba(53,97,143,.45), rgba(53,97,143,.12))',
+        background: 'linear-gradient(180deg, rgba(110,134,224,.45), rgba(110,134,224,.12))',
         borderRadius: 1
       }
     }), React.createElement("div", {
@@ -10074,8 +10070,8 @@ function _ev_Guide({
           height: isEdge ? 12 : 8,
           marginLeft: isEdge ? 2 : 4,
           borderRadius: '50%',
-          background: isEdge ? 'linear-gradient(150deg, rgba(53,97,143,.95), rgba(39,76,115,.98))' : 'rgba(255,255,255,.95)',
-          border: isEdge ? '2px solid rgba(255,255,255,.85)' : '2px solid rgba(53,97,143,.55)',
+          background: isEdge ? 'linear-gradient(150deg, rgba(110,134,224,.95), rgba(79,99,196,.98))' : 'rgba(255,255,255,.95)',
+          border: isEdge ? '2px solid rgba(255,255,255,.85)' : '2px solid rgba(110,134,224,.55)',
           boxShadow: '0 2px 6px rgba(34,49,74,.25)'
         }
       }), m2 ? React.createElement("span", {
@@ -10111,7 +10107,7 @@ function _ev_Guide({
       name: "partly_cloudy_day",
       size: 16,
       style: {
-        color: 'var(--mg-accent, #35618f)'
+        color: 'var(--mg-accent, #6e86e0)'
       }
     }), H('開催地の天気', 'てんき', 'Weather')), w ? React.createElement(_ev_WxCard, {
       w: w,
@@ -10152,7 +10148,7 @@ function _ev_Guide({
         size: 16,
         fill: true,
         style: {
-          color: 'var(--mg-accent, #35618f)'
+          color: 'var(--mg-accent, #6e86e0)'
         }
       }), H('持ち物', 'もってくる もの', 'What to bring')), React.createElement("div", {
         style: {
@@ -10198,7 +10194,7 @@ function _ev_Guide({
     size: 16,
     fill: true,
     style: {
-      color: 'var(--mg-accent, #35618f)'
+      color: 'var(--mg-accent, #6e86e0)'
     }
   }), H('持ち物', 'もってくる もの', 'What to bring')), React.createElement("div", {
     style: {
@@ -10526,7 +10522,7 @@ function _ev_MetaRow({
     name: icon,
     size: 19,
     style: {
-      color: 'var(--mg-accent, #35618f)',
+      color: 'var(--mg-accent, #6e86e0)',
       flex: 'none',
       marginTop: 2
     }
@@ -10579,7 +10575,7 @@ function _ev_Timetable({
   const publicActs = (activities || []).filter(a => a && (a.kind === 'program' || a.kind === 'meal' || a.kind === 'break'));
   if (!Array.isArray(sessions) || sessions.length === 0 || publicActs.length === 0) return null;
   const KIND_DOT = {
-    program: 'var(--mg-accent, #35618f)',
+    program: 'var(--mg-accent, #6e86e0)',
     meal: '#b98a1c',
     break: '#8ba0b6'
   };
@@ -10854,7 +10850,7 @@ function TabEvents() {
       style: {
         fontSize: 9,
         letterSpacing: '.06em',
-        color: 'var(--mg-accent, #35618f)',
+        color: 'var(--mg-accent, #6e86e0)',
         fontWeight: 500,
         marginTop: 2
       }
@@ -10913,7 +10909,7 @@ function TabEvents() {
             style: {
               fontSize: 10,
               fontWeight: 600,
-              color: over ? 'var(--mg-ink5, #8ba0b6)' : 'var(--mg-accent, #35618f)',
+              color: over ? 'var(--mg-ink5, #8ba0b6)' : 'var(--mg-accent, #6e86e0)',
               flex: 'none',
               letterSpacing: '.04em'
             }
@@ -10964,7 +10960,7 @@ function TabEvents() {
           name: "payments",
           size: 15,
           style: {
-            color: 'var(--mg-accent, #35618f)'
+            color: 'var(--mg-accent, #6e86e0)'
           }
         }), fee) : null);
       }
@@ -10987,7 +10983,7 @@ function TabEvents() {
         name: "schedule",
         size: 15,
         style: {
-          color: 'var(--mg-accent, #35618f)'
+          color: 'var(--mg-accent, #6e86e0)'
         }
       }), time) : null, venue ? React.createElement("span", {
         className: "mg-clamp1",
@@ -11001,7 +10997,7 @@ function TabEvents() {
         name: "place",
         size: 15,
         style: {
-          color: 'var(--mg-accent, #35618f)',
+          color: 'var(--mg-accent, #6e86e0)',
           flex: 'none'
         }
       }), venue) : null, fee ? React.createElement("span", {
@@ -11014,7 +11010,7 @@ function TabEvents() {
         name: "payments",
         size: 15,
         style: {
-          color: 'var(--mg-accent, #35618f)'
+          color: 'var(--mg-accent, #6e86e0)'
         }
       }), fee) : null), ev.format === 'multi' ? (() => {
         const days = _ev_dayItems(ev);
@@ -11032,8 +11028,8 @@ function TabEvents() {
             fontSize: 10.5,
             padding: '3px 8px',
             borderRadius: 10,
-            background: 'rgba(53,97,143,.08)',
-            border: '1px solid rgba(53,97,143,.16)',
+            background: 'rgba(110,134,224,.08)',
+            border: '1px solid rgba(110,134,224,.16)',
             color: 'var(--mg-ink3, #3d5877)',
             display: 'inline-flex',
             gap: 4,
@@ -11380,14 +11376,14 @@ function SheetEventDetail({
           gap: 6,
           padding: '10px 18px',
           borderRadius: 20,
-          background: 'linear-gradient(150deg, rgba(53,97,143,.93), rgba(39,76,115,.97))',
+          background: 'linear-gradient(150deg, rgba(110,134,224,.93), rgba(79,99,196,.97))',
           color: '#f2f7fc',
           fontSize: 13,
           fontWeight: 500,
           letterSpacing: '.04em',
           textDecoration: 'none',
           border: '1px solid rgba(255,255,255,.35)',
-          boxShadow: '0 10px 22px rgba(39,76,115,.3)'
+          boxShadow: '0 10px 22px rgba(79,99,196,.3)'
         }
       }, L(_ev_T.payNow), React.createElement(Icon, {
         name: "arrow_forward",
@@ -11593,9 +11589,9 @@ function SheetEventDetail({
         letterSpacing: '.08em',
         fontWeight: 500,
         ...(regStatus.open ? {
-          background: 'rgba(53,97,143,.08)',
-          border: '1px solid rgba(53,97,143,.18)',
-          color: 'var(--mg-accent, #35618f)'
+          background: 'rgba(110,134,224,.08)',
+          border: '1px solid rgba(110,134,224,.18)',
+          color: 'var(--mg-accent, #6e86e0)'
         } : {
           background: 'rgba(250,243,215,.9)',
           border: '1px solid rgba(233,208,106,.7)',
@@ -11641,7 +11637,7 @@ function SheetEventDetail({
         style: {
           fontSize: 11,
           fontWeight: 600,
-          color: 'var(--mg-accent, #35618f)',
+          color: 'var(--mg-accent, #6e86e0)',
           flex: 'none',
           letterSpacing: '.04em'
         }
@@ -11671,7 +11667,7 @@ function SheetEventDetail({
           display: 'inline-flex',
           alignItems: 'center',
           gap: 3,
-          color: 'var(--mg-accent, #35618f)',
+          color: 'var(--mg-accent, #6e86e0)',
           fontSize: 12,
           textDecoration: 'none',
           flex: 'none'
@@ -11690,7 +11686,7 @@ function SheetEventDetail({
         alignItems: 'center',
         gap: 3,
         marginLeft: 8,
-        color: 'var(--mg-accent, #35618f)',
+        color: 'var(--mg-accent, #6e86e0)',
         fontSize: 12,
         textDecoration: 'none'
       }
@@ -11735,7 +11731,7 @@ function SheetEventDetail({
         width: 5,
         height: 5,
         borderRadius: '50%',
-        background: 'var(--mg-accent, #35618f)',
+        background: 'var(--mg-accent, #6e86e0)',
         display: 'block'
       }
     }), React.createElement("span", {
@@ -11810,9 +11806,9 @@ function SheetEventDetail({
         marginBottom: 14,
         textAlign: 'center',
         borderRadius: 18,
-        background: 'rgba(53,97,143,.07)',
-        border: '1px solid rgba(53,97,143,.18)',
-        color: 'var(--mg-accent, #35618f)',
+        background: 'rgba(110,134,224,.07)',
+        border: '1px solid rgba(110,134,224,.18)',
+        color: 'var(--mg-accent, #6e86e0)',
         fontSize: 12.5,
         letterSpacing: '.12em',
         fontWeight: 500
@@ -11886,7 +11882,7 @@ function SheetEventDetail({
       const sVenue = s.online ? lang === 'en' ? 'Online' : 'オンライン' : s.venue || '—';
       const sName = (lang === 'easy' ? s.name_easy || s.name : lang === 'en' ? s.name_en || s.name : s.name) || 'Session ' + (s.order || i + 1);
       const sFee = Number(s.fee) || 0;
-      const borderColor = sIsMyActive ? 'rgba(0,157,106,.55)' : sIsMyPending ? 'rgba(179,69,63,.55)' : sIsMyCancelled ? 'rgba(240,165,0,.55)' : selected ? 'var(--mg-accent, #35618f)' : 'rgba(255,255,255,.9)';
+      const borderColor = sIsMyActive ? 'rgba(0,157,106,.55)' : sIsMyPending ? 'rgba(179,69,63,.55)' : sIsMyCancelled ? 'rgba(240,165,0,.55)' : selected ? 'var(--mg-accent, #6e86e0)' : 'rgba(255,255,255,.9)';
       return React.createElement("div", {
         key: s.id,
         className: 'mg-card' + (sDisabled ? '' : ' mg-tap'),
@@ -11901,7 +11897,7 @@ function SheetEventDetail({
           borderRadius: 22,
           padding: '14px 14px',
           border: '1px solid ' + borderColor,
-          boxShadow: selected && !sDisabled ? '0 12px 26px rgba(53,97,143,.2)' : undefined,
+          boxShadow: selected && !sDisabled ? '0 12px 26px rgba(110,134,224,.2)' : undefined,
           opacity: sFull && !isLocked || sIsMyPending || sPast ? .6 : 1,
           cursor: sDisabled ? 'default' : 'pointer'
         }
@@ -11938,8 +11934,8 @@ function SheetEventDetail({
           height: 22,
           flex: 'none',
           borderRadius: 7,
-          border: '2px solid ' + (selected ? 'var(--mg-accent, #35618f)' : 'rgba(34,49,74,.25)'),
-          background: selected ? 'linear-gradient(150deg, rgba(53,97,143,.95), rgba(39,76,115,.98))' : 'transparent',
+          border: '2px solid ' + (selected ? 'var(--mg-accent, #6e86e0)' : 'rgba(34,49,74,.25)'),
+          background: selected ? 'linear-gradient(150deg, rgba(110,134,224,.95), rgba(79,99,196,.98))' : 'transparent',
           color: '#fbfcfd',
           display: 'inline-flex',
           alignItems: 'center',
@@ -11999,7 +11995,7 @@ function SheetEventDetail({
         name: "place",
         size: 14,
         style: {
-          color: 'var(--mg-accent, #35618f)',
+          color: 'var(--mg-accent, #6e86e0)',
           flex: 'none'
         }
       }), React.createElement("span", {
@@ -12013,7 +12009,7 @@ function SheetEventDetail({
           display: 'inline-flex',
           alignItems: 'center',
           gap: 2,
-          color: 'var(--mg-accent, #35618f)',
+          color: 'var(--mg-accent, #6e86e0)',
           textDecoration: 'none',
           fontSize: 11
         }
@@ -12025,9 +12021,9 @@ function SheetEventDetail({
           padding: '1px 8px',
           borderRadius: 9,
           fontSize: 10,
-          background: 'rgba(53,97,143,.07)',
-          border: '1px solid rgba(53,97,143,.18)',
-          color: 'var(--mg-accent, #35618f)'
+          background: 'rgba(110,134,224,.07)',
+          border: '1px solid rgba(110,134,224,.18)',
+          color: 'var(--mg-accent, #6e86e0)'
         }
       }, s.region) : null), React.createElement("div", {
         style: {
@@ -12960,10 +12956,10 @@ function _reg_Dialog({
       fontSize: 13.5,
       fontWeight: 500,
       cursor: 'pointer',
-      background: 'linear-gradient(150deg, rgba(53,97,143,.93), rgba(39,76,115,.97))',
+      background: 'linear-gradient(150deg, rgba(110,134,224,.93), rgba(79,99,196,.97))',
       color: '#f2f7fc',
       border: '1px solid rgba(255,255,255,.35)',
-      boxShadow: '0 10px 22px rgba(39,76,115,.3)'
+      boxShadow: '0 10px 22px rgba(79,99,196,.3)'
     }
   }, d.okLabel || _reg_L(lang, _reg_T.ok)))));
 }
@@ -13138,10 +13134,10 @@ function _reg_PayPayNameOverlay({
       fontSize: 13.5,
       fontWeight: 500,
       border: '1px solid rgba(255,255,255,.35)',
-      background: submitting || !name.trim() ? 'rgba(91,119,150,.5)' : 'linear-gradient(150deg, rgba(53,97,143,.93), rgba(39,76,115,.97))',
+      background: submitting || !name.trim() ? 'rgba(91,119,150,.5)' : 'linear-gradient(150deg, rgba(110,134,224,.93), rgba(79,99,196,.97))',
       color: '#f2f7fc',
       cursor: submitting || !name.trim() ? 'not-allowed' : 'pointer',
-      boxShadow: '0 10px 22px rgba(39,76,115,.28)'
+      boxShadow: '0 10px 22px rgba(79,99,196,.28)'
     }
   }, submitting ? st.paypayNameSaving : st.paypayNameSaveAndPay))));
 }
@@ -13337,7 +13333,7 @@ function _reg_CompanionSection({
     className: "mg-num",
     style: {
       fontSize: 16,
-      color: 'var(--mg-accent, #35618f)',
+      color: 'var(--mg-accent, #6e86e0)',
       whiteSpace: 'nowrap'
     }
   }, "\xA5", (Number(x.fee) || 0).toLocaleString()), React.createElement("div", {
@@ -13376,8 +13372,8 @@ function _reg_CompanionSection({
     style: {
       padding: '16px 16px 14px',
       borderRadius: 22,
-      background: 'rgba(53,97,143,.06)',
-      border: '1px solid rgba(53,97,143,.22)',
+      background: 'rgba(110,134,224,.06)',
+      border: '1px solid rgba(110,134,224,.22)',
       marginBottom: 12
     }
   }, React.createElement("div", {
@@ -13509,7 +13505,7 @@ function _reg_CompanionSection({
       display: 'flex',
       alignItems: 'center',
       fontSize: 22,
-      color: 'var(--mg-accent, #35618f)',
+      color: 'var(--mg-accent, #6e86e0)',
       borderBottom: '1px solid rgba(34,49,74,.22)'
     }
   }, "\xA5", computeFee(editing.age === '' || editing.age == null ? null : Number(editing.age), editing.kind || '子供').toLocaleString()), React.createElement("div", {
@@ -13548,10 +13544,10 @@ function _reg_CompanionSection({
       fontSize: 12.5,
       fontWeight: 500,
       cursor: 'pointer',
-      background: 'linear-gradient(150deg, rgba(53,97,143,.93), rgba(39,76,115,.97))',
+      background: 'linear-gradient(150deg, rgba(110,134,224,.93), rgba(79,99,196,.97))',
       color: '#f2f7fc',
       border: '1px solid rgba(255,255,255,.35)',
-      boxShadow: '0 8px 18px rgba(39,76,115,.28)'
+      boxShadow: '0 8px 18px rgba(79,99,196,.28)'
     }
   }, isNew ? c.btnAdd || '追加' : c.btnSave || '保存'))) : React.createElement("div", null, React.createElement("button", {
     type: "button",
@@ -13570,8 +13566,8 @@ function _reg_CompanionSection({
       gap: 7,
       cursor: atMaxCompanions ? 'not-allowed' : 'pointer',
       background: 'transparent',
-      color: atMaxCompanions ? 'var(--mg-ink5, #8ba0b6)' : 'var(--mg-accent, #35618f)',
-      border: '1.5px dashed ' + (atMaxCompanions ? 'rgba(139,160,182,.6)' : 'rgba(53,97,143,.55)'),
+      color: atMaxCompanions ? 'var(--mg-ink5, #8ba0b6)' : 'var(--mg-accent, #6e86e0)',
+      border: '1.5px dashed ' + (atMaxCompanions ? 'rgba(139,160,182,.6)' : 'rgba(110,134,224,.55)'),
       opacity: atMaxCompanions ? .6 : 1
     }
   }, React.createElement(Icon, {
@@ -13589,8 +13585,8 @@ function _reg_CompanionSection({
       marginTop: 14,
       padding: '13px 15px',
       borderRadius: 18,
-      background: 'rgba(53,97,143,.06)',
-      border: '1px solid rgba(53,97,143,.16)',
+      background: 'rgba(110,134,224,.06)',
+      border: '1px solid rgba(110,134,224,.16)',
       fontSize: 13
     }
   }, React.createElement("div", {
@@ -14180,7 +14176,7 @@ function SheetRegister({
     style: {
       fontSize: 10,
       letterSpacing: '.14em',
-      color: 'var(--mg-accent, #35618f)',
+      color: 'var(--mg-accent, #6e86e0)',
       fontWeight: 500
     }
   }, L(_reg_T.required), " *") : null);
@@ -14216,7 +14212,7 @@ function SheetRegister({
         className: "mg-ui",
         style: {
           fontSize: 12,
-          color: 'var(--mg-accent, #35618f)',
+          color: 'var(--mg-accent, #6e86e0)',
           fontWeight: 500
         }
       }, lang === 'en' ? filteredSessions.length + ' ' + (filteredSessions.length > 1 ? 'sessions' : 'session') + ' selected' : filteredSessions.length + ' セッション 選択中')), React.createElement("div", {
@@ -14233,8 +14229,8 @@ function SheetRegister({
           style: {
             padding: '12px 14px',
             borderRadius: 18,
-            background: 'rgba(53,97,143,.06)',
-            border: '1px solid rgba(53,97,143,.14)'
+            background: 'rgba(110,134,224,.06)',
+            border: '1px solid rgba(110,134,224,.14)'
           }
         }, React.createElement("div", {
           style: {
@@ -14254,7 +14250,7 @@ function SheetRegister({
             alignItems: 'center',
             justifyContent: 'center',
             flexShrink: 0,
-            background: 'linear-gradient(150deg, rgba(53,97,143,.93), rgba(39,76,115,.97))',
+            background: 'linear-gradient(150deg, rgba(110,134,224,.93), rgba(79,99,196,.97))',
             color: '#f2f7fc'
           }
         }, i + 1), React.createElement("div", {
@@ -14315,7 +14311,7 @@ function SheetRegister({
             borderRadius: 13,
             fontSize: 11,
             fontWeight: 500,
-            color: 'var(--mg-accent, #35618f)',
+            color: 'var(--mg-accent, #6e86e0)',
             textDecoration: 'none'
           }
         }, React.createElement(Icon, {
@@ -14410,7 +14406,7 @@ function SheetRegister({
         borderRadius: 13,
         fontSize: 11,
         fontWeight: 500,
-        color: 'var(--mg-accent, #35618f)',
+        color: 'var(--mg-accent, #6e86e0)',
         textDecoration: 'none'
       }
     }, React.createElement(Icon, {
@@ -14432,8 +14428,8 @@ function SheetRegister({
       gap: 10,
       padding: '11px 13px',
       borderRadius: 18,
-      background: 'rgba(53,97,143,.09)',
-      border: '1px solid rgba(53,97,143,.3)'
+      background: 'rgba(110,134,224,.09)',
+      border: '1px solid rgba(110,134,224,.3)'
     }
   }, React.createElement("div", {
     style: {
@@ -14446,7 +14442,7 @@ function SheetRegister({
     name: "check_circle",
     size: 19,
     style: {
-      color: 'var(--mg-accent, #35618f)',
+      color: 'var(--mg-accent, #6e86e0)',
       flexShrink: 0
     }
   }), React.createElement("div", {
@@ -14465,7 +14461,7 @@ function SheetRegister({
     className: "mg-ui",
     style: {
       fontSize: 11.5,
-      color: 'var(--mg-accent, #35618f)',
+      color: 'var(--mg-accent, #6e86e0)',
       fontWeight: 500,
       marginTop: 1
     }
@@ -14499,8 +14495,8 @@ function SheetRegister({
       justifyContent: 'center',
       gap: 8,
       background: 'transparent',
-      color: 'var(--mg-accent, #35618f)',
-      border: '1.5px dashed rgba(53,97,143,.55)',
+      color: 'var(--mg-accent, #6e86e0)',
+      border: '1.5px dashed rgba(110,134,224,.55)',
       cursor: 'pointer'
     }
   }, React.createElement(Icon, {
@@ -14513,8 +14509,8 @@ function SheetRegister({
       borderRadius: 999,
       fontSize: 10.5,
       fontWeight: 500,
-      background: 'rgba(53,97,143,.14)',
-      color: 'var(--mg-accent, #35618f)'
+      background: 'rgba(110,134,224,.14)',
+      color: 'var(--mg-accent, #6e86e0)'
     }
   }, myCoupons.length + unclaimedEventCoupons.length)) : React.createElement("div", {
     style: {
@@ -14579,7 +14575,7 @@ function SheetRegister({
     className: "mg-num",
     style: {
       fontSize: 15,
-      color: 'var(--mg-accent, #35618f)',
+      color: 'var(--mg-accent, #6e86e0)',
       whiteSpace: 'nowrap'
     }
   }, c.discountType === 'percent' ? '-' + c.discountValue + '%' : '-¥' + Number(c.discountValue).toLocaleString()))))), unclaimedEventCoupons.length > 0 && React.createElement("div", null, React.createElement("div", {
@@ -14587,7 +14583,7 @@ function SheetRegister({
     style: {
       fontSize: 10.5,
       letterSpacing: '.16em',
-      color: 'var(--mg-accent, #35618f)',
+      color: 'var(--mg-accent, #6e86e0)',
       fontWeight: 500,
       marginBottom: 6,
       display: 'flex',
@@ -14599,7 +14595,7 @@ function SheetRegister({
       width: 6,
       height: 6,
       borderRadius: '50%',
-      background: 'var(--mg-accent, #35618f)',
+      background: 'var(--mg-accent, #6e86e0)',
       display: 'inline-block'
     }
   }), React.createElement("span", null, L(_reg_T.evCoupons))), React.createElement("div", {
@@ -14622,8 +14618,8 @@ function SheetRegister({
       borderRadius: 16,
       textAlign: 'left',
       cursor: couponValidating ? 'not-allowed' : 'pointer',
-      background: 'rgba(53,97,143,.08)',
-      border: '1.5px solid rgba(53,97,143,.35)',
+      background: 'rgba(110,134,224,.08)',
+      border: '1.5px solid rgba(110,134,224,.35)',
       display: 'flex',
       justifyContent: 'space-between',
       alignItems: 'center',
@@ -14666,7 +14662,7 @@ function SheetRegister({
   }, c.name) : null, React.createElement("div", {
     style: {
       fontSize: 10.5,
-      color: 'var(--mg-accent, #35618f)',
+      color: 'var(--mg-accent, #6e86e0)',
       marginTop: 2,
       fontWeight: 500
     }
@@ -14674,7 +14670,7 @@ function SheetRegister({
     className: "mg-num",
     style: {
       fontSize: 16,
-      color: 'var(--mg-accent, #35618f)',
+      color: 'var(--mg-accent, #6e86e0)',
       whiteSpace: 'nowrap'
     }
   }, c.discountType === 'percent' ? '-' + c.discountValue + '%' : '-¥' + Number(c.discountValue).toLocaleString()))))), React.createElement("div", null, React.createElement("div", {
@@ -14717,7 +14713,7 @@ function SheetRegister({
       fontWeight: 500,
       flexShrink: 0,
       whiteSpace: 'nowrap',
-      background: couponValidating || !couponCode.trim() ? 'rgba(91,119,150,.4)' : 'linear-gradient(150deg, rgba(53,97,143,.93), rgba(39,76,115,.97))',
+      background: couponValidating || !couponCode.trim() ? 'rgba(91,119,150,.4)' : 'linear-gradient(150deg, rgba(110,134,224,.93), rgba(79,99,196,.97))',
       color: '#f2f7fc',
       border: '1px solid rgba(255,255,255,.35)',
       cursor: couponValidating || !couponCode.trim() ? 'not-allowed' : 'pointer'
@@ -14766,8 +14762,8 @@ function SheetRegister({
         display: 'flex',
         alignItems: 'center',
         gap: 12,
-        background: selected ? 'rgba(53,97,143,.1)' : 'rgba(255,255,255,.88)',
-        border: selected ? '1.5px solid rgba(53,97,143,.55)' : '1px solid rgba(34,49,74,.12)',
+        background: selected ? 'rgba(110,134,224,.1)' : 'rgba(255,255,255,.88)',
+        border: selected ? '1.5px solid rgba(110,134,224,.55)' : '1px solid rgba(34,49,74,.12)',
         transition: 'all .25s ease'
       }
     }, React.createElement("span", {
@@ -14779,8 +14775,8 @@ function SheetRegister({
         display: 'inline-flex',
         alignItems: 'center',
         justifyContent: 'center',
-        background: selected ? 'linear-gradient(150deg, rgba(53,97,143,.93), rgba(39,76,115,.97))' : 'rgba(53,97,143,.08)',
-        color: selected ? '#f2f7fc' : 'var(--mg-accent, #35618f)',
+        background: selected ? 'linear-gradient(150deg, rgba(110,134,224,.93), rgba(79,99,196,.97))' : 'rgba(110,134,224,.08)',
+        color: selected ? '#f2f7fc' : 'var(--mg-accent, #6e86e0)',
         transition: 'all .25s ease'
       }
     }, React.createElement(Icon, {
@@ -14813,7 +14809,7 @@ function SheetRegister({
         borderRadius: '50%',
         flexShrink: 0,
         background: '#fff',
-        border: selected ? '6px solid var(--mg-accent, #35618f)' : '2px solid rgba(34,49,74,.25)',
+        border: selected ? '6px solid var(--mg-accent, #6e86e0)' : '2px solid rgba(34,49,74,.25)',
         transition: 'all .25s ease'
       }
     }));
@@ -14943,7 +14939,7 @@ function SheetRegister({
       }
     }, "\xA5", Number(ev.fee).toLocaleString()) : null, isFree ? React.createElement("span", {
       style: {
-        color: 'var(--mg-accent, #35618f)',
+        color: 'var(--mg-accent, #6e86e0)',
         fontWeight: 500
       }
     }, L(_reg_T.free)) : null), card(React.createElement("div", null, secTitle('01 — ' + L(_reg_T.sec1)), renderBookingDetails(), ev.format === 'multi' ? React.createElement("div", {
@@ -15003,14 +14999,14 @@ function SheetRegister({
             marginBottom: 8,
             cursor: mine ? 'default' : 'pointer',
             opacity: mine ? .62 : 1,
-            border: '1px solid ' + (mine ? 'rgba(22,114,63,.4)' : on ? 'var(--mg-accent, #35618f)' : 'rgba(34,49,74,.16)'),
-            background: mine ? 'rgba(22,114,63,.06)' : on ? 'rgba(53,97,143,.08)' : 'rgba(255,255,255,.6)'
+            border: '1px solid ' + (mine ? 'rgba(22,114,63,.4)' : on ? 'var(--mg-accent, #6e86e0)' : 'rgba(34,49,74,.16)'),
+            background: mine ? 'rgba(22,114,63,.06)' : on ? 'rgba(110,134,224,.08)' : 'rgba(255,255,255,.6)'
           }
         }, React.createElement(Icon, {
           name: mine ? 'how_to_reg' : on ? 'check_circle' : 'radio_button_unchecked',
           size: 20,
           style: {
-            color: mine ? '#16723f' : on ? 'var(--mg-accent, #35618f)' : 'var(--mg-ink5, #8ba0b6)',
+            color: mine ? '#16723f' : on ? 'var(--mg-accent, #6e86e0)' : 'var(--mg-ink5, #8ba0b6)',
             flex: 'none'
           }
         }), React.createElement("div", {
@@ -15109,8 +15105,8 @@ function SheetRegister({
         overflowY: 'auto',
         padding: '13px 15px',
         borderRadius: 18,
-        background: 'rgba(53,97,143,.06)',
-        border: '1px solid rgba(53,97,143,.14)',
+        background: 'rgba(110,134,224,.06)',
+        border: '1px solid rgba(110,134,224,.14)',
         fontSize: 13,
         lineHeight: 2,
         color: 'var(--mg-ink3, #3d5877)',
@@ -15144,10 +15140,10 @@ function SheetRegister({
         alignItems: 'center',
         justifyContent: 'center',
         border: agreedPolicy ? '1px solid rgba(255,255,255,.35)' : '1px solid rgba(34,49,74,.3)',
-        background: agreedPolicy ? 'linear-gradient(150deg, rgba(53,97,143,.95), rgba(39,76,115,.98))' : 'rgba(255,255,255,.85)',
+        background: agreedPolicy ? 'linear-gradient(150deg, rgba(110,134,224,.95), rgba(79,99,196,.98))' : 'rgba(255,255,255,.85)',
         color: '#f2f7fc',
         transition: 'all .25s ease',
-        boxShadow: agreedPolicy ? '0 6px 14px rgba(39,76,115,.28)' : 'none'
+        boxShadow: agreedPolicy ? '0 6px 14px rgba(79,99,196,.28)' : 'none'
       }
     }, agreedPolicy ? React.createElement(Icon, {
       name: "check",
@@ -15161,7 +15157,7 @@ function SheetRegister({
       }
     }, L(_reg_T.agree), React.createElement("span", {
       style: {
-        color: 'var(--mg-accent, #35618f)',
+        color: 'var(--mg-accent, #6e86e0)',
         marginLeft: 4
       }
     }, "*")))), 'secPolicy'), isPaid && card(React.createElement("div", null, secTitle('03 — ' + L(_reg_T.secPayment), true), (isCouponApplied || hasPaidCompanions) && React.createElement("div", {
@@ -15274,14 +15270,14 @@ function SheetRegister({
       }
     }, React.createElement("span", {
       style: {
-        color: 'var(--mg-accent, #35618f)',
+        color: 'var(--mg-accent, #6e86e0)',
         fontWeight: 500
       }
     }, lang === 'en' ? 'Coupon (' + appliedCoupon.code + ')' : 'クーポン (' + appliedCoupon.code + ')'), React.createElement("span", {
       className: "mg-num",
       style: {
         fontSize: 15,
-        color: 'var(--mg-accent, #35618f)'
+        color: 'var(--mg-accent, #6e86e0)'
       }
     }, "-\xA5", appliedCoupon.discount.toLocaleString())), (appliedCoupon || hasPaidCompanions) && React.createElement("div", {
       style: {
@@ -16022,7 +16018,7 @@ function OverlayRegisterComplete({
     }, React.createElement("span", {
       style: {
         fontWeight: 600,
-        color: 'var(--mg-accent, #35618f)'
+        color: 'var(--mg-accent, #6e86e0)'
       }
     }, lang === 'easy' ? (s2.order || i + 1) + 'にちめ' : 'Day ' + (s2.order || i + 1)), React.createElement("span", {
       className: "mg-num"
@@ -16216,10 +16212,10 @@ function OverlayRegisterComplete({
       cursor: 'pointer',
       fontSize: 14,
       fontWeight: 500,
-      background: 'linear-gradient(150deg, rgba(53,97,143,.95), rgba(39,76,115,.98))',
+      background: 'linear-gradient(150deg, rgba(110,134,224,.95), rgba(79,99,196,.98))',
       color: '#f2f7fc',
       border: '1px solid rgba(255,255,255,.3)',
-      boxShadow: '0 14px 30px rgba(39,76,115,.32), inset 0 1px 0 rgba(255,255,255,.3)'
+      boxShadow: '0 14px 30px rgba(79,99,196,.32), inset 0 1px 0 rgba(255,255,255,.3)'
     }
   }, React.createElement(Icon, {
     name: "calendar_add_on",
@@ -16305,7 +16301,7 @@ function OverlayRegisterComplete({
       fontSize: 12.5,
       fontWeight: 500,
       letterSpacing: '.04em',
-      color: 'var(--mg-accent, #35618f)',
+      color: 'var(--mg-accent, #6e86e0)',
       textDecorationLine: 'underline',
       textUnderlineOffset: 3,
       cursor: 'pointer'
@@ -17061,7 +17057,7 @@ function _my_Row({
     name: icon,
     size: 19,
     style: {
-      color: iconColor || 'var(--mg-accent, #35618f)',
+      color: iconColor || 'var(--mg-accent, #6e86e0)',
       flex: 'none'
     }
   }), React.createElement("div", {
@@ -17393,8 +17389,8 @@ function TabMyPage() {
       height: 62,
       flex: 'none',
       borderRadius: 31,
-      background: 'linear-gradient(150deg, rgba(53,97,143,.14), rgba(53,97,143,.06))',
-      border: '1px solid rgba(53,97,143,.18)',
+      background: 'linear-gradient(150deg, rgba(110,134,224,.14), rgba(110,134,224,.06))',
+      border: '1px solid rgba(110,134,224,.18)',
       display: 'grid',
       placeItems: 'center'
     }
@@ -17402,7 +17398,7 @@ function TabMyPage() {
     className: "mg-serif",
     style: {
       fontSize: 24,
-      color: 'var(--mg-accent, #35618f)'
+      color: 'var(--mg-accent, #6e86e0)'
     }
   }, String(user.nickname || user.name || '').slice(0, 1) || React.createElement(Icon, {
     name: "person",
@@ -17576,8 +17572,8 @@ function TabMyPage() {
       style: {
         fontSize: 10.5,
         letterSpacing: '.08em',
-        color: 'var(--mg-accent, #35618f)',
-        border: '1px solid rgba(53,97,143,.3)',
+        color: 'var(--mg-accent, #6e86e0)',
+        border: '1px solid rgba(110,134,224,.3)',
         borderRadius: 11,
         padding: '2px 8px'
       }
@@ -17633,7 +17629,7 @@ function TabMyPage() {
       padding: '0 18px',
       borderRadius: 20,
       fontSize: 12.5,
-      color: 'var(--mg-accent, #35618f)',
+      color: 'var(--mg-accent, #6e86e0)',
       display: 'inline-flex',
       alignItems: 'center',
       gap: 6,
@@ -17696,9 +17692,9 @@ function TabMyPage() {
         fontWeight: 600,
         padding: '1px 7px',
         borderRadius: 8,
-        background: 'rgba(53,97,143,.10)',
-        border: '1px solid rgba(53,97,143,.20)',
-        color: 'var(--mg-accent, #35618f)'
+        background: 'rgba(110,134,224,.10)',
+        border: '1px solid rgba(110,134,224,.20)',
+        color: 'var(--mg-accent, #6e86e0)'
       }
     }, "Day", dayN2) : null, React.createElement("span", {
       className: "mg-clamp1",
@@ -17735,9 +17731,9 @@ function TabMyPage() {
         padding: '7px 11px',
         borderRadius: 16,
         fontSize: 11.5,
-        background: 'rgba(53,97,143,.08)',
-        color: 'var(--mg-accent, #35618f)',
-        border: '1px solid rgba(53,97,143,.28)',
+        background: 'rgba(110,134,224,.08)',
+        color: 'var(--mg-accent, #6e86e0)',
+        border: '1px solid rgba(110,134,224,.28)',
         cursor: 'pointer',
         flex: 'none'
       }
@@ -17765,7 +17761,7 @@ function TabMyPage() {
         padding: '7px 12px',
         borderRadius: 16,
         fontSize: 11.5,
-        background: 'rgba(53,97,143,.95)',
+        background: 'rgba(110,134,224,.95)',
         color: '#f2f7fc',
         border: '1px solid rgba(255,255,255,.35)',
         cursor: 'pointer',
@@ -17793,7 +17789,7 @@ function TabMyPage() {
       cursor: 'pointer',
       fontSize: 12,
       letterSpacing: '.08em',
-      color: 'var(--mg-accent, #35618f)',
+      color: 'var(--mg-accent, #6e86e0)',
       display: 'inline-flex',
       alignItems: 'center',
       gap: 4
@@ -17852,7 +17848,7 @@ function TabMyPage() {
     const label = lang === 'en' ? 'Install as an app' : lang === 'easy' ? 'アプリとして いれる' : 'アプリとしてインストール';
     return React.createElement(_my_Row, {
       icon: "install_mobile",
-      iconColor: "var(--mg-accent, #35618f)",
+      iconColor: "var(--mg-accent, #6e86e0)",
       label: label,
       sub: isIOS && !evt ? lang === 'en' ? 'Share → Add to Home Screen' : lang === 'easy' ? 'きょうゆう → ホームがめんに ついか' : '共有メニュー → ホーム画面に追加' : undefined,
       onClick: async () => {
@@ -18352,8 +18348,8 @@ function SheetProfileEdit({
       borderRadius: 14,
       fontSize: 13.5,
       wordBreak: 'break-all',
-      background: 'rgba(53,97,143,.07)',
-      border: '1px solid rgba(53,97,143,.18)',
+      background: 'rgba(110,134,224,.07)',
+      border: '1px solid rgba(110,134,224,.18)',
       color: 'var(--mg-ink2, #2b3d57)'
     }
   }, user.email || '—'), React.createElement("a", {
@@ -18363,7 +18359,7 @@ function SheetProfileEdit({
       display: 'inline-block',
       marginTop: 7,
       fontSize: 11.5,
-      color: 'var(--mg-accent, #35618f)',
+      color: 'var(--mg-accent, #6e86e0)',
       textDecoration: 'underline'
     }
   }, L(_my_T.emailChange)), React.createElement("div", {
@@ -18596,7 +18592,7 @@ function SheetLanguage({
       size: 20,
       fill: 1,
       style: {
-        color: 'var(--mg-accent, #35618f)'
+        color: 'var(--mg-accent, #6e86e0)'
       }
     }) : React.createElement("span", {
       style: {
@@ -18611,14 +18607,14 @@ function SheetLanguage({
       gap: 10,
       padding: '14px 16px',
       borderRadius: 20,
-      background: 'rgba(53,97,143,.08)',
-      border: '1px solid rgba(53,97,143,.18)'
+      background: 'rgba(110,134,224,.08)',
+      border: '1px solid rgba(110,134,224,.18)'
     }
   }, React.createElement(Icon, {
     name: "info",
     size: 20,
     style: {
-      color: 'var(--mg-accent, #35618f)',
+      color: 'var(--mg-accent, #6e86e0)',
       flex: 'none'
     }
   }), React.createElement("div", {
@@ -19179,7 +19175,7 @@ function _eng_albumToView(album) {
 }
 function _eng_Spin({
   size = 26,
-  color = 'var(--mg-accent, #35618f)'
+  color = 'var(--mg-accent, #6e86e0)'
 }) {
   const ref = useRef(null);
   useEffect(() => {
@@ -19254,7 +19250,7 @@ function _eng_MidBtn({
     name: icon,
     size: 19,
     style: {
-      color: muted ? 'inherit' : 'var(--mg-accent, #35618f)'
+      color: muted ? 'inherit' : 'var(--mg-accent, #6e86e0)'
     }
   }) : null, React.createElement("span", null, label));
 }
@@ -19282,7 +19278,7 @@ function TicketPill() {
     name: "qr_code_2",
     size: 22,
     style: {
-      color: 'var(--mg-accent, #35618f)'
+      color: 'var(--mg-accent, #6e86e0)'
     }
   }), React.createElement("span", {
     style: {
@@ -19463,7 +19459,7 @@ function SheetTicket({
       display: 'inline-flex',
       alignItems: 'center',
       justifyContent: 'center',
-      background: bright ? 'linear-gradient(150deg, rgba(53,97,143,.93), rgba(39,76,115,.97))' : 'rgba(34,49,74,.06)',
+      background: bright ? 'linear-gradient(150deg, rgba(110,134,224,.93), rgba(79,99,196,.97))' : 'rgba(34,49,74,.06)',
       border: bright ? '1px solid rgba(255,255,255,.35)' : '1px solid transparent',
       color: bright ? '#f2f7fc' : 'var(--mg-ink3, #4c6584)'
     }
@@ -19662,8 +19658,8 @@ function SheetTicket({
             borderRadius: 17,
             fontSize: 12.5,
             cursor: cur ? 'default' : 'pointer',
-            border: '1px solid ' + (cur ? 'var(--mg-accent, #35618f)' : 'rgba(34,49,74,.18)'),
-            background: cur ? 'linear-gradient(150deg, rgba(53,97,143,.95), rgba(39,76,115,.98))' : 'rgba(255,255,255,.8)',
+            border: '1px solid ' + (cur ? 'var(--mg-accent, #6e86e0)' : 'rgba(34,49,74,.18)'),
+            background: cur ? 'linear-gradient(150deg, rgba(110,134,224,.95), rgba(79,99,196,.98))' : 'rgba(255,255,255,.8)',
             color: cur ? '#f2f7fc' : 'var(--mg-ink2, #2b3d57)',
             fontWeight: cur ? 600 : 400
           }
@@ -19732,7 +19728,7 @@ function SheetTicket({
       name: "event",
       size: 18,
       style: {
-        color: 'var(--mg-accent, #35618f)',
+        color: 'var(--mg-accent, #6e86e0)',
         flex: 'none'
       }
     }), (() => {
@@ -19744,9 +19740,9 @@ function SheetTicket({
           fontWeight: 600,
           padding: '2px 8px',
           borderRadius: 9,
-          background: 'rgba(53,97,143,.10)',
-          border: '1px solid rgba(53,97,143,.22)',
-          color: 'var(--mg-accent, #35618f)'
+          background: 'rgba(110,134,224,.10)',
+          border: '1px solid rgba(110,134,224,.22)',
+          color: 'var(--mg-accent, #6e86e0)'
         }
       }, "Day", n2) : null;
     })(), React.createElement("span", null, _eng_fmtDateLong(dateStr, lang), timeRange ? '　' + timeRange : '')) : null, venue ? React.createElement("div", {
@@ -19762,7 +19758,7 @@ function SheetTicket({
       name: "place",
       size: 18,
       style: {
-        color: 'var(--mg-accent, #35618f)',
+        color: 'var(--mg-accent, #6e86e0)',
         flex: 'none'
       }
     }), React.createElement("span", null, venue)) : null, priceLine ? React.createElement("div", {
@@ -19778,7 +19774,7 @@ function SheetTicket({
       name: "payments",
       size: 18,
       style: {
-        color: 'var(--mg-accent, #35618f)',
+        color: 'var(--mg-accent, #6e86e0)',
         flex: 'none'
       }
     }), React.createElement("span", null, priceLine)) : null)), React.createElement("div", {
@@ -19788,7 +19784,7 @@ function SheetTicket({
         fontSize: 12,
         lineHeight: 1.8,
         marginTop: 14,
-        color: isCheckedIn ? 'var(--mg-accent, #35618f)' : 'var(--mg-ink3, #4c6584)',
+        color: isCheckedIn ? 'var(--mg-accent, #6e86e0)' : 'var(--mg-ink3, #4c6584)',
         fontWeight: isCheckedIn ? 600 : 400
       }
     }, isCheckedIn ? L(_eng_T.tCheckedIn) : L(_eng_T.tReception)), React.createElement("div", {
@@ -20039,14 +20035,14 @@ function SheetSurvey({
           size: 34,
           fill: sel,
           style: {
-            color: sel ? 'var(--mg-accent, #35618f)' : '#a7b8c9',
+            color: sel ? 'var(--mg-accent, #6e86e0)' : '#a7b8c9',
             transition: 'color .25s'
           }
         }), React.createElement("span", {
           className: "mg-ui",
           style: {
             fontSize: 10.5,
-            color: sel ? 'var(--mg-accent, #35618f)' : 'var(--mg-ink5, #8ba0b6)'
+            color: sel ? 'var(--mg-accent, #6e86e0)' : 'var(--mg-ink5, #8ba0b6)'
           }
         }, face4 ? face4[i] : String(val))));
       }
@@ -20090,7 +20086,7 @@ function SheetSurvey({
           display: 'inline-flex',
           alignItems: 'center',
           justifyContent: 'center',
-          background: sel ? 'linear-gradient(150deg, rgba(53,97,143,.93), rgba(39,76,115,.97))' : 'rgba(255,255,255,.9)',
+          background: sel ? 'linear-gradient(150deg, rgba(110,134,224,.93), rgba(79,99,196,.97))' : 'rgba(255,255,255,.9)',
           color: sel ? '#f2f7fc' : 'var(--mg-ink2, #2b3d57)',
           border: sel ? '1px solid rgba(255,255,255,.35)' : '1px solid rgba(34,49,74,.12)'
         }
@@ -20106,7 +20102,7 @@ function SheetSurvey({
       size: 44,
       fill: has,
       style: {
-        color: has ? 'var(--mg-accent, #35618f)' : '#a7b8c9'
+        color: has ? 'var(--mg-accent, #6e86e0)' : '#a7b8c9'
       }
     })), React.createElement("div", {
       style: {
@@ -20135,7 +20131,7 @@ function SheetSurvey({
       }
     }, React.createElement(_eng_Label, null, qLabel(q), q.required ? React.createElement("span", {
       style: {
-        color: 'var(--mg-accent, #35618f)',
+        color: 'var(--mg-accent, #6e86e0)',
         marginLeft: 5
       }
     }, "*") : null), (q.type === 'nps' || q.type === 'scale') && renderScale(q), q.type === 'single' && React.createElement("div", {
@@ -20163,8 +20159,8 @@ function SheetSurvey({
           borderRadius: 18,
           fontSize: 14,
           color: 'var(--mg-ink, #22314a)',
-          background: sel ? 'rgba(53,97,143,.10)' : 'rgba(255,255,255,.92)',
-          border: sel ? '1px solid rgba(53,97,143,.45)' : '1px solid rgba(34,49,74,.12)',
+          background: sel ? 'rgba(110,134,224,.10)' : 'rgba(255,255,255,.92)',
+          border: sel ? '1px solid rgba(110,134,224,.45)' : '1px solid rgba(34,49,74,.12)',
           transition: 'background .2s, border-color .2s'
         }
       }, React.createElement("span", {
@@ -20174,7 +20170,7 @@ function SheetSurvey({
           borderRadius: 11,
           flex: 'none',
           border: sel ? '0' : '2px solid rgba(34,49,74,.25)',
-          background: sel ? 'linear-gradient(150deg, rgba(53,97,143,.95), rgba(39,76,115,.98))' : 'transparent',
+          background: sel ? 'linear-gradient(150deg, rgba(110,134,224,.95), rgba(79,99,196,.98))' : 'transparent',
           display: 'inline-flex',
           alignItems: 'center',
           justifyContent: 'center',
@@ -20260,12 +20256,12 @@ function SheetSurvey({
         height: 78,
         borderRadius: 39,
         margin: '0 auto 20px',
-        background: 'linear-gradient(150deg, rgba(53,97,143,.95), rgba(39,76,115,.98))',
+        background: 'linear-gradient(150deg, rgba(110,134,224,.95), rgba(79,99,196,.98))',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
         color: '#f2f7fc',
-        boxShadow: '0 14px 30px rgba(39,76,115,.32)',
+        boxShadow: '0 14px 30px rgba(79,99,196,.32)',
         animation: 'mgLineUp .7s cubic-bezier(.16,1,.3,1) both'
       }
     }, React.createElement(Icon, {
@@ -20449,7 +20445,7 @@ function SheetSurvey({
         className: "mg-ui",
         style: {
           fontSize: 11,
-          color: 'var(--mg-accent, #35618f)',
+          color: 'var(--mg-accent, #6e86e0)',
           marginTop: 3
         }
       }, (s.sessionOrder ? lang === 'easy' ? s.sessionOrder + 'にちめ' : 'Day ' + s.sessionOrder : '') + (s.sessionDate ? ' · ' + _eng_fmtMD(s.sessionDate) : '')) : null), s.answered ? React.createElement("span", {
@@ -20460,7 +20456,7 @@ function SheetSurvey({
           alignItems: 'center',
           gap: 4,
           fontSize: 11.5,
-          color: 'var(--mg-accent, #35618f)'
+          color: 'var(--mg-accent, #6e86e0)'
         }
       }, React.createElement(Icon, {
         name: "check_circle",
@@ -20473,7 +20469,7 @@ function SheetSurvey({
           alignItems: 'center',
           gap: 4,
           fontSize: 12,
-          color: 'var(--mg-accent, #35618f)'
+          color: 'var(--mg-accent, #6e86e0)'
         }
       }, L(_eng_T.svAnswer), React.createElement(Icon, {
         name: "arrow_forward",
@@ -20747,14 +20743,14 @@ function SheetAlbum({
       alignItems: 'center',
       padding: '14px 16px',
       borderRadius: 20,
-      background: 'rgba(53,97,143,.07)',
-      border: '1px solid rgba(53,97,143,.18)'
+      background: 'rgba(110,134,224,.07)',
+      border: '1px solid rgba(110,134,224,.18)'
     }
   }, React.createElement(Icon, {
     name: "visibility_off",
     size: 20,
     style: {
-      color: 'var(--mg-accent, #35618f)',
+      color: 'var(--mg-accent, #6e86e0)',
       flex: 'none'
     }
   }), React.createElement("div", {
@@ -20767,7 +20763,7 @@ function SheetAlbum({
     }
   }, L(_eng_T.alHideLead)[0], React.createElement("span", {
     style: {
-      color: 'var(--mg-accent, #35618f)'
+      color: 'var(--mg-accent, #6e86e0)'
     }
   }, L(_eng_T.alHideLead)[1]), "\u3002"), React.createElement(Icon, {
     name: "chevron_right",
@@ -20980,14 +20976,14 @@ function SheetHideRequest({
       gap: 10,
       padding: '14px 16px',
       borderRadius: 20,
-      background: 'rgba(53,97,143,.07)',
-      border: '1px solid rgba(53,97,143,.18)'
+      background: 'rgba(110,134,224,.07)',
+      border: '1px solid rgba(110,134,224,.18)'
     }
   }, React.createElement(Icon, {
     name: "lock",
     size: 20,
     style: {
-      color: 'var(--mg-accent, #35618f)',
+      color: 'var(--mg-accent, #6e86e0)',
       flex: 'none'
     }
   }), React.createElement("div", {
@@ -21912,9 +21908,9 @@ function _info_SourceChip({
       letterSpacing: '.08em',
       whiteSpace: 'nowrap',
       flex: 'none',
-      color: 'var(--mg-accent, #35618f)',
-      background: 'rgba(53,97,143,.08)',
-      border: '1px solid rgba(53,97,143,.16)',
+      color: 'var(--mg-accent, #6e86e0)',
+      background: 'rgba(110,134,224,.08)',
+      border: '1px solid rgba(110,134,224,.16)',
       borderRadius: 7,
       padding: '2px 7px'
     }
@@ -22004,9 +22000,9 @@ function _info_Pills({
       whiteSpace: 'nowrap',
       borderRadius: 999,
       padding: '3px 10px',
-      color: 'var(--mg-accent, #35618f)',
-      background: 'rgba(53,97,143,.08)',
-      border: '1px solid rgba(53,97,143,.18)'
+      color: 'var(--mg-accent, #6e86e0)',
+      background: 'rgba(110,134,224,.08)',
+      border: '1px solid rgba(110,134,224,.18)'
     }
   }, _info_L(lang, _info_T.importance), ": ", _info_text(lang, imp.label)) : null, (targetUsers || []).map(k => React.createElement("span", {
     key: k,
@@ -22152,7 +22148,7 @@ function _info_ArticleSheet({
       name: "check",
       size: 16,
       style: {
-        color: 'var(--mg-accent, #35618f)',
+        color: 'var(--mg-accent, #6e86e0)',
         flex: 'none',
         marginTop: 3
       }
@@ -22182,8 +22178,8 @@ function _info_ArticleSheet({
         height: 20,
         borderRadius: 10,
         marginTop: 2,
-        background: 'rgba(53,97,143,.10)',
-        color: 'var(--mg-accent, #35618f)',
+        background: 'rgba(110,134,224,.10)',
+        color: 'var(--mg-accent, #6e86e0)',
         fontSize: 11,
         fontWeight: 500,
         display: 'inline-flex',
@@ -22476,10 +22472,10 @@ function TabLife() {
       padding: '10px 8px',
       borderRadius: 20,
       textDecoration: 'none',
-      background: 'linear-gradient(150deg, rgba(53,97,143,.93), rgba(39,76,115,.97))',
+      background: 'linear-gradient(150deg, rgba(110,134,224,.93), rgba(79,99,196,.97))',
       border: '1px solid rgba(255,255,255,.35)',
       color: '#f2f7fc',
-      boxShadow: '0 10px 22px rgba(39,76,115,.28)'
+      boxShadow: '0 10px 22px rgba(79,99,196,.28)'
     }
   }, React.createElement("span", {
     className: "mg-num",
@@ -22561,7 +22557,7 @@ function TabLife() {
       name: _info_catIcon(cat),
       size: 26,
       style: {
-        color: 'var(--mg-accent, #35618f)'
+        color: 'var(--mg-accent, #6e86e0)'
       }
     }), React.createElement("div", {
       className: "mg-serif",
@@ -22624,7 +22620,7 @@ function TabLife() {
     name: _info_newsIcon(n),
     size: 19,
     style: {
-      color: 'var(--mg-accent, #35618f)',
+      color: 'var(--mg-accent, #6e86e0)',
       flex: 'none'
     }
   }), React.createElement("span", {
@@ -22717,7 +22713,7 @@ function SheetSearch({
     name: "search",
     size: 19,
     style: {
-      color: 'var(--mg-accent, #35618f)',
+      color: 'var(--mg-accent, #6e86e0)',
       flex: 'none'
     }
   }), React.createElement("input", {
@@ -22816,7 +22812,7 @@ function SheetSearch({
       name: icon,
       size: 22,
       style: {
-        color: 'var(--mg-accent, #35618f)',
+        color: 'var(--mg-accent, #6e86e0)',
         flex: 'none'
       }
     }), React.createElement("div", {
@@ -22894,7 +22890,7 @@ function SheetSearch({
     name: _info_catIcon(cat),
     size: 20,
     style: {
-      color: 'var(--mg-accent, #35618f)',
+      color: 'var(--mg-accent, #6e86e0)',
       flex: 'none'
     }
   }), React.createElement("div", {
@@ -23446,7 +23442,7 @@ function _cs_Row({
     name: icon,
     size: 24,
     style: {
-      color: 'var(--mg-accent, #35618f)',
+      color: 'var(--mg-accent, #6e86e0)',
       flex: 'none'
     }
   }), React.createElement("div", {
@@ -23527,7 +23523,7 @@ function _cs_TelPill({
       fontSize: 17,
       letterSpacing: '.04em',
       textDecoration: 'none',
-      color: 'var(--mg-accent, #35618f)'
+      color: 'var(--mg-accent, #6e86e0)'
     }
   }, num);
 }
@@ -23614,10 +23610,10 @@ function _cs_Bubble({
       fontSize: 13.5,
       lineHeight: 1.85,
       borderRadius: isUser ? '20px 20px 6px 20px' : '20px 20px 20px 6px',
-      background: isUser ? 'linear-gradient(150deg, rgba(53,97,143,.95), rgba(39,76,115,.98))' : 'var(--mg-paper, rgba(255,255,255,.90))',
+      background: isUser ? 'linear-gradient(150deg, rgba(110,134,224,.95), rgba(79,99,196,.98))' : 'var(--mg-paper, rgba(255,255,255,.90))',
       color: isUser ? '#f2f7fc' : 'var(--mg-ink, #22314a)',
       border: isUser ? '1px solid rgba(255,255,255,.28)' : '1px solid rgba(34,49,74,.10)',
-      boxShadow: isUser ? '0 8px 18px rgba(39,76,115,.22)' : '0 6px 14px rgba(34,49,74,.08)',
+      boxShadow: isUser ? '0 8px 18px rgba(79,99,196,.22)' : '0 6px 14px rgba(34,49,74,.08)',
       whiteSpace: 'pre-wrap',
       wordBreak: 'break-word'
     }
@@ -23834,7 +23830,7 @@ function SheetConsult({
       width: 38,
       height: 38,
       borderRadius: 19,
-      background: 'linear-gradient(150deg, rgba(53,97,143,.14), rgba(39,76,115,.10))',
+      background: 'linear-gradient(150deg, rgba(110,134,224,.14), rgba(79,99,196,.10))',
       display: 'inline-flex',
       alignItems: 'center',
       justifyContent: 'center'
@@ -23843,7 +23839,7 @@ function SheetConsult({
     name: "forum",
     size: 21,
     style: {
-      color: 'var(--mg-accent, #35618f)'
+      color: 'var(--mg-accent, #6e86e0)'
     }
   })), React.createElement("div", {
     style: {
@@ -23924,8 +23920,8 @@ function SheetConsult({
       cursor: 'pointer',
       fontSize: 12,
       fontWeight: 500,
-      color: 'var(--mg-accent, #35618f)',
-      border: '1px solid rgba(53,97,143,.28)',
+      color: 'var(--mg-accent, #6e86e0)',
+      border: '1px solid rgba(110,134,224,.28)',
       background: 'rgba(255,255,255,.92)'
     }
   }, React.createElement(Icon, {
@@ -24009,7 +24005,7 @@ function SheetConsult({
       alignItems: 'center',
       justifyContent: 'center',
       padding: 0,
-      background: input.trim() ? 'linear-gradient(150deg, rgba(53,97,143,.95), rgba(39,76,115,.98))' : 'rgba(34,49,74,.10)',
+      background: input.trim() ? 'linear-gradient(150deg, rgba(110,134,224,.95), rgba(79,99,196,.98))' : 'rgba(34,49,74,.10)',
       border: input.trim() ? '1px solid rgba(255,255,255,.3)' : '1px solid transparent',
       color: input.trim() ? '#f2f7fc' : 'var(--mg-ink5, #8ba0b6)',
       transition: 'background .2s, color .2s'
@@ -24039,7 +24035,7 @@ function SheetConsult({
     name: "support_agent",
     size: 24,
     style: {
-      color: 'var(--mg-accent, #35618f)',
+      color: 'var(--mg-accent, #6e86e0)',
       flex: 'none'
     }
   }), React.createElement("div", {
@@ -24240,7 +24236,7 @@ function _rx_fmtMD(dateStr) {
 }
 function _rx_Spin({
   size = 26,
-  color = 'var(--mg-accent, #35618f)'
+  color = 'var(--mg-accent, #6e86e0)'
 }) {
   const ref = useRef(null);
   useEffect(() => {
@@ -24377,7 +24373,7 @@ function _rx_Note({
     name: isErr ? 'error' : 'info',
     size: 20,
     style: {
-      color: isErr ? '#8a6d1c' : 'var(--mg-accent, #35618f)',
+      color: isErr ? '#8a6d1c' : 'var(--mg-accent, #6e86e0)',
       flex: 'none',
       marginTop: 2
     }
@@ -24483,7 +24479,7 @@ function _rx_Dialog({
     name: isError ? 'error' : dlg.kind === 'success' ? 'check_circle' : 'help',
     size: 22,
     style: {
-      color: isError ? '#8f3542' : 'var(--mg-accent, #35618f)',
+      color: isError ? '#8f3542' : 'var(--mg-accent, #6e86e0)',
       flex: 'none'
     }
   }), React.createElement("div", {
@@ -25092,11 +25088,11 @@ function ScreenCancel({
       fontSize: 11.5,
       fontWeight: 500,
       letterSpacing: '.04em',
-      color: 'var(--mg-accent, #35618f)',
+      color: 'var(--mg-accent, #6e86e0)',
       padding: '4px 12px',
       borderRadius: 999,
-      background: 'rgba(53,97,143,.07)',
-      border: '1px solid rgba(53,97,143,.18)'
+      background: 'rgba(110,134,224,.07)',
+      border: '1px solid rgba(110,134,224,.18)'
     }
   }, T.sessionsIn(siblingRegs.length))), React.createElement("h2", {
     className: "mg-serif",
@@ -26021,13 +26017,13 @@ function ScreenCouponClaim({
       borderRadius: 18,
       textAlign: 'center',
       marginBottom: 16,
-      background: 'rgba(53,97,143,.07)',
-      border: '1px solid rgba(53,97,143,.18)'
+      background: 'rgba(110,134,224,.07)',
+      border: '1px solid rgba(110,134,224,.18)'
     }
   }, React.createElement("div", {
     className: "mg-label",
     style: {
-      color: 'var(--mg-accent, #35618f)',
+      color: 'var(--mg-accent, #6e86e0)',
       marginBottom: 4
     }
   }, T.discount), React.createElement("div", {
@@ -26035,7 +26031,7 @@ function ScreenCouponClaim({
     style: {
       fontSize: 27,
       fontStyle: 'italic',
-      color: 'var(--mg-accent, #35618f)',
+      color: 'var(--mg-accent, #6e86e0)',
       lineHeight: 1.15
     }
   }, cp.discountType === 'percent' ? '-' + cp.discountValue + '%' : '-¥' + Number(cp.discountValue || 0).toLocaleString(), cp.discountType === 'percent' && cp.maxDiscount > 0 && React.createElement("span", {
@@ -26043,7 +26039,7 @@ function ScreenCouponClaim({
     style: {
       fontSize: 11,
       fontStyle: 'normal',
-      color: 'var(--mg-accent, #35618f)',
+      color: 'var(--mg-accent, #6e86e0)',
       marginLeft: 8
     }
   }, T.maxNote(Number(cp.maxDiscount).toLocaleString())))), React.createElement("div", {
@@ -26396,7 +26392,7 @@ function _ni_NewsRow({
       width: 7,
       height: 7,
       borderRadius: '50%',
-      background: isNew ? 'var(--mg-accent, #35618f)' : 'rgba(34,49,74,.18)',
+      background: isNew ? 'var(--mg-accent, #6e86e0)' : 'rgba(34,49,74,.18)',
       flex: 'none',
       marginTop: 7
     }
@@ -26431,8 +26427,8 @@ function _ni_NewsRow({
     style: {
       padding: '1px 8px',
       borderRadius: 9,
-      background: 'rgba(53,97,143,.12)',
-      color: 'var(--mg-accent, #35618f)'
+      background: 'rgba(110,134,224,.12)',
+      color: 'var(--mg-accent, #6e86e0)'
     }
   }, cat) : null)), React.createElement(Icon, {
     name: "chevron_right",
@@ -26756,8 +26752,8 @@ function SheetNewsDetail({
       padding: '3px 10px',
       borderRadius: 11,
       fontSize: 11,
-      background: 'rgba(53,97,143,.12)',
-      color: 'var(--mg-accent, #35618f)'
+      background: 'rgba(110,134,224,.12)',
+      color: 'var(--mg-accent, #6e86e0)'
     }
   }, cat) : null, React.createElement("span", {
     className: "mg-num",
@@ -26808,7 +26804,7 @@ function SheetNewsDetail({
       width: 5,
       height: 5,
       borderRadius: '50%',
-      background: 'var(--mg-accent, #35618f)',
+      background: 'var(--mg-accent, #6e86e0)',
       display: 'block'
     }
   }), React.createElement("span", {
@@ -27066,7 +27062,7 @@ function SheetAbout({
     name: lk.icon,
     size: 19,
     style: {
-      color: 'var(--mg-accent, #35618f)'
+      color: 'var(--mg-accent, #6e86e0)'
     }
   }), React.createElement("span", {
     className: "mg-ui",
@@ -27867,11 +27863,11 @@ function ScreenContact() {
         height: 64,
         borderRadius: 32,
         margin: '0 auto 18px',
-        background: 'linear-gradient(150deg, rgba(53,97,143,.93), rgba(39,76,115,.97))',
+        background: 'linear-gradient(150deg, rgba(110,134,224,.93), rgba(79,99,196,.97))',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        boxShadow: '0 14px 30px rgba(39,76,115,.32)'
+        boxShadow: '0 14px 30px rgba(79,99,196,.32)'
       }
     }, React.createElement(Icon, {
       name: "check",
@@ -27903,7 +27899,7 @@ function ScreenContact() {
         borderRadius: 17,
         fontSize: 15,
         letterSpacing: '.06em',
-        color: 'var(--mg-accent, #35618f)',
+        color: 'var(--mg-accent, #6e86e0)',
         marginBottom: 22
       }
     }, inquiryId), React.createElement(GhostBtn, {
@@ -27923,7 +27919,7 @@ function ScreenContact() {
       fontSize: 11,
       letterSpacing: '.2em',
       fontWeight: 500,
-      color: 'var(--mg-accent, #35618f)',
+      color: 'var(--mg-accent, #6e86e0)',
       marginBottom: 10
     }
   }, tc.tag), React.createElement("div", {
@@ -27935,7 +27931,7 @@ function ScreenContact() {
     }
   }, tc.title, tc.titleStrong ? React.createElement("span", {
     style: {
-      color: 'var(--mg-accent, #35618f)'
+      color: 'var(--mg-accent, #6e86e0)'
     }
   }, " ", tc.titleStrong) : null, tc.titleSuffix ? React.createElement("div", null, tc.titleSuffix) : null), React.createElement("div", {
     className: "mg-ui",
@@ -27992,14 +27988,14 @@ function ScreenContact() {
       height: '100%',
       width: progress + '%',
       borderRadius: 2,
-      background: 'linear-gradient(90deg, rgba(53,97,143,.85), rgba(39,76,115,.98))',
+      background: 'linear-gradient(90deg, rgba(110,134,224,.85), rgba(79,99,196,.98))',
       transition: 'width 0.4s cubic-bezier(0.16, 1, 0.3, 1)'
     }
   })), React.createElement("div", {
     className: "mg-num",
     style: {
       fontSize: 14,
-      color: 'var(--mg-accent, #35618f)',
+      color: 'var(--mg-accent, #6e86e0)',
       minWidth: 36,
       textAlign: 'right'
     }
@@ -28064,7 +28060,7 @@ function ScreenContact() {
     }
   }, tc.label_type, React.createElement("span", {
     style: {
-      color: 'var(--mg-accent, #35618f)',
+      color: 'var(--mg-accent, #6e86e0)',
       marginLeft: 3
     }
   }, "*")), React.createElement("div", {
@@ -28115,7 +28111,7 @@ function ScreenContact() {
     }
   }, tc.label_message, React.createElement("span", {
     style: {
-      color: 'var(--mg-accent, #35618f)',
+      color: 'var(--mg-accent, #6e86e0)',
       marginLeft: 3
     }
   }, "*")), React.createElement("textarea", {
@@ -28135,8 +28131,8 @@ function ScreenContact() {
       fontSize: 14.5,
       lineHeight: 1.8,
       color: 'var(--mg-ink, #22314a)',
-      background: 'rgba(53,97,143,.07)',
-      border: '1px solid ' + (errors.message ? '#b3453f' : 'rgba(53,97,143,.18)'),
+      background: 'rgba(110,134,224,.07)',
+      border: '1px solid ' + (errors.message ? '#b3453f' : 'rgba(110,134,224,.18)'),
       borderRadius: 14,
       padding: '12px 14px',
       outline: 'none',
@@ -28280,7 +28276,7 @@ function ScreenPolicy({
       gap: 6,
       fontSize: 13,
       fontWeight: 500,
-      color: 'var(--mg-accent, #35618f)'
+      color: 'var(--mg-accent, #6e86e0)'
     }
   }, React.createElement(Icon, {
     name: "arrow_back",
@@ -28299,7 +28295,7 @@ function ScreenPolicy({
       gap: 6,
       fontSize: 13,
       fontWeight: 500,
-      color: 'var(--mg-accent, #35618f)'
+      color: 'var(--mg-accent, #6e86e0)'
     }
   }, React.createElement("span", null, isPrivacy ? lang === 'en' ? 'Terms of Service' : '利用規約' : lang === 'en' ? 'Privacy Policy' : 'プライバシーポリシー'), React.createElement(Icon, {
     name: "arrow_forward",
@@ -28588,8 +28584,8 @@ function _ShellIntro({
   }, [leave, onDone]);
   React.useEffect(() => {
     try {
-      document.documentElement.style.backgroundColor = '#1a2740';
-      document.body.style.backgroundColor = '#1a2740';
+      document.documentElement.style.backgroundColor = '#e9edfc';
+      document.body.style.backgroundColor = '#e9edfc';
     } catch (e) {}
     return () => {
       try {
@@ -28609,7 +28605,7 @@ function _ShellIntro({
       inset: 0,
       zIndex: 9000,
       cursor: 'pointer',
-      background: '#1a2740',
+      background: 'radial-gradient(72% 44% at 16% 10%, #c6d4f6 0%, rgba(198,212,246,0) 55%), radial-gradient(66% 42% at 88% 14%, #e6d6f2 0%, rgba(230,214,242,0) 55%), radial-gradient(72% 46% at 84% 88%, #f4dce2 0%, rgba(244,220,226,0) 58%), radial-gradient(68% 44% at 10% 92%, #d6e8de 0%, rgba(214,232,222,0) 56%), radial-gradient(92% 62% at 50% 46%, #eef2fd 0%, rgba(238,242,253,0) 74%), linear-gradient(176deg, #e9edfc 0%, #e3e8f8 100%)',
       animation: leaving ? 'mgIntroOutTap .95s ease .25s both' : 'mgIntroOut .9s ease 6.5s both'
     }
   }, img && React.createElement("img", {
@@ -28623,18 +28619,11 @@ function _ShellIntro({
       maxWidth: 'none',
       height: 'calc(100% + var(--mg-vp-gap, 0px))',
       objectFit: 'cover',
+      opacity: 0.16,
+      mixBlendMode: 'luminosity',
       transform: leaving ? 'scale(1.09)' : 'scale(1)',
-      filter: leaving ? 'blur(5px) brightness(1.06)' : 'none',
+      filter: leaving ? 'blur(5px)' : 'none',
       transition: 'transform 1.15s cubic-bezier(.22,1,.36,1), filter 1.15s ease'
-    }
-  }), React.createElement("div", {
-    style: {
-      position: 'absolute',
-      top: 0,
-      left: 0,
-      right: 0,
-      bottom: 'calc(0px - var(--mg-vp-gap, 0px))',
-      background: 'linear-gradient(180deg, rgba(20,32,50,.34) 0%, rgba(20,32,50,.08) 30%, rgba(20,32,50,.52) 66%, rgba(15,24,38,.86) 100%)'
     }
   }), React.createElement("div", {
     style: {
@@ -28663,8 +28652,7 @@ function _ShellIntro({
       textAlign: 'center',
       fontSize: 17,
       letterSpacing: '.12em',
-      color: 'rgba(255,255,255,.94)',
-      textShadow: '0 1px 8px rgba(20,32,50,.42)'
+      color: '#6e86e0'
     }
   }, "connec+a"), React.createElement("div", {
     style: {
@@ -28678,9 +28666,8 @@ function _ShellIntro({
     style: {
       fontSize: 13,
       letterSpacing: '.18em',
-      color: 'rgba(255,255,255,.78)',
-      marginBottom: 14,
-      textShadow: '0 1px 8px rgba(20,32,50,.42)'
+      color: 'rgba(64,80,140,.72)',
+      marginBottom: 14
     }
   }, tagline), lines.map((ln, i) => React.createElement("div", {
     key: i,
@@ -28693,8 +28680,8 @@ function _ShellIntro({
       fontSize: 46,
       lineHeight: 1.18,
       fontWeight: 500,
-      color: '#fff',
-      textShadow: '0 3px 18px rgba(34,49,74,.42)',
+      color: '#28324f',
+      textShadow: '0 1px 2px rgba(255,255,255,.5)',
       animation: 'mgLineUp 1s ' + _shell_EASE + ' ' + (0.35 + i * 0.2) + 's both'
     }
   }, ln)))), ripple && React.createElement("span", {
@@ -28709,7 +28696,7 @@ function _ShellIntro({
       marginTop: -7,
       borderRadius: '50%',
       pointerEvents: 'none',
-      background: 'radial-gradient(circle, rgba(255,255,255,.55) 0%, rgba(255,255,255,.12) 70%, transparent 100%)',
+      background: 'radial-gradient(circle, rgba(110,134,224,.42) 0%, rgba(110,134,224,.12) 70%, transparent 100%)',
       animation: 'mgRipple .85s ease-out both'
     }
   }), React.createElement("div", {
@@ -28722,8 +28709,7 @@ function _ShellIntro({
       textAlign: 'center',
       fontSize: 11,
       letterSpacing: '.24em',
-      color: 'rgba(255,255,255,.82)',
-      textShadow: '0 1px 8px rgba(20,32,50,.42)',
+      color: 'rgba(64,80,140,.8)',
       animation: 'mgLineUp 1s ' + _shell_EASE + ' 1.1s both'
     }
   }, tap))));
@@ -28761,7 +28747,7 @@ function MgToast({
     className: "msr",
     style: {
       fontSize: 19,
-      color: err ? '#8a6d1c' : '#35618f',
+      color: err ? '#8a6d1c' : '#6e86e0',
       flexShrink: 0
     }
   }, err ? 'error' : 'check_circle'), React.createElement("span", null, t.msg)));
@@ -28824,8 +28810,8 @@ function MgTabBar({
       width: 'calc((100% - 12px) / 4)',
       height: 52,
       borderRadius: 26,
-      background: 'linear-gradient(150deg, rgba(53,97,143,.14), rgba(53,97,143,.06))',
-      border: '1px solid rgba(53,97,143,.18)',
+      background: 'linear-gradient(150deg, rgba(110,134,224,.14), rgba(110,134,224,.06))',
+      border: '1px solid rgba(110,134,224,.18)',
       transform: 'translateX(' + tab * 100 + '%)',
       transition: 'transform .46s ' + _shell_EASE
     }
@@ -28929,12 +28915,12 @@ class _ShellErrorBoundary extends React.Component {
           padding: '0 34px',
           borderRadius: 27,
           border: '1px solid rgba(255,255,255,.35)',
-          background: 'linear-gradient(150deg, rgba(53,97,143,.93), rgba(39,76,115,.97))',
+          background: 'linear-gradient(150deg, rgba(110,134,224,.93), rgba(79,99,196,.97))',
           color: '#f2f7fc',
           fontSize: 14,
           letterSpacing: '.08em',
           cursor: 'pointer',
-          boxShadow: '0 14px 30px rgba(39,76,115,.32)'
+          boxShadow: '0 14px 30px rgba(79,99,196,.32)'
         }
       }, "\u518D\u8AAD\u307F\u8FBC\u307F / Reload"));
     }
@@ -29227,8 +29213,8 @@ function _ShellRoot() {
   React.useEffect(() => {
     const dark = showGate || !!authScreen;
     try {
-      document.documentElement.style.backgroundColor = dark ? '#1a2740' : '';
-      document.body.style.backgroundColor = dark ? '#1a2740' : '';
+      document.documentElement.style.backgroundColor = dark ? '#e9edfc' : '';
+      document.body.style.backgroundColor = dark ? '#e9edfc' : '';
     } catch (e) {}
   }, [showGate, authScreen]);
   return React.createElement(MgCtx.Provider, {
@@ -29292,7 +29278,7 @@ function _ShellRoot() {
     doc: standalone.doc
   })), showGate && React.createElement(_ShellFull, {
     z: 70,
-    bg: "#1a2740"
+    bg: "#e9edfc"
   }, React.createElement(ScreenGate, null)), authScreen && React.createElement(_ShellFull, {
     z: 80
   }, authScreen === 'login' && React.createElement(ScreenLogin, null), authScreen === 'signup' && React.createElement(ScreenSignup, null), authScreen === 'signup-verify' && React.createElement(ScreenSignupVerify, null), authScreen === 'forgot-password' && React.createElement(ScreenForgot, null), authScreen === 'reset-password' && React.createElement(ScreenReset, null), authScreen === 'signup-profile' && React.createElement(ScreenSignupProfile, null)), React.createElement(MgToast, {
