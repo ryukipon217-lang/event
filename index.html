@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-<script>window.__MG_BUILD='20260814020300';</script>
+<script>window.__MG_BUILD='20260814020539';</script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover">
 <title>connec+a — 出会いが、まちを変えていく。</title>
@@ -2180,6 +2180,16 @@ try {
     window.addEventListener('resize', apply);
     document.addEventListener('visibilitychange', () => {
       if (!document.hidden) setTimeout(apply, 100);
+    });
+    try {
+      if (window.visualViewport) window.visualViewport.addEventListener('resize', () => {
+        setTimeout(apply, 120);
+        setTimeout(apply, 500);
+      });
+    } catch (e) {}
+    document.addEventListener('focusout', () => {
+      setTimeout(apply, 200);
+      setTimeout(apply, 700);
     });
   } catch (e) {}
 })();
