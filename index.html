@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-<script>window.__MG_BUILD='20260814003612';</script>
+<script>window.__MG_BUILD='20260814004636';</script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>connec+a — 出会いが、まちを変えていく。</title>
@@ -16005,7 +16005,16 @@ function TabMyPage() {
     icon: "info",
     label: L(_my_T.aboutRow),
     onClick: () => A.openSheet('about')
-  }), React.createElement(_my_Row, {
+  }), React.createElement("div", {
+    className: "mg-num",
+    style: {
+      padding: '10px 18px 2px',
+      fontSize: 10.5,
+      letterSpacing: '.08em',
+      color: 'var(--mg-ink5, #8ba0b6)',
+      textAlign: 'right'
+    }
+  }, "build ", String(window.__MG_BUILD || '—')), React.createElement(_my_Row, {
     icon: "logout",
     iconColor: "var(--mg-ink5, #8ba0b6)",
     label: L(_my_T.logout),
