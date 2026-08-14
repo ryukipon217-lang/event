@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-<script>window.__MG_BUILD='20260814021214';</script>
+<script>window.__MG_BUILD='20260814021505';</script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover">
 <title>connec+a — 出会いが、まちを変えていく。</title>
@@ -8174,36 +8174,88 @@ function TabHome() {
       lineHeight: 1.4,
       marginBottom: 1
     }
-  }, jaTitle(fTitle)) : null, fTime ? React.createElement("div", {
-    style: {
-      display: 'flex',
-      alignItems: 'center',
-      gap: 7,
-      fontSize: 13
+  }, jaTitle(fTitle)) : null, (() => {
+    const sess = featured.format === 'multi' && Array.isArray(featured.sessions) ? featured.sessions.filter(x => x && x.date).slice().sort((a, b) => String(a.date).localeCompare(String(b.date))) : [];
+    if (sess.length >= 2) {
+      return sess.slice(0, 4).map((s2, i2) => {
+        const over = typeof mgSessionOver === 'function' && mgSessionOver(s2.date, s2.endTime);
+        const n2 = Number(s2.order) || i2 + 1;
+        const md = (Number(String(s2.date).slice(5, 7)) || '') + '.' + (Number(String(s2.date).slice(8, 10)) || '');
+        return React.createElement("div", {
+          key: s2.id || i2,
+          style: {
+            display: 'flex',
+            alignItems: 'baseline',
+            gap: 7,
+            fontSize: 12.5,
+            color: over ? 'var(--mg-ink5, #8ba0b6)' : 'var(--mg-ink2, #2b3d57)',
+            minWidth: 0
+          }
+        }, React.createElement("span", {
+          className: "mg-ui",
+          style: {
+            fontSize: 10,
+            fontWeight: 600,
+            letterSpacing: '.06em',
+            color: over ? 'var(--mg-ink5, #8ba0b6)' : 'var(--mg-accent, #35618f)',
+            flex: 'none'
+          }
+        }, lang === 'easy' ? n2 + 'にちめ' : 'Day' + n2), React.createElement("span", {
+          className: "mg-num",
+          style: {
+            fontSize: 13,
+            flex: 'none'
+          }
+        }, md), s2.startTime ? React.createElement("span", {
+          className: "mg-num",
+          style: {
+            fontSize: 12,
+            flex: 'none'
+          }
+        }, s2.startTime) : null, React.createElement("span", {
+          className: "mg-clamp1",
+          style: {
+            minWidth: 0
+          }
+        }, s2.online ? lang === 'en' ? 'Online' : 'オンライン' : s2.venue || ''), over ? React.createElement("span", {
+          style: {
+            fontSize: 9.5,
+            flex: 'none'
+          }
+        }, lang === 'en' ? 'ended' : lang === 'easy' ? 'おわり' : '終了') : null);
+      });
     }
-  }, React.createElement(Icon, {
-    name: "schedule",
-    size: 18,
-    style: {
-      color: 'var(--mg-accent, #35618f)'
-    }
-  }), fTime) : null, React.createElement("div", {
-    style: {
-      display: 'flex',
-      alignItems: 'center',
-      gap: 7,
-      fontSize: 13
-    }
-  }, React.createElement(Icon, {
-    name: "place",
-    size: 18,
-    style: {
-      color: 'var(--mg-accent, #35618f)',
-      flex: 'none'
-    }
-  }), React.createElement("span", {
-    className: "mg-clamp1"
-  }, fVenue)), fFull ? React.createElement("div", {
+    return React.createElement(React.Fragment, null, fTime ? React.createElement("div", {
+      style: {
+        display: 'flex',
+        alignItems: 'center',
+        gap: 7,
+        fontSize: 13
+      }
+    }, React.createElement(Icon, {
+      name: "schedule",
+      size: 18,
+      style: {
+        color: 'var(--mg-accent, #35618f)'
+      }
+    }), fTime) : null, React.createElement("div", {
+      style: {
+        display: 'flex',
+        alignItems: 'center',
+        gap: 7,
+        fontSize: 13
+      }
+    }, React.createElement(Icon, {
+      name: "place",
+      size: 18,
+      style: {
+        color: 'var(--mg-accent, #35618f)',
+        flex: 'none'
+      }
+    }), React.createElement("span", {
+      className: "mg-clamp1"
+    }, fVenue)));
+  })(), fFull ? React.createElement("div", {
     style: {
       display: 'flex',
       alignItems: 'center',
@@ -8272,8 +8324,10 @@ function TabHome() {
     const _nx2 = ev.format === 'multi' && typeof mgNextSession === 'function' ? mgNextSession(ev) : null;
     const dp = _home_dateParts(_nx2 && _nx2.s.date || ev.date);
     const title = _home_i18nField(ev, 'title', lang) || ev.title || '';
-    const venue2 = _home_venueLabel(ev, lang);
-    const time2 = _home_timeRange(ev);
+    const venue2 = _nx2 && _nx2.s && !_nx2.s.online && _nx2.s.venue ? _nx2.s.venue : _home_venueLabel(ev, lang);
+    const time2 = _nx2 && _nx2.s && _nx2.s.startTime ? _nx2.s.startTime + (_nx2.s.endTime ? ' — ' + _nx2.s.endTime : '') : _home_timeRange(ev);
+    const ACT2 = ['申込済み', '決済済み', '確定', 'チェックイン済', 'チェックイン保留'];
+    const isRegd = (A && A.regs || []).some(r => String(r.eventId) === String(ev.id) && ACT2.indexOf(r.status) >= 0);
     return React.createElement("div", {
       key: ev.id,
       className: "mg-tap",
@@ -8338,9 +8392,32 @@ function TabHome() {
       className: "mg-serif mg-clamp2",
       style: {
         fontSize: 17.5,
-        lineHeight: 1.32
+        lineHeight: 1.32,
+        display: 'flex',
+        alignItems: 'center',
+        gap: 8,
+        flexWrap: 'wrap'
       }
-    }, jaTitle ? jaTitle(title) : title), React.createElement("div", {
+    }, React.createElement("span", null, jaTitle ? jaTitle(title) : title), isRegd ? React.createElement("span", {
+      className: "mg-ui",
+      style: {
+        flex: 'none',
+        display: 'inline-flex',
+        alignItems: 'center',
+        gap: 3,
+        fontSize: 9.5,
+        fontWeight: 600,
+        letterSpacing: '.06em',
+        padding: '2px 8px',
+        borderRadius: 10,
+        background: 'rgba(22,114,63,.1)',
+        border: '1px solid rgba(22,114,63,.3)',
+        color: '#16723f'
+      }
+    }, React.createElement(Icon, {
+      name: "how_to_reg",
+      size: 12
+    }), lang === 'en' ? 'Registered' : lang === 'easy' ? 'もうしこみずみ' : '申込済み') : null), React.createElement("div", {
       style: {
         display: 'flex',
         flexDirection: 'column',
