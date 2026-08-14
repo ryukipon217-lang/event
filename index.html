@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-<script>window.__MG_BUILD='20260814131306';</script>
+<script>window.__MG_BUILD='20260814133100';</script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover">
 <title>connec+a — 出会いが、まちを変えていく。</title>
@@ -9234,7 +9234,7 @@ function _ev_WxCard({
   const [idx, setIdx] = React.useState(0);
   const [paused, setPaused] = React.useState(false);
   React.useEffect(() => {
-    setIdx(0);
+    setIdx(Math.floor(hours.length / 2));
   }, [w && w.place, hours.length]);
   React.useEffect(() => {
     if (paused || hours.length <= 1) return undefined;
@@ -9338,8 +9338,8 @@ function _ev_WxCard({
   return React.createElement("div", {
     className: "mg-card",
     style: {
-      borderRadius: 24,
-      padding: '18px 20px 17px',
+      borderRadius: 26,
+      padding: '22px 22px 20px',
       position: 'relative',
       overflow: 'hidden'
     },
@@ -9362,28 +9362,28 @@ function _ev_WxCard({
   }, win.s ? React.createElement("div", {
     className: "mg-ui",
     style: {
-      fontSize: 10,
-      letterSpacing: '.06em',
+      fontSize: 12,
+      letterSpacing: '.05em',
       color: 'var(--mg-ink4, #5b7796)',
-      marginBottom: 6
+      marginBottom: 8
     }
   }, H('イベントの時間帯 ', 'イベントの じかん ', 'During the event ') + win.s + (win.e ? '–' + win.e : '')) : null, React.createElement("div", {
     key: 'cur' + idx,
     style: {
       display: 'flex',
       alignItems: 'center',
-      gap: 12,
+      gap: 14,
       animation: 'mgWxSlide .55s cubic-bezier(.2,.7,.2,1)'
     }
   }, React.createElement("span", {
     "aria-hidden": "true",
     style: {
-      width: 60,
-      height: 60,
+      width: 104,
+      height: 104,
       flex: 'none',
-      margin: '-6px -3px -6px -8px',
+      margin: '-10px -6px -10px -12px',
       display: 'inline-block',
-      filter: 'drop-shadow(0 2px 5px rgba(20,40,70,.12))'
+      filter: 'drop-shadow(0 3px 7px rgba(20,40,70,.14))'
     },
     dangerouslySetInnerHTML: {
       __html: _ev_WX_SVG[cm.mi] || ''
@@ -9396,19 +9396,20 @@ function _ev_WxCard({
     style: {
       display: 'flex',
       alignItems: 'baseline',
-      gap: 8
+      gap: 10
     }
   }, React.createElement("span", {
     className: "mg-num",
     style: {
-      fontSize: 17,
+      fontSize: 30,
       fontStyle: 'italic',
-      color: 'var(--mg-ink3, #3d5877)'
+      color: 'var(--mg-ink2, #2b3d57)',
+      lineHeight: 1
     }
   }, cur.hm), React.createElement("span", {
     className: "mg-ui",
     style: {
-      fontSize: 12,
+      fontSize: 15,
       fontWeight: 600,
       color: 'var(--mg-ink2, #2b3d57)'
     }
@@ -9416,26 +9417,28 @@ function _ev_WxCard({
     style: {
       display: 'flex',
       alignItems: 'baseline',
-      gap: 8,
-      marginTop: 1
+      gap: 10,
+      marginTop: 4
     }
   }, React.createElement("span", {
     className: "mg-num",
     style: {
-      fontSize: 25
+      fontSize: 44,
+      lineHeight: 1
     }
   }, cur.temp, "\xB0"), cur.pop != null ? React.createElement("span", {
     className: "mg-num",
     style: {
-      fontSize: 12,
+      fontSize: 17,
       color: '#4a7bd0',
       display: 'inline-flex',
       alignItems: 'center',
-      gap: 2
+      gap: 3
     }
   }, React.createElement(Icon, {
     name: "water_drop",
-    size: 13,
+    size: 18,
+    fill: true,
     style: {
       color: '#4a7bd0'
     }
@@ -9443,7 +9446,7 @@ function _ev_WxCard({
     className: "mg-num",
     style: {
       marginLeft: 'auto',
-      fontSize: 13,
+      fontSize: 15,
       fontStyle: 'italic',
       color: 'var(--mg-ink4, #5b7796)',
       alignSelf: 'flex-start'
@@ -9451,8 +9454,8 @@ function _ev_WxCard({
   }, dateMd) : null), React.createElement("div", {
     style: {
       display: 'flex',
-      gap: 6,
-      marginTop: 12
+      gap: 7,
+      marginTop: 16
     }
   }, hours.map((h, i) => {
     const hm2 = _ev_WMO(h.code);
@@ -9468,31 +9471,32 @@ function _ev_WxCard({
         flex: 1,
         minWidth: 0,
         appearance: 'none',
-        border: on ? '1px solid ' + hm2.tint + '55' : '1px solid transparent',
-        background: on ? 'rgba(255,255,255,.72)' : 'rgba(255,255,255,.34)',
-        borderRadius: 12,
-        padding: '7px 3px 6px',
+        border: on ? '1.5px solid ' + hm2.tint + '66' : '1px solid transparent',
+        background: on ? 'rgba(255,255,255,.78)' : 'rgba(255,255,255,.36)',
+        borderRadius: 15,
+        padding: '9px 3px 8px',
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
-        gap: 2,
+        gap: 3,
         cursor: 'pointer',
-        boxShadow: on ? '0 3px 9px rgba(34,49,74,.12)' : 'none',
+        boxShadow: on ? '0 4px 12px rgba(34,49,74,.14)' : 'none',
         transition: 'background .3s, border-color .3s, box-shadow .3s'
       }
     }, React.createElement("span", {
       className: "mg-num",
       style: {
-        fontSize: 10.5,
-        color: on ? 'var(--mg-ink2, #2b3d57)' : 'var(--mg-ink4, #5b7796)'
+        fontSize: 15,
+        fontWeight: on ? 700 : 500,
+        color: on ? 'var(--mg-ink, #22314a)' : 'var(--mg-ink3, #3d5877)'
       }
     }, h.hm), React.createElement("span", {
       "aria-hidden": "true",
       style: {
-        width: 26,
-        height: 26,
+        width: 42,
+        height: 42,
         display: 'inline-block',
-        opacity: on ? 1 : 0.7,
+        opacity: on ? 1 : 0.72,
         transition: 'opacity .3s'
       },
       dangerouslySetInnerHTML: {
@@ -9501,16 +9505,26 @@ function _ev_WxCard({
     }), React.createElement("span", {
       className: "mg-num",
       style: {
-        fontSize: 12,
+        fontSize: 17,
         color: on ? 'var(--mg-ink, #22314a)' : 'var(--mg-ink4, #5b7796)'
       }
     }, h.temp, "\xB0"), h.pop != null && h.pop >= 30 ? React.createElement("span", {
       className: "mg-num",
       style: {
-        fontSize: 9,
+        fontSize: 11,
+        color: '#4a7bd0',
+        display: 'inline-flex',
+        alignItems: 'center',
+        gap: 1
+      }
+    }, React.createElement(Icon, {
+      name: "water_drop",
+      size: 11,
+      fill: true,
+      style: {
         color: '#4a7bd0'
       }
-    }, h.pop, "%") : null);
+    }), h.pop, "%") : null);
   }))));
 }
 async function _ev_weatherFor(placeCandidates, dateStr, geoStr, startTime, endTime) {
@@ -9563,22 +9577,33 @@ async function _ev_weatherFor(placeCandidates, dateStr, geoStr, startTime, endTi
     let sMin = toMin(startTime);
     let eMin = toMin(endTime);
     if (sMin == null) sMin = 9 * 60;
-    if (eMin == null || eMin <= sMin) eMin = Math.min(sMin + 6 * 60, 21 * 60);
+    if (eMin == null || eMin <= sMin) eMin = sMin + 2 * 60;
+    const midMin = Math.round((sMin + eMin) / 2);
     if (hourly && hourly.time && hourly.time.length) {
-      const inWin = [];
-      hourly.time.forEach((t, i) => {
-        const mn = toMin(String(t).slice(11, 16));
-        if (mn != null && mn >= sMin - 1 && mn <= eMin + 1) inWin.push(i);
-      });
-      const pick = [];
-      for (let k = 0; k < inWin.length; k += 3) pick.push(inWin[k]);
-      if (inWin.length && pick[pick.length - 1] !== inWin[inWin.length - 1]) pick.push(inWin[inWin.length - 1]);
-      out.hours = pick.slice(0, 6).map(i => ({
-        hm: String(hourly.time[i]).slice(11, 16),
-        code: hourly.weather_code[i],
-        temp: Math.round(hourly.temperature_2m[i]),
-        pop: hourly.precipitation_probability ? hourly.precipitation_probability[i] : null
-      }));
+      const wants = [-6, -3, 0, 3, 6].map(o => midMin + o * 60).filter(m => m >= 0 && m <= 23 * 60);
+      const used = {};
+      out.hours = wants.map(wmn => {
+        let bi = -1,
+          bd = 1e9;
+        hourly.time.forEach((t, i) => {
+          const mn = toMin(String(t).slice(11, 16));
+          if (mn != null) {
+            const d = Math.abs(mn - wmn);
+            if (d < bd) {
+              bd = d;
+              bi = i;
+            }
+          }
+        });
+        if (bi < 0 || used[bi]) return null;
+        used[bi] = 1;
+        return {
+          hm: String(hourly.time[bi]).slice(11, 16),
+          code: hourly.weather_code[bi],
+          temp: Math.round(hourly.temperature_2m[bi]),
+          pop: hourly.precipitation_probability ? hourly.precipitation_probability[bi] : null
+        };
+      }).filter(Boolean);
     }
     out.win = {
       s: startTime || '',
@@ -9592,12 +9617,178 @@ async function _ev_weatherFor(placeCandidates, dateStr, geoStr, startTime, endTi
     return null;
   }
 }
-const _ev_BELONG_ICONS = [[/飲み物|飲料|水筒|ペットボトル|水|ドリンク|drink|water|bottle/i, 'water_full'], [/傘|雨具|カッパ|レインコート|rain|umbrella/i, 'rainy'], [/靴|シューズ|スニーカー|歩きやす|shoe|sneaker/i, 'steps'], [/バッテリー|充電|charger|battery/i, 'battery_charging_full'], [/現金|お金|小銭|円|money|cash|yen/i, 'payments'], [/帽子|ぼうし|hat|cap/i, 'face_retouching_natural'], [/タオル|towel|汗/i, 'dry_cleaning'], [/日焼け|サンスクリーン|sunscreen/i, 'sunny'], [/カメラ|写真|camera|photo/i, 'photo_camera'], [/保険証|身分証|パスポート|在留カード|ID|証明/i, 'badge'], [/チケット|ticket|QR/i, 'confirmation_number'], [/マスク|mask/i, 'masks'], [/薬|くすり|medicine|medication/i, 'medication'], [/弁当|昼食|食べ物|軽食|おやつ|food|lunch|snack/i, 'restaurant'], [/レジャーシート|シート|敷物|sheet|mat/i, 'texture'], [/スマホ|携帯|phone/i, 'smartphone'], [/筆記|ペン|鉛筆|pen|pencil/i, 'edit'], [/ノート|メモ|notebook|note/i, 'menu_book'], [/上着|防寒|羽織|ジャケット|jacket|coat|寒/i, 'apparel'], [/バッグ|かばん|リュック|bag|backpack/i, 'backpack'], [/虫除け|虫よけ|insect/i, 'pest_control'], [/手袋|glove/i, 'front_hand'], [/サングラス|sunglass/i, 'eyeglasses'], [/エコバッグ|袋/i, 'shopping_bag']];
-const _ev_belongIcon = t => {
-  for (const [re, ic] of _ev_BELONG_ICONS) {
-    if (re.test(String(t))) return ic;
+const _ev_BELONG = [{
+  re: /飲み物|飲料|水筒|ペットボトル|水分|ドリンク|drink|water|bottle/i,
+  ic: 'water_bottle',
+  c: '#2a9d8f',
+  easy: 'のみもの',
+  en: 'Drink'
+}, {
+  re: /傘|雨具|カッパ|合羽|レインコート|rain|umbrella|poncho/i,
+  ic: 'umbrella',
+  c: '#5a6dd0',
+  easy: 'かさ・あまぐ',
+  en: 'Umbrella / rain gear'
+}, {
+  re: /歩きやす|スニーカー|運動靴|靴|シューズ|shoe|sneaker/i,
+  ic: 'footprint',
+  c: '#c67a3e',
+  easy: 'あるきやすい くつ',
+  en: 'Comfortable shoes'
+}, {
+  re: /サンダル|sandal|ビーチサンダル/i,
+  ic: 'footprint',
+  c: '#c9922e',
+  easy: 'サンダル',
+  en: 'Sandals'
+}, {
+  re: /バッテリー|充電|モバイル|charger|battery|power ?bank/i,
+  ic: 'battery_charging_full',
+  c: '#3a9d5c',
+  easy: 'じゅうでんき',
+  en: 'Power bank'
+}, {
+  re: /現金|お金|小銭|財布|円|money|cash|wallet|yen/i,
+  ic: 'wallet',
+  c: '#c9922e',
+  easy: 'げんきん',
+  en: 'Cash'
+}, {
+  re: /日焼け|サンスクリーン|日焼け止め|sunscreen|sunblock/i,
+  ic: 'sunny',
+  c: '#e0912f',
+  easy: 'ひやけどめ',
+  en: 'Sunscreen'
+}, {
+  re: /帽子|ぼうし|キャップ|hat|cap/i,
+  ic: 'sunny',
+  c: '#d98c2f',
+  easy: 'ぼうし',
+  en: 'Hat'
+}, {
+  re: /サングラス|sunglass/i,
+  ic: 'eyeglasses',
+  c: '#4c6584',
+  easy: 'サングラス',
+  en: 'Sunglasses'
+}, {
+  re: /タオル|towel|汗ふき|汗/i,
+  ic: 'dry_cleaning',
+  c: '#4aa3c0',
+  easy: 'タオル',
+  en: 'Towel'
+}, {
+  re: /カメラ|写真|camera|photo/i,
+  ic: 'photo_camera',
+  c: '#7a6ab2',
+  easy: 'カメラ',
+  en: 'Camera'
+}, {
+  re: /保険証|身分証|パスポート|在留カード|学生証|免許|ID|証明/i,
+  ic: 'badge',
+  c: '#4c6584',
+  easy: 'みぶんしょうめいしょ',
+  en: 'ID card'
+}, {
+  re: /チケット|ticket|QR|入場/i,
+  ic: 'local_activity',
+  c: '#d0688a',
+  easy: 'チケット',
+  en: 'Ticket'
+}, {
+  re: /マスク|mask/i,
+  ic: 'masks',
+  c: '#5aa0a8',
+  easy: 'マスク',
+  en: 'Mask'
+}, {
+  re: /薬|くすり|常備薬|medicine|medication|pills/i,
+  ic: 'medication',
+  c: '#d15a6a',
+  easy: 'くすり',
+  en: 'Medicine'
+}, {
+  re: /弁当|昼食|食べ物|軽食|おやつ|お菓子|food|lunch|snack/i,
+  ic: 'restaurant',
+  c: '#d97a45',
+  easy: 'たべもの',
+  en: 'Food / snack'
+}, {
+  re: /水着|swimsuit|swimwear/i,
+  ic: 'pool',
+  c: '#2a93c0',
+  easy: 'みずぎ',
+  en: 'Swimsuit'
+}, {
+  re: /レジャーシート|シート|敷物|ピクニック|sheet|mat/i,
+  ic: 'grass',
+  c: '#8a9a5b',
+  easy: 'レジャーシート',
+  en: 'Picnic sheet'
+}, {
+  re: /スマホ|携帯|phone|mobile/i,
+  ic: 'smartphone',
+  c: '#4c6584',
+  easy: 'スマホ',
+  en: 'Phone'
+}, {
+  re: /筆記|ペン|鉛筆|pen|pencil/i,
+  ic: 'ink_pen',
+  c: '#6a7fd0',
+  easy: 'ペン',
+  en: 'Pen'
+}, {
+  re: /ノート|メモ|notebook|note/i,
+  ic: 'sticky_note_2',
+  c: '#b0763e',
+  easy: 'メモちょう',
+  en: 'Notebook'
+}, {
+  re: /上着|防寒|羽織|ジャケット|コート|jacket|coat|寒/i,
+  ic: 'checkroom',
+  c: '#5a6dd0',
+  easy: 'うわぎ',
+  en: 'Jacket'
+}, {
+  re: /バッグ|かばん|カバン|リュック|bag|backpack/i,
+  ic: 'backpack',
+  c: '#7a6ab2',
+  easy: 'かばん',
+  en: 'Bag'
+}, {
+  re: /虫除け|虫よけ|虫刺され|insect|repellent/i,
+  ic: 'pest_control',
+  c: '#6a9d3a',
+  easy: 'むしよけ',
+  en: 'Insect repellent'
+}, {
+  re: /手袋|グローブ|glove/i,
+  ic: 'front_hand',
+  c: '#b06a8a',
+  easy: 'てぶくろ',
+  en: 'Gloves'
+}, {
+  re: /エコバッグ|買い物袋|袋/i,
+  ic: 'shopping_bag',
+  c: '#3a9d5c',
+  easy: 'エコバッグ',
+  en: 'Eco bag'
+}];
+const _ev_belongMeta = t => {
+  for (const b of _ev_BELONG) {
+    if (b.re.test(String(t))) return b;
   }
-  return 'check_circle';
+  return {
+    ic: 'check_circle',
+    c: '#4c6584'
+  };
+};
+const _ev_belongIcon = t => _ev_belongMeta(t).ic;
+const _ev_belongLabel = (t, lang) => {
+  if (!lang || lang === 'ja') return t;
+  const b = _ev_belongMeta(t);
+  const lab = lang === 'en' ? b.en : b.easy;
+  return lab || t;
 };
 function _ev_Guide({
   ev,
@@ -9775,7 +9966,7 @@ function _ev_Guide({
         minWidth: 0,
         scrollSnapAlign: 'start',
         scrollSnapStop: 'always',
-        padding: '0 6px',
+        padding: '0 6px 8px',
         boxSizing: 'border-box'
       }
     }, lines.length > 0 ? React.createElement("div", {
@@ -9942,7 +10133,8 @@ function _ev_Guide({
       const bl = _belongOf(s2);
       return bl.length ? React.createElement("div", {
         style: {
-          marginTop: 14
+          marginTop: 14,
+          paddingBottom: 6
         }
       }, React.createElement("div", {
         className: "mg-ui",
@@ -9958,6 +10150,7 @@ function _ev_Guide({
       }, React.createElement(Icon, {
         name: "backpack",
         size: 16,
+        fill: true,
         style: {
           color: 'var(--mg-accent, #35618f)'
         }
@@ -9967,42 +10160,11 @@ function _ev_Guide({
           gridTemplateColumns: 'repeat(auto-fill, minmax(150px, 1fr))',
           gap: 9
         }
-      }, bl.map((b, k) => React.createElement("div", {
+      }, bl.map((b, k) => React.createElement(_ev_BelongTile, {
         key: k,
-        className: "mg-card",
-        style: {
-          borderRadius: 18,
-          padding: '11px 12px',
-          display: 'flex',
-          alignItems: 'center',
-          gap: 10
-        }
-      }, React.createElement("span", {
-        style: {
-          width: 36,
-          height: 36,
-          flex: 'none',
-          borderRadius: 12,
-          display: 'inline-flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          background: 'linear-gradient(150deg, rgba(53,97,143,.14), rgba(53,97,143,.05))',
-          border: '1px solid rgba(53,97,143,.18)'
-        }
-      }, React.createElement(Icon, {
-        name: _ev_belongIcon(b),
-        size: 19,
-        style: {
-          color: 'var(--mg-accent, #35618f)'
-        }
-      })), React.createElement("span", {
-        className: "mg-ui",
-        style: {
-          fontSize: 12.5,
-          lineHeight: 1.45,
-          minWidth: 0
-        }
-      }, b))))) : null;
+        item: b,
+        lang: lang
+      })))) : null;
     })() : null, !lines.length && !wxOk(s2) && !anyDayBelong ? React.createElement("div", {
       style: {
         fontSize: 12,
@@ -10034,6 +10196,7 @@ function _ev_Guide({
   }, React.createElement(Icon, {
     name: "backpack",
     size: 16,
+    fill: true,
     style: {
       color: 'var(--mg-accent, #35618f)'
     }
@@ -10043,42 +10206,57 @@ function _ev_Guide({
       gridTemplateColumns: 'repeat(auto-fill, minmax(150px, 1fr))',
       gap: 9
     }
-  }, belongings.map((b, i2) => React.createElement("div", {
+  }, belongings.map((b, i2) => React.createElement(_ev_BelongTile, {
     key: i2,
+    item: b,
+    lang: lang
+  })))));
+}
+function _ev_BelongTile({
+  item,
+  lang
+}) {
+  const m = _ev_belongMeta(item);
+  const label = _ev_belongLabel(item, lang);
+  return React.createElement("div", {
     className: "mg-card",
     style: {
       borderRadius: 18,
-      padding: '11px 12px',
+      padding: '12px 13px',
       display: 'flex',
       alignItems: 'center',
-      gap: 10
+      gap: 11
     }
   }, React.createElement("span", {
     style: {
-      width: 36,
-      height: 36,
+      width: 42,
+      height: 42,
       flex: 'none',
-      borderRadius: 12,
+      borderRadius: 13,
       display: 'inline-flex',
       alignItems: 'center',
       justifyContent: 'center',
-      background: 'linear-gradient(150deg, rgba(53,97,143,.14), rgba(53,97,143,.05))',
-      border: '1px solid rgba(53,97,143,.18)'
+      background: 'linear-gradient(150deg, ' + m.c + '2a, ' + m.c + '12)',
+      border: '1px solid ' + m.c + '33',
+      boxShadow: 'inset 0 1px 0 rgba(255,255,255,.5)'
     }
   }, React.createElement(Icon, {
-    name: _ev_belongIcon(b),
-    size: 19,
+    name: m.ic,
+    size: 23,
+    fill: true,
+    weight: 500,
     style: {
-      color: 'var(--mg-accent, #35618f)'
+      color: m.c
     }
   })), React.createElement("span", {
     className: "mg-ui",
     style: {
-      fontSize: 12.5,
-      lineHeight: 1.45,
-      minWidth: 0
+      fontSize: 13,
+      lineHeight: 1.4,
+      minWidth: 0,
+      fontWeight: 500
     }
-  }, b))))));
+  }, label));
 }
 function _ev_feeType(ev, sessions) {
   if (!ev) return '';
