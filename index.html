@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-<script>window.__MG_BUILD='20260814021505';</script>
+<script>window.__MG_BUILD='20260814022546';</script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover">
 <title>connec+a — 出会いが、まちを変えていく。</title>
@@ -9113,6 +9113,450 @@ function _ev_publicEvents(events) {
     return true;
   });
 }
+const _ev_WMO = code => {
+  const c = Number(code);
+  if (c === 0) return {
+    icon: '☀️',
+    ja: '快晴',
+    easy: 'はれ',
+    en: 'Clear'
+  };
+  if (c <= 2) return {
+    icon: '🌤',
+    ja: '晴れ',
+    easy: 'はれ',
+    en: 'Sunny'
+  };
+  if (c === 3) return {
+    icon: '☁️',
+    ja: 'くもり',
+    easy: 'くもり',
+    en: 'Cloudy'
+  };
+  if (c === 45 || c === 48) return {
+    icon: '🌫',
+    ja: '霧',
+    easy: 'きり',
+    en: 'Fog'
+  };
+  if (c <= 57) return {
+    icon: '🌦',
+    ja: '霧雨',
+    easy: 'こさめ',
+    en: 'Drizzle'
+  };
+  if (c <= 67) return {
+    icon: '🌧',
+    ja: '雨',
+    easy: 'あめ',
+    en: 'Rain'
+  };
+  if (c <= 77) return {
+    icon: '🌨',
+    ja: '雪',
+    easy: 'ゆき',
+    en: 'Snow'
+  };
+  if (c <= 82) return {
+    icon: '🌦',
+    ja: 'にわか雨',
+    easy: 'ときどき あめ',
+    en: 'Showers'
+  };
+  if (c <= 86) return {
+    icon: '🌨',
+    ja: 'にわか雪',
+    easy: 'ときどき ゆき',
+    en: 'Snow showers'
+  };
+  return {
+    icon: '⛈',
+    ja: '雷雨',
+    easy: 'かみなり・あめ',
+    en: 'Thunderstorm'
+  };
+};
+async function _ev_weatherFor(placeCandidates, dateStr) {
+  const key = 'mg_wx_' + String(placeCandidates[0] || '') + '_' + dateStr;
+  try {
+    const c = sessionStorage.getItem(key);
+    if (c) return JSON.parse(c);
+  } catch (e) {}
+  let geo = null;
+  for (const raw of placeCandidates) {
+    if (!raw) continue;
+    const q = String(raw).replace(/(駅|口|前|集合|広場|公園|ホール|センター|キャンパス).*$/, '').trim();
+    if (q.length < 2) continue;
+    try {
+      const r = await fetch('https://geocoding-api.open-meteo.com/v1/search?name=' + encodeURIComponent(q) + '&count=1&language=ja&format=json');
+      const j = await r.json();
+      if (j && j.results && j.results[0]) {
+        geo = j.results[0];
+        break;
+      }
+    } catch (e) {}
+  }
+  if (!geo) return null;
+  try {
+    const u = 'https://api.open-meteo.com/v1/forecast?latitude=' + geo.latitude + '&longitude=' + geo.longitude + '&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max&timezone=Asia%2FTokyo' + '&start_date=' + dateStr + '&end_date=' + dateStr;
+    const r2 = await fetch(u);
+    const j2 = await r2.json();
+    const d = j2 && j2.daily;
+    if (!d || !d.time || !d.time.length) return null;
+    const out = {
+      code: d.weather_code[0],
+      tmax: Math.round(d.temperature_2m_max[0]),
+      tmin: Math.round(d.temperature_2m_min[0]),
+      pop: d.precipitation_probability_max ? d.precipitation_probability_max[0] : null,
+      place: geo.name || ''
+    };
+    try {
+      sessionStorage.setItem(key, JSON.stringify(out));
+    } catch (e) {}
+    return out;
+  } catch (e) {
+    return null;
+  }
+}
+const _ev_BELONG_ICONS = [[/飲み物|飲料|水筒|ペットボトル|水|ドリンク|drink|water|bottle/i, 'water_full'], [/傘|雨具|カッパ|レインコート|rain|umbrella/i, 'rainy'], [/靴|シューズ|スニーカー|歩きやす|shoe|sneaker/i, 'steps'], [/バッテリー|充電|charger|battery/i, 'battery_charging_full'], [/現金|お金|小銭|円|money|cash|yen/i, 'payments'], [/帽子|ぼうし|hat|cap/i, 'face_retouching_natural'], [/タオル|towel|汗/i, 'dry_cleaning'], [/日焼け|サンスクリーン|sunscreen/i, 'sunny'], [/カメラ|写真|camera|photo/i, 'photo_camera'], [/保険証|身分証|パスポート|在留カード|ID|証明/i, 'badge'], [/チケット|ticket|QR/i, 'confirmation_number'], [/マスク|mask/i, 'masks'], [/薬|くすり|medicine|medication/i, 'medication'], [/弁当|昼食|食べ物|軽食|おやつ|food|lunch|snack/i, 'restaurant'], [/レジャーシート|シート|敷物|sheet|mat/i, 'texture'], [/スマホ|携帯|phone/i, 'smartphone'], [/筆記|ペン|鉛筆|pen|pencil/i, 'edit'], [/ノート|メモ|notebook|note/i, 'menu_book'], [/上着|防寒|羽織|ジャケット|jacket|coat|寒/i, 'apparel'], [/バッグ|かばん|リュック|bag|backpack/i, 'backpack'], [/虫除け|虫よけ|insect/i, 'pest_control'], [/手袋|glove/i, 'front_hand'], [/サングラス|sunglass/i, 'eyeglasses'], [/エコバッグ|袋/i, 'shopping_bag']];
+const _ev_belongIcon = t => {
+  for (const [re, ic] of _ev_BELONG_ICONS) {
+    if (re.test(String(t))) return ic;
+  }
+  return 'check_circle';
+};
+function _ev_Guide({
+  ev,
+  sessions,
+  lang
+}) {
+  const belongings = String(ev.belongings || '').split('\n').map(x => x.trim()).filter(Boolean);
+  const sorted = (sessions || []).filter(x => x && x.date).slice().sort((a, b) => String(a.date).localeCompare(String(b.date)));
+  const withTT = sorted.filter(x => String(x.timetable || '').trim());
+  const n0 = new Date();
+  const todayYmd = n0.getFullYear() + '-' + String(n0.getMonth() + 1).padStart(2, '0') + '-' + String(n0.getDate()).padStart(2, '0');
+  const lim = new Date(n0.getTime() + 15 * 864e5);
+  const limYmd = lim.getFullYear() + '-' + String(lim.getMonth() + 1).padStart(2, '0') + '-' + String(lim.getDate()).padStart(2, '0');
+  const wxDays = sorted.filter(x => x.date >= todayYmd && x.date <= limYmd).slice(0, 4);
+  const [wx, setWx] = React.useState({});
+  React.useEffect(() => {
+    let dead = false;
+    (async () => {
+      for (const s2 of wxDays) {
+        const w = await _ev_weatherFor([s2.venue, ev.address, ev.venue], s2.date);
+        if (dead) return;
+        if (w) setWx(p => ({
+          ...p,
+          [s2.id]: w
+        }));
+      }
+    })();
+    return () => {
+      dead = true;
+    };
+  }, [ev.id, sessions.length]);
+  if (!belongings.length && !withTT.length && !wxDays.length) return null;
+  const H = (jaT, easyT, enT) => lang === 'easy' ? easyT : lang === 'en' ? enT : jaT;
+  const dayN = (s2, i2) => lang === 'easy' ? (Number(s2.order) || i2 + 1) + 'にちめ' : 'Day ' + (Number(s2.order) || i2 + 1);
+  const md = y => (Number(String(y).slice(5, 7)) || '') + '.' + (Number(String(y).slice(8, 10)) || '');
+  return React.createElement("div", {
+    style: {
+      marginTop: 22,
+      paddingTop: 18,
+      borderTop: '1px solid rgba(34,49,74,.14)'
+    }
+  }, React.createElement("div", {
+    className: "mg-ui",
+    style: {
+      fontSize: 10.5,
+      letterSpacing: '.3em',
+      color: 'var(--mg-accent, #35618f)',
+      marginBottom: 4
+    }
+  }, "EVENT GUIDE"), React.createElement("div", {
+    className: "mg-serif",
+    style: {
+      fontSize: 20,
+      lineHeight: 1.4,
+      marginBottom: 14
+    }
+  }, H('イベントガイド', 'イベントの あんない', 'Event guide')), withTT.length > 0 && React.createElement("div", {
+    style: {
+      marginBottom: 16
+    }
+  }, React.createElement("div", {
+    className: "mg-ui",
+    style: {
+      fontSize: 12,
+      fontWeight: 600,
+      color: 'var(--mg-ink3, #3d5877)',
+      marginBottom: 8,
+      display: 'flex',
+      alignItems: 'center',
+      gap: 6
+    }
+  }, React.createElement(Icon, {
+    name: "schedule",
+    size: 16,
+    style: {
+      color: 'var(--mg-accent, #35618f)'
+    }
+  }), H('タイムテーブル', 'じかんの よてい', 'Timetable')), React.createElement("div", {
+    style: {
+      display: 'flex',
+      flexDirection: 'column',
+      gap: 12
+    }
+  }, withTT.map((s2, i2) => {
+    const lines = String(s2.timetable).split('\n').map(x => x.trim()).filter(Boolean);
+    return React.createElement("div", {
+      key: s2.id,
+      className: "mg-card",
+      style: {
+        borderRadius: 22,
+        padding: '16px 18px 14px',
+        overflow: 'hidden',
+        position: 'relative'
+      }
+    }, React.createElement("div", {
+      style: {
+        display: 'flex',
+        alignItems: 'baseline',
+        gap: 10,
+        marginBottom: 12
+      }
+    }, React.createElement("span", {
+      className: "mg-ui",
+      style: {
+        fontSize: 10,
+        fontWeight: 600,
+        letterSpacing: '.1em',
+        color: '#f2f7fc',
+        background: 'linear-gradient(150deg, rgba(53,97,143,.95), rgba(39,76,115,.98))',
+        padding: '3px 10px',
+        borderRadius: 11,
+        flex: 'none'
+      }
+    }, dayN(s2, i2)), React.createElement("span", {
+      className: "mg-num",
+      style: {
+        fontSize: 19,
+        fontStyle: 'italic'
+      }
+    }, md(s2.date)), s2.name ? React.createElement("span", {
+      className: "mg-serif mg-clamp1",
+      style: {
+        fontSize: 13,
+        color: 'var(--mg-ink3, #3d5877)',
+        minWidth: 0
+      }
+    }, s2.name) : null), React.createElement("div", {
+      style: {
+        position: 'relative',
+        paddingLeft: 24
+      }
+    }, React.createElement("div", {
+      "aria-hidden": "true",
+      style: {
+        position: 'absolute',
+        left: 7,
+        top: 10,
+        bottom: 10,
+        width: 2,
+        background: 'linear-gradient(180deg, rgba(53,97,143,.45), rgba(53,97,143,.12))',
+        borderRadius: 1
+      }
+    }), React.createElement("div", {
+      style: {
+        display: 'flex',
+        flexDirection: 'column',
+        gap: 13
+      }
+    }, lines.map((ln, j) => {
+      const m2 = ln.match(/^(\d{1,2}:\d{2})\s*(.*)$/);
+      const isEdge = j === 0 || j === lines.length - 1;
+      return React.createElement("div", {
+        key: j,
+        style: {
+          position: 'relative',
+          display: 'flex',
+          alignItems: 'baseline',
+          gap: 12
+        }
+      }, React.createElement("span", {
+        "aria-hidden": "true",
+        style: {
+          position: 'absolute',
+          left: -24,
+          top: '50%',
+          transform: 'translateY(-50%)',
+          width: isEdge ? 12 : 8,
+          height: isEdge ? 12 : 8,
+          marginLeft: isEdge ? 2 : 4,
+          borderRadius: '50%',
+          background: isEdge ? 'linear-gradient(150deg, rgba(53,97,143,.95), rgba(39,76,115,.98))' : 'rgba(255,255,255,.95)',
+          border: isEdge ? '2px solid rgba(255,255,255,.85)' : '2px solid rgba(53,97,143,.55)',
+          boxShadow: '0 2px 6px rgba(34,49,74,.25)'
+        }
+      }), m2 ? React.createElement("span", {
+        className: "mg-num",
+        style: {
+          flex: 'none',
+          fontSize: 16,
+          fontStyle: 'italic',
+          color: 'var(--mg-ink, #22314a)',
+          width: 52
+        }
+      }, m2[1]) : null, React.createElement("span", {
+        className: "mg-serif",
+        style: {
+          minWidth: 0,
+          fontSize: 13.5,
+          lineHeight: 1.65,
+          color: 'var(--mg-ink2, #2b3d57)'
+        }
+      }, m2 ? m2[2] : ln));
+    }))));
+  }))), belongings.length > 0 && React.createElement("div", {
+    style: {
+      marginBottom: 16
+    }
+  }, React.createElement("div", {
+    className: "mg-ui",
+    style: {
+      fontSize: 12,
+      fontWeight: 600,
+      color: 'var(--mg-ink3, #3d5877)',
+      marginBottom: 8,
+      display: 'flex',
+      alignItems: 'center',
+      gap: 6
+    }
+  }, React.createElement(Icon, {
+    name: "backpack",
+    size: 16,
+    style: {
+      color: 'var(--mg-accent, #35618f)'
+    }
+  }), H('持ち物', 'もってくる もの', 'What to bring')), React.createElement("div", {
+    style: {
+      display: 'grid',
+      gridTemplateColumns: 'repeat(auto-fill, minmax(150px, 1fr))',
+      gap: 9
+    }
+  }, belongings.map((b, i2) => React.createElement("div", {
+    key: i2,
+    className: "mg-card",
+    style: {
+      borderRadius: 18,
+      padding: '11px 12px',
+      display: 'flex',
+      alignItems: 'center',
+      gap: 10
+    }
+  }, React.createElement("span", {
+    style: {
+      width: 36,
+      height: 36,
+      flex: 'none',
+      borderRadius: 12,
+      display: 'inline-flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      background: 'linear-gradient(150deg, rgba(53,97,143,.14), rgba(53,97,143,.05))',
+      border: '1px solid rgba(53,97,143,.18)'
+    }
+  }, React.createElement(Icon, {
+    name: _ev_belongIcon(b),
+    size: 19,
+    style: {
+      color: 'var(--mg-accent, #35618f)'
+    }
+  })), React.createElement("span", {
+    className: "mg-ui",
+    style: {
+      fontSize: 12.5,
+      lineHeight: 1.45,
+      minWidth: 0
+    }
+  }, b))))), wxDays.length > 0 && React.createElement("div", null, React.createElement("div", {
+    className: "mg-ui",
+    style: {
+      fontSize: 12,
+      fontWeight: 600,
+      color: 'var(--mg-ink3, #3d5877)',
+      marginBottom: 8,
+      display: 'flex',
+      alignItems: 'center',
+      gap: 6
+    }
+  }, React.createElement(Icon, {
+    name: "partly_cloudy_day",
+    size: 16,
+    style: {
+      color: 'var(--mg-accent, #35618f)'
+    }
+  }), H('開催地の天気', 'てんき', 'Weather')), React.createElement("div", {
+    style: {
+      display: 'flex',
+      flexDirection: 'column',
+      gap: 6
+    }
+  }, wxDays.map((s2, i2) => {
+    const w = wx[s2.id];
+    const wm = w ? _ev_WMO(w.code) : null;
+    return React.createElement("div", {
+      key: s2.id,
+      style: {
+        display: 'flex',
+        alignItems: 'baseline',
+        gap: 9,
+        fontSize: 12.5,
+        color: 'var(--mg-ink2, #2b3d57)'
+      }
+    }, React.createElement("span", {
+      className: "mg-ui",
+      style: {
+        fontSize: 10.5,
+        fontWeight: 600,
+        letterSpacing: '.06em',
+        color: 'var(--mg-accent, #35618f)',
+        flex: 'none'
+      }
+    }, dayN(s2, sorted.indexOf(s2))), React.createElement("span", {
+      className: "mg-num",
+      style: {
+        fontSize: 13,
+        flex: 'none'
+      }
+    }, md(s2.date)), w ? React.createElement(React.Fragment, null, React.createElement("span", {
+      style: {
+        flex: 'none'
+      }
+    }, wm.icon, " ", wm[lang] || wm.ja), React.createElement("span", {
+      className: "mg-num",
+      style: {
+        fontSize: 13
+      }
+    }, w.tmax, "\xB0 / ", w.tmin, "\xB0"), w.pop != null ? React.createElement("span", {
+      className: "mg-num",
+      style: {
+        fontSize: 12,
+        color: 'var(--mg-ink4, #5b7796)'
+      }
+    }, "\u2614", w.pop, "%") : null) : React.createElement("span", {
+      style: {
+        color: 'var(--mg-ink5, #8ba0b6)'
+      }
+    }, H('取得中…', 'よみこみちゅう…', 'Loading…')));
+  })), React.createElement("div", {
+    style: {
+      fontSize: 10,
+      color: 'var(--mg-ink5, #8ba0b6)',
+      marginTop: 6
+    }
+  }, H('予報: Open-Meteo(変わることがあります)', 'てんきよほうです。かわるかも しれません', 'Forecast by Open-Meteo — may change'))));
+}
 function _ev_feeType(ev, sessions) {
   if (!ev) return '';
   if (ev.feeType) {
@@ -10555,7 +10999,11 @@ function SheetEventDetail({
       }
     }, sym), sym === '✕' ? L(_ev_T.seatsFull) : L(_ev_T.remainPre) + spotsLeft + L(_ev_T.remainPost)) : null, ev.regCloseDate ? React.createElement(_ev_MetaRow, {
       icon: "hourglass_bottom"
-    }, (t.detail && t.detail.meta && t.detail.meta.regClose || '申込締切') + '：' + ev.regCloseDate) : null), easyText ? React.createElement("div", {
+    }, (t.detail && t.detail.meta && t.detail.meta.regClose || '申込締切') + '：' + ev.regCloseDate) : null), myRegsForEvent.length > 0 || window.__mgGuidePreview ? React.createElement(_ev_Guide, {
+      ev: ev,
+      sessions: sessions,
+      lang: lang
+    }) : null, easyText ? React.createElement("div", {
       style: {
         marginTop: 20,
         paddingTop: 16,
