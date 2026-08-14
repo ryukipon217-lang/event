@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-<script>window.__MG_BUILD='20260814010242';</script>
+<script>window.__MG_BUILD='20260814010433';</script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>connec+a — 出会いが、まちを変えていく。</title>
@@ -1373,7 +1373,7 @@ async function postToGAS(action, payload, retryCount) {
   retryCount = retryCount || 0;
   const MAX_RETRIES = 2;
   const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), 60000);
+  const timeoutId = setTimeout(() => controller.abort(), 18000);
   try {
     const res = await fetch(CONFIG.GAS_URL, {
       method: 'POST',
@@ -1407,12 +1407,12 @@ async function postToGAS(action, payload, retryCount) {
   } catch (err) {
     clearTimeout(timeoutId);
     if (err.name === 'AbortError') {
-      if (retryCount < MAX_RETRIES) {
+      if (retryCount < 1) {
         console.warn('[postToGAS] timeout, retrying (attempt ' + (retryCount + 2) + ')');
         await new Promise(r => setTimeout(r, 500));
         return postToGAS(action, payload, retryCount + 1);
       }
-      throw new Error('応答がタイムアウトしました');
+      throw new Error('通信がタイムアウトしました。電波状況を確認して、もう一度お試しください');
     }
     if (err instanceof TypeError && retryCount < MAX_RETRIES) {
       console.warn('[postToGAS] network error, retrying (attempt ' + (retryCount + 2) + ')');
