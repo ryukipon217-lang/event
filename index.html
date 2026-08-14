@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-<script>window.__MG_BUILD='20260814025327';</script>
+<script>window.__MG_BUILD='20260814031223';</script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover">
 <title>connec+a — 出会いが、まちを変えていく。</title>
@@ -9282,12 +9282,23 @@ function _ev_Guide({
 }) {
   const belongings = String(ev.belongings || '').split('\n').map(x => x.trim()).filter(Boolean);
   const sorted = (sessions || []).filter(x => x && x.date).slice().sort((a, b) => String(a.date).localeCompare(String(b.date)));
-  const withTT = sorted.filter(x => String(x.timetable || '').trim());
+  const evEnd = (String(ev.time || '').match(/(\d{1,2}:\d{2})\s*[-〜~‐–]\s*(\d{1,2}:\d{2})/) || [])[2] || '';
+  const days = sorted.length ? sorted : ev.date ? [{
+    id: '_EV0',
+    date: String(ev.date).slice(0, 10),
+    endTime: evEnd,
+    venue: ev.venue,
+    geo: ev.geo || '',
+    timetable: '',
+    order: 1,
+    name: ''
+  }] : [];
   const n0 = new Date();
   const todayYmd = n0.getFullYear() + '-' + String(n0.getMonth() + 1).padStart(2, '0') + '-' + String(n0.getDate()).padStart(2, '0');
   const lim = new Date(n0.getTime() + 15 * 864e5);
   const limYmd = lim.getFullYear() + '-' + String(lim.getMonth() + 1).padStart(2, '0') + '-' + String(lim.getDate()).padStart(2, '0');
-  const wxDays = sorted.filter(x => x.date >= todayYmd && x.date <= limYmd).slice(0, 4);
+  const wxOk = s2 => s2.date >= todayYmd && s2.date <= limYmd;
+  const wxDays = days.filter(wxOk).slice(0, 4);
   const [wx, setWx] = React.useState({});
   React.useEffect(() => {
     let dead = false;
@@ -9305,10 +9316,30 @@ function _ev_Guide({
       dead = true;
     };
   }, [ev.id, sessions.length]);
-  if (!belongings.length && !withTT.length && !wxDays.length) return null;
+  const withTT = days.filter(x => String(x.timetable || '').trim());
   const H = (jaT, easyT, enT) => lang === 'easy' ? easyT : lang === 'en' ? enT : jaT;
   const dayN = (s2, i2) => lang === 'easy' ? (Number(s2.order) || i2 + 1) + 'にちめ' : 'Day ' + (Number(s2.order) || i2 + 1);
   const md = y => (Number(String(y).slice(5, 7)) || '') + '.' + (Number(String(y).slice(8, 10)) || '');
+  const isOver = s2 => mgSessionOver(s2.date, s2.endTime);
+  const liveDays = days.filter(s2 => !isOver(s2));
+  const allOver = days.length > 0 && liveDays.length === 0;
+  const [dayIdx, setDayIdx] = React.useState(0);
+  const pagerRef = React.useRef(null);
+  const goDay = i => {
+    setDayIdx(i);
+    const el = pagerRef.current;
+    if (el) el.scrollTo({
+      left: i * el.clientWidth,
+      behavior: 'smooth'
+    });
+  };
+  const onPagerScroll = e => {
+    const el = e.currentTarget;
+    const i = Math.round(el.scrollLeft / Math.max(1, el.clientWidth));
+    if (i !== dayIdx && i >= 0 && i < liveDays.length) setDayIdx(i);
+  };
+  if (!belongings.length && !withTT.length && !wxDays.length) return null;
+  const hasPager = liveDays.length > 0 && (withTT.length > 0 || wxDays.length > 0);
   return React.createElement("div", {
     style: {
       marginTop: 22,
@@ -9330,37 +9361,118 @@ function _ev_Guide({
       lineHeight: 1.4,
       marginBottom: 14
     }
-  }, H('イベントガイド', 'イベントの あんない', 'Event guide')), withTT.length > 0 && React.createElement("div", {
+  }, H('イベントガイド', 'イベントの あんない', 'Event guide')), allOver && React.createElement("div", {
+    className: "mg-card",
     style: {
-      marginBottom: 16
+      borderRadius: 16,
+      padding: '12px 16px',
+      marginBottom: 16,
+      display: 'flex',
+      alignItems: 'center',
+      gap: 8,
+      background: 'rgba(120,134,155,.10)'
     }
-  }, React.createElement("div", {
+  }, React.createElement(Icon, {
+    name: "check_circle",
+    size: 16,
+    style: {
+      color: 'var(--mg-ink4, #5b7796)'
+    }
+  }), React.createElement("span", {
     className: "mg-ui",
     style: {
       fontSize: 12,
       fontWeight: 600,
-      color: 'var(--mg-ink3, #3d5877)',
-      marginBottom: 8,
-      display: 'flex',
-      alignItems: 'center',
-      gap: 6
+      color: 'var(--mg-ink3, #3d5877)'
     }
-  }, React.createElement(Icon, {
-    name: "schedule",
-    size: 16,
+  }, H('このイベントは終了しました', 'この イベントは おわりました', 'This event has ended'))), hasPager && React.createElement("div", {
     style: {
-      color: 'var(--mg-accent, #35618f)'
+      marginBottom: 16
     }
-  }), H('タイムテーブル', 'じかんの よてい', 'Timetable')), React.createElement("div", {
+  }, liveDays.length > 1 && React.createElement("div", {
     style: {
       display: 'flex',
-      flexDirection: 'column',
-      gap: 12
+      gap: 8,
+      marginBottom: 10,
+      flexWrap: 'wrap'
     }
-  }, withTT.map((s2, i2) => {
-    const lines = String(s2.timetable).split('\n').map(x => x.trim()).filter(Boolean);
+  }, liveDays.map((s2, i2) => {
+    const act = i2 === dayIdx;
+    return React.createElement("button", {
+      key: s2.id,
+      type: "button",
+      onClick: () => goDay(i2),
+      className: "mg-ui",
+      style: {
+        appearance: 'none',
+        border: act ? '1px solid transparent' : '1px solid rgba(53,97,143,.28)',
+        background: act ? 'linear-gradient(150deg, rgba(53,97,143,.95), rgba(39,76,115,.98))' : 'rgba(255,255,255,.6)',
+        color: act ? '#f2f7fc' : 'var(--mg-ink3, #3d5877)',
+        borderRadius: 999,
+        padding: '6px 13px',
+        fontSize: 11.5,
+        fontWeight: 600,
+        letterSpacing: '.04em',
+        display: 'inline-flex',
+        alignItems: 'baseline',
+        gap: 6,
+        cursor: 'pointer',
+        boxShadow: act ? '0 3px 10px rgba(34,49,74,.22)' : 'none'
+      }
+    }, React.createElement("span", null, dayN(s2, i2)), React.createElement("span", {
+      className: "mg-num",
+      style: {
+        fontSize: 12,
+        fontStyle: 'italic'
+      }
+    }, md(s2.date)));
+  })), React.createElement("div", {
+    ref: pagerRef,
+    onScroll: onPagerScroll,
+    className: "mg-hidebar",
+    style: {
+      display: 'flex',
+      overflowX: 'auto',
+      scrollSnapType: 'x mandatory',
+      WebkitOverflowScrolling: 'touch',
+      margin: '0 -6px'
+    }
+  }, liveDays.map((s2, i2) => {
+    const lines = String(s2.timetable || '').split('\n').map(x => x.trim()).filter(Boolean);
+    const w = wx[s2.id];
+    const wm = w ? _ev_WMO(w.code) : null;
     return React.createElement("div", {
       key: s2.id,
+      style: {
+        flex: '0 0 100%',
+        minWidth: 0,
+        scrollSnapAlign: 'start',
+        scrollSnapStop: 'always',
+        padding: '0 6px',
+        boxSizing: 'border-box'
+      }
+    }, lines.length > 0 ? React.createElement("div", {
+      style: {
+        marginBottom: 12
+      }
+    }, React.createElement("div", {
+      className: "mg-ui",
+      style: {
+        fontSize: 12,
+        fontWeight: 600,
+        color: 'var(--mg-ink3, #3d5877)',
+        marginBottom: 8,
+        display: 'flex',
+        alignItems: 'center',
+        gap: 6
+      }
+    }, React.createElement(Icon, {
+      name: "schedule",
+      size: 16,
+      style: {
+        color: 'var(--mg-accent, #35618f)'
+      }
+    }), H('タイムテーブル', 'じかんの よてい', 'Timetable')), React.createElement("div", {
       className: "mg-card",
       style: {
         borderRadius: 22,
@@ -9466,97 +9578,24 @@ function _ev_Guide({
           color: 'var(--mg-ink2, #2b3d57)'
         }
       }, m2 ? m2[2] : ln));
-    }))));
-  }))), belongings.length > 0 && React.createElement("div", {
-    style: {
-      marginBottom: 16
-    }
-  }, React.createElement("div", {
-    className: "mg-ui",
-    style: {
-      fontSize: 12,
-      fontWeight: 600,
-      color: 'var(--mg-ink3, #3d5877)',
-      marginBottom: 8,
-      display: 'flex',
-      alignItems: 'center',
-      gap: 6
-    }
-  }, React.createElement(Icon, {
-    name: "backpack",
-    size: 16,
-    style: {
-      color: 'var(--mg-accent, #35618f)'
-    }
-  }), H('持ち物', 'もってくる もの', 'What to bring')), React.createElement("div", {
-    style: {
-      display: 'grid',
-      gridTemplateColumns: 'repeat(auto-fill, minmax(150px, 1fr))',
-      gap: 9
-    }
-  }, belongings.map((b, i2) => React.createElement("div", {
-    key: i2,
-    className: "mg-card",
-    style: {
-      borderRadius: 18,
-      padding: '11px 12px',
-      display: 'flex',
-      alignItems: 'center',
-      gap: 10
-    }
-  }, React.createElement("span", {
-    style: {
-      width: 36,
-      height: 36,
-      flex: 'none',
-      borderRadius: 12,
-      display: 'inline-flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      background: 'linear-gradient(150deg, rgba(53,97,143,.14), rgba(53,97,143,.05))',
-      border: '1px solid rgba(53,97,143,.18)'
-    }
-  }, React.createElement(Icon, {
-    name: _ev_belongIcon(b),
-    size: 19,
-    style: {
-      color: 'var(--mg-accent, #35618f)'
-    }
-  })), React.createElement("span", {
-    className: "mg-ui",
-    style: {
-      fontSize: 12.5,
-      lineHeight: 1.45,
-      minWidth: 0
-    }
-  }, b))))), wxDays.length > 0 && React.createElement("div", null, React.createElement("div", {
-    className: "mg-ui",
-    style: {
-      fontSize: 12,
-      fontWeight: 600,
-      color: 'var(--mg-ink3, #3d5877)',
-      marginBottom: 8,
-      display: 'flex',
-      alignItems: 'center',
-      gap: 6
-    }
-  }, React.createElement(Icon, {
-    name: "partly_cloudy_day",
-    size: 16,
-    style: {
-      color: 'var(--mg-accent, #35618f)'
-    }
-  }), H('開催地の天気', 'てんき', 'Weather')), React.createElement("div", {
-    style: {
-      display: 'grid',
-      gridTemplateColumns: wxDays.length > 1 ? '1fr 1fr' : '1fr',
-      gap: 10
-    }
-  }, wxDays.map(s2 => {
-    const w = wx[s2.id];
-    const wm = w ? _ev_WMO(w.code) : null;
-    return React.createElement("div", {
-      key: s2.id,
+    }))))) : null, wxOk(s2) ? React.createElement("div", null, React.createElement("div", {
+      className: "mg-ui",
+      style: {
+        fontSize: 12,
+        fontWeight: 600,
+        color: 'var(--mg-ink3, #3d5877)',
+        marginBottom: 8,
+        display: 'flex',
+        alignItems: 'center',
+        gap: 6
+      }
+    }, React.createElement(Icon, {
+      name: "partly_cloudy_day",
+      size: 16,
+      style: {
+        color: 'var(--mg-accent, #35618f)'
+      }
+    }), H('開催地の天気', 'てんき', 'Weather')), React.createElement("div", {
       className: "mg-card",
       style: {
         borderRadius: 20,
@@ -9575,28 +9614,7 @@ function _ev_Guide({
       style: {
         position: 'relative'
       }
-    }, React.createElement("div", {
-      style: {
-        display: 'flex',
-        alignItems: 'baseline',
-        gap: 7,
-        marginBottom: 8
-      }
-    }, React.createElement("span", {
-      className: "mg-ui",
-      style: {
-        fontSize: 10,
-        fontWeight: 600,
-        letterSpacing: '.08em',
-        color: 'var(--mg-accent, #35618f)'
-      }
-    }, dayN(s2, sorted.indexOf(s2))), React.createElement("span", {
-      className: "mg-num",
-      style: {
-        fontSize: 14,
-        fontStyle: 'italic'
-      }
-    }, md(s2.date))), w ? React.createElement("div", {
+    }, w ? React.createElement("div", {
       style: {
         display: 'flex',
         alignItems: 'center',
@@ -9658,20 +9676,97 @@ function _ev_Guide({
       style: {
         color: '#4a7bd0'
       }
-    }), w.pop, "%") : null))) : React.createElement("div", {
+    }), w.pop, "%") : null)), React.createElement("span", {
+      className: "mg-num",
+      style: {
+        marginLeft: 'auto',
+        fontSize: 13,
+        fontStyle: 'italic',
+        color: 'var(--mg-ink4, #5b7796)',
+        alignSelf: 'flex-start'
+      }
+    }, md(s2.date))) : React.createElement("div", {
       style: {
         fontSize: 12,
         color: 'var(--mg-ink5, #8ba0b6)',
         padding: '10px 0'
       }
-    }, H('取得中…', 'よみこみちゅう…', 'Loading…'))));
-  })), React.createElement("div", {
+    }, H('取得中…', 'よみこみちゅう…', 'Loading…'))))) : null, !lines.length && !wxOk(s2) ? React.createElement("div", {
+      style: {
+        fontSize: 12,
+        color: 'var(--mg-ink5, #8ba0b6)',
+        padding: '8px 2px'
+      }
+    }, H('開催が近づくと、タイムテーブルや天気がここに表示されます。', 'ちかくなったら じかんや てんきが でます。', 'Timetable and weather will appear closer to the date.')) : null);
+  })), wxDays.length > 0 ? React.createElement("div", {
     style: {
       fontSize: 10,
       color: 'var(--mg-ink5, #8ba0b6)',
       marginTop: 6
     }
-  }, H('予報: Open-Meteo(変わることがあります)', 'てんきよほうです。かわるかも しれません', 'Forecast by Open-Meteo — may change'))));
+  }, H('予報: Open-Meteo(変わることがあります)', 'てんきよほうです。かわるかも しれません', 'Forecast by Open-Meteo — may change')) : null), !allOver && belongings.length > 0 && React.createElement("div", {
+    style: {
+      marginBottom: 16
+    }
+  }, React.createElement("div", {
+    className: "mg-ui",
+    style: {
+      fontSize: 12,
+      fontWeight: 600,
+      color: 'var(--mg-ink3, #3d5877)',
+      marginBottom: 8,
+      display: 'flex',
+      alignItems: 'center',
+      gap: 6
+    }
+  }, React.createElement(Icon, {
+    name: "backpack",
+    size: 16,
+    style: {
+      color: 'var(--mg-accent, #35618f)'
+    }
+  }), H('持ち物', 'もってくる もの', 'What to bring')), React.createElement("div", {
+    style: {
+      display: 'grid',
+      gridTemplateColumns: 'repeat(auto-fill, minmax(150px, 1fr))',
+      gap: 9
+    }
+  }, belongings.map((b, i2) => React.createElement("div", {
+    key: i2,
+    className: "mg-card",
+    style: {
+      borderRadius: 18,
+      padding: '11px 12px',
+      display: 'flex',
+      alignItems: 'center',
+      gap: 10
+    }
+  }, React.createElement("span", {
+    style: {
+      width: 36,
+      height: 36,
+      flex: 'none',
+      borderRadius: 12,
+      display: 'inline-flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      background: 'linear-gradient(150deg, rgba(53,97,143,.14), rgba(53,97,143,.05))',
+      border: '1px solid rgba(53,97,143,.18)'
+    }
+  }, React.createElement(Icon, {
+    name: _ev_belongIcon(b),
+    size: 19,
+    style: {
+      color: 'var(--mg-accent, #35618f)'
+    }
+  })), React.createElement("span", {
+    className: "mg-ui",
+    style: {
+      fontSize: 12.5,
+      lineHeight: 1.45,
+      minWidth: 0
+    }
+  }, b))))));
 }
 function _ev_feeType(ev, sessions) {
   if (!ev) return '';
@@ -10645,7 +10740,17 @@ function SheetEventDetail({
   const myReg = React.useMemo(() => (Array.isArray(myRegs) ? myRegs.find(r => r.eventId === eventId && _ev_isActiveReg(r)) : null) || null, [myRegs, eventId]);
   const myRegsForEvent = React.useMemo(() => Array.isArray(myRegs) ? myRegs.filter(r => r.eventId === eventId && _ev_isActiveReg(r)) : [], [myRegs, eventId]);
   const alreadyRegistered = !!myReg;
-  const regMode = myRegsForEvent.length > 0;
+  const guideHasContent = React.useMemo(() => {
+    if (String(ev && ev.belongings || '').trim()) return true;
+    if ((sessions || []).some(s => String(s.timetable || '').trim())) return true;
+    const n = new Date();
+    const t = n.getFullYear() + '-' + String(n.getMonth() + 1).padStart(2, '0') + '-' + String(n.getDate()).padStart(2, '0');
+    const lim = new Date(n.getTime() + 15 * 864e5);
+    const lm = lim.getFullYear() + '-' + String(lim.getMonth() + 1).padStart(2, '0') + '-' + String(lim.getDate()).padStart(2, '0');
+    const dts = (sessions && sessions.length ? sessions.map(s => String(s.date || '').slice(0, 10)) : [String(ev && ev.date || '').slice(0, 10)]).filter(Boolean);
+    return dts.some(d => d >= t && d <= lm);
+  }, [ev, sessions]);
+  const regMode = myRegsForEvent.length > 0 && guideHasContent;
   const sessionStates = React.useMemo(() => {
     const map = {};
     if (!Array.isArray(myRegs) || !sessions) return map;
