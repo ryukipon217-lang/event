@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-<script>window.__MG_BUILD='20260815051345';</script>
+<script>window.__MG_BUILD='20260815053454';</script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover">
 <title>connec+a — 出会いが、まちを変えていく。</title>
@@ -23339,6 +23339,13 @@ function _info_TownWeather({
   };
   const t0 = days[0],
     m0 = wmo(t0.code);
+  const wkMax = Math.max.apply(null, days.map(function (d) {
+    return d.tmax;
+  }));
+  const wkMin = Math.min.apply(null, days.map(function (d) {
+    return d.tmin;
+  }));
+  const wkRange = wkMax > wkMin ? wkMax - wkMin : 1;
   return React.createElement("div", null, React.createElement("div", {
     style: {
       display: 'flex',
@@ -23414,53 +23421,79 @@ function _info_TownWeather({
     }
   }), t0.pop, "%") : null))), React.createElement("div", {
     style: {
-      display: 'flex',
-      gap: 3,
-      marginTop: 10
+      marginTop: 8
     }
-  }, days.map((d, i) => React.createElement("div", {
-    key: i,
-    style: {
-      flex: '1 0 0',
-      minWidth: 0,
-      display: 'flex',
-      flexDirection: 'column',
-      alignItems: 'center',
-      gap: 3,
-      padding: '9px 1px',
-      borderRadius: 13,
-      background: i === 0 ? 'rgba(110,134,224,.15)' : 'rgba(255,255,255,.42)'
-    }
-  }, React.createElement("span", {
-    style: {
-      fontSize: 11.5,
-      fontWeight: 600,
-      color: i === 0 ? 'var(--mg-accent, #6e86e0)' : 'var(--mg-ink4, #5b7796)'
-    }
-  }, i === 0 ? H('今日', 'きょう', 'Now') : dow(d.date)), React.createElement("span", {
-    "aria-hidden": "true",
-    style: {
-      width: 38,
-      height: 38,
-      display: 'inline-block'
-    },
-    dangerouslySetInnerHTML: {
-      __html: svgFor(d.code)
-    }
-  }), React.createElement("span", {
-    className: "mg-num",
-    style: {
-      fontSize: 14,
-      fontWeight: 600,
-      color: 'var(--mg-ink, #22314a)'
-    }
-  }, d.tmax, "\xB0"), React.createElement("span", {
-    className: "mg-num",
-    style: {
-      fontSize: 11.5,
-      color: 'var(--mg-ink5, #8ba0b6)'
-    }
-  }, d.tmin, "\xB0")))));
+  }, days.map((d, i) => {
+    const loPct = (d.tmin - wkMin) / wkRange * 100;
+    const hiPct = (wkMax - d.tmax) / wkRange * 100;
+    return React.createElement("div", {
+      key: i,
+      style: {
+        display: 'flex',
+        alignItems: 'center',
+        gap: 10,
+        padding: '8px 6px',
+        borderTop: i ? '1px solid rgba(34,49,74,.06)' : 'none'
+      }
+    }, React.createElement("span", {
+      style: {
+        width: 36,
+        flex: 'none',
+        fontSize: 13,
+        fontWeight: i === 0 ? 700 : 500,
+        color: i === 0 ? 'var(--mg-accent, #6e86e0)' : 'var(--mg-ink2, #33456a)'
+      }
+    }, i === 0 ? H('今日', 'きょう', 'Now') : dow(d.date)), React.createElement("span", {
+      "aria-hidden": "true",
+      style: {
+        width: 30,
+        height: 30,
+        flex: 'none',
+        display: 'inline-block'
+      },
+      dangerouslySetInnerHTML: {
+        __html: svgFor(d.code)
+      }
+    }), React.createElement("span", {
+      className: "mg-num",
+      style: {
+        width: 30,
+        flex: 'none',
+        textAlign: 'right',
+        fontSize: 13,
+        color: 'var(--mg-ink5, #8ba0b6)'
+      }
+    }, d.tmin, "\xB0"), React.createElement("span", {
+      style: {
+        flex: 1,
+        height: 6,
+        borderRadius: 3,
+        background: 'rgba(34,49,74,.08)',
+        position: 'relative',
+        minWidth: 40
+      }
+    }, React.createElement("span", {
+      style: {
+        position: 'absolute',
+        left: loPct + '%',
+        right: hiPct + '%',
+        top: 0,
+        height: 6,
+        borderRadius: 3,
+        background: 'linear-gradient(90deg, #86b3ea, #cbb0e0 55%, #efb2c8)'
+      }
+    })), React.createElement("span", {
+      className: "mg-num",
+      style: {
+        width: 30,
+        flex: 'none',
+        textAlign: 'right',
+        fontSize: 13.5,
+        fontWeight: 700,
+        color: 'var(--mg-ink, #22314a)'
+      }
+    }, d.tmax, "\xB0"));
+  })));
 }
 const _TOWN_KANTO = ['東京都', '神奈川県', '埼玉県', '千葉県', '茨城県', '栃木県', '群馬県'];
 const _TOWN_YAHOO_AREA = {
