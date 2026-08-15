@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-<script>window.__MG_BUILD='20260815005334';</script>
+<script>window.__MG_BUILD='20260815010000';</script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover">
 <title>connec+a — 出会いが、まちを変えていく。</title>
@@ -8213,39 +8213,137 @@ function _home_WeatherChip({
     style: {
       color: 'var(--mg-accent, #6e86e0)'
     }
-  })) : null), open && detail && hours.length > 0 ? React.createElement("div", {
+  })) : null), React.createElement(SheetShell, {
+    open: open && detail,
+    onClose: () => setDetail(false),
+    z: 90,
+    height: "560px",
+    header: React.createElement("div", {
+      style: {
+        display: 'flex',
+        alignItems: 'center',
+        gap: 9,
+        minWidth: 0
+      }
+    }, svg ? React.createElement("span", {
+      "aria-hidden": "true",
+      style: {
+        width: 26,
+        height: 26,
+        flex: 'none',
+        display: 'inline-block'
+      },
+      dangerouslySetInnerHTML: {
+        __html: svg
+      }
+    }) : React.createElement(Icon, {
+      name: "partly_cloudy_day",
+      size: 18,
+      style: {
+        color: 'var(--mg-accent, #35618f)'
+      }
+    }), React.createElement("span", {
+      className: "mg-serif",
+      style: {
+        fontSize: 18,
+        color: 'var(--mg-ink, #22314a)'
+      }
+    }, regionLabel, " \xB7 ", H('今日の天気', 'きょうの てんき', 'Today')))
+  }, React.createElement("div", {
+    style: {
+      padding: '4px 20px 30px'
+    }
+  }, wx ? React.createElement("div", {
     className: "mg-card",
     style: {
-      position: 'absolute',
-      top: 58,
-      right: 0,
-      width: 262,
-      borderRadius: 20,
-      padding: '13px 14px',
-      zIndex: 8,
-      animation: 'mgLineUp .3s cubic-bezier(.16,1,.3,1) both'
+      borderRadius: 22,
+      padding: '18px 20px',
+      marginBottom: 16,
+      display: 'flex',
+      alignItems: 'center',
+      gap: 14
+    }
+  }, React.createElement("span", {
+    "aria-hidden": "true",
+    style: {
+      width: 76,
+      height: 76,
+      flex: 'none',
+      display: 'inline-block',
+      margin: '-8px -6px'
+    },
+    dangerouslySetInnerHTML: {
+      __html: svg
+    }
+  }), React.createElement("div", {
+    style: {
+      minWidth: 0
     }
   }, React.createElement("div", {
     className: "mg-ui",
     style: {
-      fontSize: 11,
+      fontSize: 14,
+      fontWeight: 600,
+      color: 'var(--mg-ink2, #2b3d57)'
+    }
+  }, cond), React.createElement("div", {
+    style: {
+      display: 'flex',
+      alignItems: 'baseline',
+      gap: 10,
+      marginTop: 4
+    }
+  }, React.createElement("span", {
+    className: "mg-num",
+    style: {
+      fontSize: 40,
+      lineHeight: 1
+    }
+  }, wx.tmax, "\xB0", React.createElement("span", {
+    style: {
+      fontSize: 18,
+      color: 'var(--mg-ink4, #5b7796)'
+    }
+  }, " / ", wx.tmin, "\xB0")), wx.pop != null ? React.createElement("span", {
+    className: "mg-num",
+    style: {
+      fontSize: 15,
+      color: '#4a7bd0',
+      display: 'inline-flex',
+      alignItems: 'center',
+      gap: 3
+    }
+  }, React.createElement(Icon, {
+    name: "water_drop",
+    size: 16,
+    fill: true,
+    style: {
+      color: '#4a7bd0'
+    }
+  }), wx.pop, "%") : null))) : null, hours.length > 0 ? React.createElement(React.Fragment, null, React.createElement("div", {
+    className: "mg-ui",
+    style: {
+      fontSize: 12,
       fontWeight: 600,
       color: 'var(--mg-ink3, #3d5877)',
-      marginBottom: 9,
+      marginBottom: 10,
       display: 'flex',
       alignItems: 'center',
       gap: 6
     }
   }, React.createElement(Icon, {
     name: "schedule",
-    size: 15,
+    size: 16,
     style: {
       color: 'var(--mg-accent, #35618f)'
     }
-  }), regionLabel, " \xB7 ", H('今日の天気', 'きょうの てんき', 'Today')), React.createElement("div", {
+  }), H('時間ごとの天気', 'じかんごとの てんき', 'Hourly')), React.createElement("div", {
+    className: "mg-card",
     style: {
+      borderRadius: 20,
+      padding: '16px 14px',
       display: 'flex',
-      gap: 5,
+      gap: 6,
       justifyContent: 'space-between'
     }
   }, hours.map((h, i) => {
@@ -8259,19 +8357,19 @@ function _home_WeatherChip({
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
-        gap: 2
+        gap: 4
       }
     }, React.createElement("span", {
       className: "mg-num",
       style: {
-        fontSize: 11,
-        color: 'var(--mg-ink4, #5b7796)'
+        fontSize: 13,
+        color: 'var(--mg-ink3, #3d5877)'
       }
     }, h.hm), React.createElement("span", {
       "aria-hidden": "true",
       style: {
-        width: 30,
-        height: 30,
+        width: 40,
+        height: 40,
         display: 'inline-block'
       },
       dangerouslySetInnerHTML: {
@@ -8280,17 +8378,23 @@ function _home_WeatherChip({
     }), React.createElement("span", {
       className: "mg-num",
       style: {
-        fontSize: 13,
+        fontSize: 16,
         color: 'var(--mg-ink, #22314a)'
       }
     }, h.temp, "\xB0"), h.pop != null && h.pop >= 30 ? React.createElement("span", {
       className: "mg-num",
       style: {
-        fontSize: 9,
+        fontSize: 11,
         color: '#4a7bd0'
       }
     }, h.pop, "%") : null);
-  }))) : null);
+  })), React.createElement("div", {
+    style: {
+      fontSize: 10.5,
+      color: 'var(--mg-ink5, #8ba0b6)',
+      marginTop: 8
+    }
+  }, H('予報: Open-Meteo(変わることがあります)', 'てんきよほう。かわるかも', 'Forecast by Open-Meteo'))) : null)));
 }
 function _home_NotifBell({
   news,
