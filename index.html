@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-<script>window.__MG_BUILD='20260815053454';</script>
+<script>window.__MG_BUILD='20260815054523';</script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover">
 <title>connec+a — 出会いが、まちを変えていく。</title>
@@ -23570,100 +23570,127 @@ function _town_TrainLive({
       dead = true;
     };
   }, []);
-  if (!done) return React.createElement("div", {
-    style: {
-      padding: '12px 14px',
-      fontSize: 12.5,
-      color: 'var(--mg-ink5, #8ba0b6)'
-    }
-  }, T({
-    ja: '運行情報を確認中…',
-    easy: 'うんこう じょうほう を かくにんちゅう…',
-    en: 'Checking service status…'
-  }));
-  const src = data && data.source;
-  if (!data || src === 'nokey' || src === 'error') return null;
-  const lines = Array.isArray(data.lines) ? data.lines : [];
-  if (!lines.length) {
-    return React.createElement("div", {
+  let inner = null;
+  if (!done) {
+    inner = React.createElement("div", {
       style: {
-        display: 'flex',
-        alignItems: 'center',
-        gap: 9,
-        padding: '13px 14px'
-      }
-    }, React.createElement("span", {
-      style: {
-        width: 9,
-        height: 9,
-        borderRadius: 5,
-        background: '#3fae7a',
-        flex: 'none',
-        boxShadow: '0 0 0 4px rgba(63,174,122,.16)'
-      }
-    }), React.createElement("span", {
-      style: {
-        flex: 1,
-        fontSize: 13,
-        color: 'var(--mg-ink2, #33456a)',
-        fontWeight: 600
+        padding: '13px 15px',
+        fontSize: 12.5,
+        color: 'var(--mg-ink5, #8ba0b6)'
       }
     }, T({
-      ja: '現在、大きな遅れはありません',
-      easy: 'いま、おおきな おくれ は ありません',
-      en: 'No major delays right now'
-    })));
+      ja: '運行情報を確認中…',
+      easy: 'うんこう じょうほう を かくにんちゅう…',
+      en: 'Checking service status…'
+    }));
+  } else {
+    const src = data && data.source;
+    if (!data || src === 'nokey' || src === 'error') return null;
+    const lines = Array.isArray(data.lines) ? data.lines : [];
+    if (!lines.length) {
+      inner = React.createElement("div", {
+        style: {
+          display: 'flex',
+          alignItems: 'center',
+          gap: 10,
+          padding: '14px 15px'
+        }
+      }, React.createElement("span", {
+        style: {
+          width: 9,
+          height: 9,
+          borderRadius: 5,
+          background: '#3fae7a',
+          flex: 'none',
+          boxShadow: '0 0 0 4px rgba(63,174,122,.16)'
+        }
+      }), React.createElement("span", {
+        style: {
+          flex: 1,
+          fontSize: 13,
+          color: 'var(--mg-ink2, #33456a)',
+          fontWeight: 600
+        }
+      }, T({
+        ja: '現在、大きな遅れはありません',
+        easy: 'いま、おおきな おくれ は ありません',
+        en: 'No major delays right now'
+      })), React.createElement(Icon, {
+        name: "train",
+        size: 16,
+        style: {
+          color: 'var(--mg-ink5, #8ba0b6)',
+          flex: 'none'
+        }
+      }));
+    } else {
+      inner = React.createElement("div", null, lines.slice(0, 8).map((ln, i) => React.createElement("div", {
+        key: i,
+        style: {
+          display: 'flex',
+          gap: 10,
+          padding: '11px 15px',
+          borderTop: i ? '1px solid rgba(34,49,74,.06)' : 'none'
+        }
+      }, React.createElement("span", {
+        style: {
+          width: 26,
+          height: 26,
+          borderRadius: 8,
+          flex: 'none',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          background: 'rgba(224,145,47,.15)',
+          marginTop: 1
+        }
+      }, React.createElement(Icon, {
+        name: "warning",
+        size: 15,
+        fill: true,
+        style: {
+          color: '#e0912f'
+        }
+      })), React.createElement("div", {
+        style: {
+          flex: 1,
+          minWidth: 0
+        }
+      }, React.createElement("div", {
+        style: {
+          fontSize: 12.5,
+          fontWeight: 700,
+          color: 'var(--mg-ink, #22314a)'
+        }
+      }, lang === 'en' ? ln.railwayEn || ln.railwayJa : ln.railwayJa, ln.statusJa && lang !== 'en' ? '・' + ln.statusJa : ''), React.createElement("div", {
+        style: {
+          fontSize: 11.5,
+          color: 'var(--mg-ink3, #3d5877)',
+          lineHeight: 1.5,
+          marginTop: 1
+        }
+      }, lang === 'en' ? ln.textEn || ln.textJa : ln.textJa)))), lines.length > 8 ? React.createElement("div", {
+        style: {
+          fontSize: 11,
+          color: 'var(--mg-ink5, #8ba0b6)',
+          padding: '6px 15px 3px'
+        }
+      }, T({
+        ja: 'ほか ' + (lines.length - 8) + ' 路線',
+        easy: 'ほか ' + (lines.length - 8) + ' ろせん',
+        en: '+' + (lines.length - 8) + ' more lines'
+      })) : null);
+    }
   }
+  if (!inner) return null;
   return React.createElement("div", {
+    className: "mg-card",
     style: {
-      padding: '2px 0'
+      borderRadius: 18,
+      overflow: 'hidden',
+      marginBottom: 10
     }
-  }, lines.slice(0, 8).map((ln, i) => React.createElement("div", {
-    key: i,
-    style: {
-      display: 'flex',
-      gap: 9,
-      padding: '10px 14px',
-      borderTop: i ? '1px solid rgba(34,49,74,.07)' : 'none'
-    }
-  }, React.createElement(Icon, {
-    name: "warning",
-    size: 17,
-    fill: true,
-    style: {
-      color: '#e0912f',
-      flex: 'none',
-      marginTop: 1
-    }
-  }), React.createElement("div", {
-    style: {
-      flex: 1,
-      minWidth: 0
-    }
-  }, React.createElement("div", {
-    style: {
-      fontSize: 12.5,
-      fontWeight: 700,
-      color: 'var(--mg-ink, #22314a)'
-    }
-  }, lang === 'en' ? ln.railwayEn || ln.railwayJa : ln.railwayJa, ln.statusJa && lang !== 'en' ? '・' + ln.statusJa : ''), React.createElement("div", {
-    style: {
-      fontSize: 11.5,
-      color: 'var(--mg-ink3, #3d5877)',
-      lineHeight: 1.5,
-      marginTop: 1
-    }
-  }, lang === 'en' ? ln.textEn || ln.textJa : ln.textJa)))), lines.length > 8 ? React.createElement("div", {
-    style: {
-      fontSize: 11,
-      color: 'var(--mg-ink5, #8ba0b6)',
-      padding: '5px 14px 2px'
-    }
-  }, T({
-    ja: 'ほか ' + (lines.length - 8) + ' 路線',
-    easy: 'ほか ' + (lines.length - 8) + ' ろせん',
-    en: '+' + (lines.length - 8) + ' more lines'
-  })) : null);
+  }, inner);
 }
 function PageTown() {
   const A = useMg() || {};
@@ -23684,7 +23711,11 @@ function PageTown() {
       easy: 'でんしゃ の うんこう じょうほう',
       en: 'Train status'
     },
-    url: _town_trainUrl(_u.prefecture, _cityFull)
+    url: _town_trainUrl(_u.prefecture, _cityFull),
+    tint: {
+      bg: 'rgba(74,123,208,.14)',
+      fg: '#3f7fd0'
+    }
   }, {
     ic: 'directions_car',
     label: {
@@ -23692,94 +23723,131 @@ function PageTown() {
       easy: 'どうろ の こうつう じょうほう',
       en: 'Road traffic'
     },
-    url: _q(transitArea + ' 道路 交通情報')
+    url: _q(transitArea + ' 道路 交通情報'),
+    tint: {
+      bg: 'rgba(110,130,160,.16)',
+      fg: '#5b7796'
+    }
   }];
   const townLinks = [{
     ic: 'account_balance',
     label: {
-      ja: '市区町村の窓口（公式サイト）',
-      easy: 'やくしょ の こうしきサイト',
-      en: 'City / ward office (official)'
+      ja: '市区町村の窓口',
+      easy: 'やくしょ の まどぐち',
+      en: 'City / ward office'
     },
-    url: _cRec && _cRec[4] ? _cRec[4] : _q(_cityFull + ' 公式サイト')
+    url: _cRec && _cRec[4] ? _cRec[4] : _q(_cityFull + ' 公式サイト'),
+    tint: {
+      bg: 'rgba(110,134,224,.15)',
+      fg: '#5a6dd0'
+    }
   }, {
     ic: 'delete',
     label: {
       ja: 'ゴミの出し方・分別',
-      easy: 'ゴミ の だしかた・わけかた',
+      easy: 'ゴミ の だしかた',
       en: 'Garbage & recycling'
     },
-    url: _q(_cityFull + ' ゴミ 分別 ' + (lang === 'en' ? 'multilingual' : '外国語'))
+    url: _q(_cityFull + ' ゴミ 分別 ' + (lang === 'en' ? 'multilingual' : '外国語')),
+    tint: {
+      bg: 'rgba(63,174,122,.15)',
+      fg: '#2f9d6f'
+    }
   }, {
     ic: 'volunteer_activism',
     label: {
       ja: '外国人向け生活ガイド',
-      easy: 'がいこくじん の せいかつガイド',
-      en: 'Life guide for residents'
+      easy: 'せいかつ ガイド',
+      en: 'Life guide'
     },
-    url: _q(_cityFull + ' 外国人 生活ガイド')
+    url: _q(_cityFull + ' 外国人 生活ガイド'),
+    tint: {
+      bg: 'rgba(230,140,175,.17)',
+      fg: '#c8618f'
+    }
   }, {
     ic: 'festival',
     label: {
-      ja: 'まちのイベント・お祭り',
-      easy: 'まち の イベント・おまつり',
-      en: 'Local events & festivals'
+      ja: 'イベント・お祭り',
+      easy: 'イベント・おまつり',
+      en: 'Events & festivals'
     },
-    url: _q(_cityFull + ' イベント 祭り')
+    url: _q(_cityFull + ' イベント 祭り'),
+    tint: {
+      bg: 'rgba(224,160,60,.16)',
+      fg: '#c07a1e'
+    }
   }];
-  const Row = (t, i) => React.createElement("a", {
+  const Tile = (t, i, labelOverride) => React.createElement("a", {
     key: i,
     href: t.url,
     target: "_blank",
     rel: "noopener noreferrer",
     className: "mg-tap",
     style: {
+      position: 'relative',
+      display: 'flex',
+      flexDirection: 'column',
+      gap: 10,
+      padding: '15px 14px 14px',
+      borderRadius: 18,
+      background: 'linear-gradient(160deg, rgba(255,255,255,.95), rgba(255,255,255,.76))',
+      border: '1px solid rgba(255,255,255,.9)',
+      boxShadow: '0 12px 24px rgba(34,49,74,.10)',
+      textDecoration: 'none',
+      color: 'var(--mg-ink, #22314a)'
+    }
+  }, React.createElement("span", {
+    style: {
+      width: 40,
+      height: 40,
+      borderRadius: 13,
+      flex: 'none',
       display: 'flex',
       alignItems: 'center',
-      gap: 11,
-      padding: '13px 14px',
-      textDecoration: 'none',
-      color: 'var(--mg-ink, #22314a)',
-      borderTop: i ? '1px solid rgba(34,49,74,.07)' : 'none'
+      justifyContent: 'center',
+      background: t.tint.bg
     }
   }, React.createElement(Icon, {
     name: t.ic,
-    size: 21,
+    size: 22,
     style: {
-      color: 'var(--mg-accent, #6e86e0)',
-      flex: 'none'
+      color: t.tint.fg
     }
-  }), React.createElement("span", {
+  })), React.createElement("span", {
     style: {
-      flex: 1,
-      minWidth: 0,
-      fontSize: 14
+      fontSize: 13,
+      lineHeight: 1.4,
+      fontWeight: 500,
+      letterSpacing: '.01em'
     }
-  }, T(t.label)), React.createElement(Icon, {
-    name: "open_in_new",
-    size: 16,
+  }, labelOverride || T(t.label)), React.createElement(Icon, {
+    name: "north_east",
+    size: 13,
     style: {
+      position: 'absolute',
+      top: 14,
+      right: 14,
       color: 'var(--mg-ink5, #8ba0b6)',
-      flex: 'none'
+      opacity: 0.7
     }
   }));
-  const Section = (labelObj, rows) => React.createElement("div", {
+  const TileGrid = (labelObj, items) => React.createElement("div", {
     style: {
       marginBottom: 14
     }
   }, React.createElement("div", {
     className: "mg-label-accent",
     style: {
-      margin: '0 2px 7px'
+      margin: '0 2px 9px'
     }
   }, T(labelObj)), React.createElement("div", {
-    className: "mg-card",
     style: {
-      borderRadius: 20,
-      overflow: 'hidden',
-      padding: 0
+      display: 'grid',
+      gridTemplateColumns: '1fr 1fr',
+      gap: 10
     }
-  }, rows));
+  }, items.map((t, i) => Tile(t, i))));
   return React.createElement("div", {
     className: "mg-ui",
     style: {
@@ -23866,65 +23934,29 @@ function PageTown() {
   }, React.createElement("div", {
     className: "mg-label-accent",
     style: {
-      margin: '0 2px 7px'
+      margin: '0 2px 9px'
     }
   }, T({
     ja: '交通・運行情報',
     easy: 'こうつう・うんこう じょうほう',
     en: 'Transit & traffic'
-  })), React.createElement("div", {
-    className: "mg-card",
-    style: {
-      borderRadius: 20,
-      overflow: 'hidden',
-      padding: 0
-    }
-  }, isKanto ? React.createElement(_town_TrainLive, {
+  })), isKanto ? React.createElement(_town_TrainLive, {
     lang: lang
-  }) : null, transitLinks.map((t, i) => React.createElement("a", {
-    key: i,
-    href: t.url,
-    target: "_blank",
-    rel: "noopener noreferrer",
-    className: "mg-tap",
+  }) : null, React.createElement("div", {
     style: {
-      display: 'flex',
-      alignItems: 'center',
-      gap: 11,
-      padding: '13px 14px',
-      textDecoration: 'none',
-      color: 'var(--mg-ink, #22314a)',
-      borderTop: i || isKanto ? '1px solid rgba(34,49,74,.07)' : 'none'
+      display: 'grid',
+      gridTemplateColumns: '1fr 1fr',
+      gap: 10
     }
-  }, React.createElement(Icon, {
-    name: t.ic,
-    size: 21,
-    style: {
-      color: 'var(--mg-accent, #6e86e0)',
-      flex: 'none'
-    }
-  }), React.createElement("span", {
-    style: {
-      flex: 1,
-      minWidth: 0,
-      fontSize: 14
-    }
-  }, i === 0 && isKanto ? T({
-    ja: '鉄道の運行情報を詳しく',
-    easy: 'でんしゃ の うんこう じょうほう(くわしく)',
-    en: 'Train status — details'
-  }) : T(t.label)), React.createElement(Icon, {
-    name: "open_in_new",
-    size: 16,
-    style: {
-      color: 'var(--mg-ink5, #8ba0b6)',
-      flex: 'none'
-    }
-  }))))), Section({
+  }, transitLinks.map((t, i) => Tile(t, i, i === 0 && isKanto ? T({
+    ja: '運行情報を詳しく',
+    easy: 'うんこう じょうほう(くわしく)',
+    en: 'Train details'
+  }) : null)))), TileGrid({
     ja: 'くらしの窓口',
     easy: 'くらし の まどぐち',
     en: 'Living & services'
-  }, townLinks.map(Row)), React.createElement("div", {
+  }, townLinks), React.createElement("div", {
     style: {
       fontSize: 10.5,
       color: 'var(--mg-ink5, #8ba0b6)',
