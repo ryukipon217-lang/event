@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-<script>window.__MG_BUILD='20260815012800';</script>
+<script>window.__MG_BUILD='20260815013649';</script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover">
 <title>connec+a — 出会いが、まちを変えていく。</title>
@@ -10231,7 +10231,7 @@ function _ev_WxCard({
 }
 const _EV_WX_TTL = 3600e3;
 function _ev_wxKey(place, dateStr, geoStr, startTime, endTime) {
-  return 'mg_wx3_' + String(geoStr || place || '') + '_' + dateStr + '_' + (startTime || '') + '_' + (endTime || '');
+  return 'mg_wx4_' + String(geoStr || place || '') + '_' + dateStr + '_' + (startTime || '') + '_' + (endTime || '');
 }
 function _ev_wxRead(key) {
   try {
@@ -10329,6 +10329,26 @@ async function _ev_weatherFor(placeCandidates, dateStr, geoStr, startTime, endTi
           pop: hourly.precipitation_probability ? hourly.precipitation_probability[bi] : null
         };
       }).filter(Boolean);
+    }
+    if (out.hours && out.hours.length) {
+      const sev = cc => {
+        const c = Number(cc);
+        if (c >= 95) return 7;
+        if (c >= 71 && c <= 77 || c >= 85) return 6;
+        if (c >= 61 && c <= 67 || c >= 80 && c <= 82) return 5;
+        if (c >= 51 && c <= 57) return 4;
+        if (c === 45 || c === 48) return 3;
+        if (c === 3) return 2;
+        if (c === 1 || c === 2) return 1;
+        return 0;
+      };
+      let best = out.hours[0];
+      for (const h of out.hours) {
+        if (sev(h.code) * 1000 + (h.pop || 0) > sev(best.code) * 1000 + (best.pop || 0)) best = h;
+      }
+      out.code = best.code;
+      const pops = out.hours.map(h => h.pop == null ? null : Number(h.pop)).filter(v => v != null);
+      if (pops.length) out.pop = Math.max.apply(null, pops);
     }
     out.win = {
       s: startTime || '',
