@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-<script>window.__MG_BUILD='20260815012119';</script>
+<script>window.__MG_BUILD='20260815012459';</script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover">
 <title>connec+a — 出会いが、まちを変えていく。</title>
@@ -8359,14 +8359,14 @@ function _home_WeatherChip({
     }, React.createElement("span", {
       className: "mg-num",
       style: {
-        fontSize: 13,
+        fontSize: 14,
         color: 'var(--mg-ink3, #3d5877)'
       }
-    }, h.hm), React.createElement("span", {
+    }, parseInt(String(h.hm).slice(0, 2), 10), lang === 'en' ? '' : '時'), React.createElement("span", {
       "aria-hidden": "true",
       style: {
-        width: 40,
-        height: 40,
+        width: 42,
+        height: 42,
         display: 'inline-block'
       },
       dangerouslySetInnerHTML: {
@@ -8375,13 +8375,14 @@ function _home_WeatherChip({
     }), React.createElement("span", {
       className: "mg-num",
       style: {
-        fontSize: 16,
+        fontSize: 23,
+        lineHeight: 1,
         color: 'var(--mg-ink, #22314a)'
       }
     }, h.temp, "\xB0"), h.pop != null && h.pop >= 30 ? React.createElement("span", {
       className: "mg-num",
       style: {
-        fontSize: 11,
+        fontSize: 12,
         color: '#4a7bd0'
       }
     }, h.pop, "%") : null);
@@ -10190,7 +10191,7 @@ function _ev_WxCard({
         fontWeight: on ? 700 : 500,
         color: on ? 'var(--mg-ink, #22314a)' : 'var(--mg-ink3, #3d5877)'
       }
-    }, h.hm), React.createElement("span", {
+    }, parseInt(String(h.hm).slice(0, 2), 10), lang === 'en' ? '' : '時'), React.createElement("span", {
       "aria-hidden": "true",
       style: {
         width: 42,
@@ -10205,7 +10206,8 @@ function _ev_WxCard({
     }), React.createElement("span", {
       className: "mg-num",
       style: {
-        fontSize: 17,
+        fontSize: 22,
+        lineHeight: 1,
         color: on ? 'var(--mg-ink, #22314a)' : 'var(--mg-ink4, #5b7796)'
       }
     }, h.temp, "\xB0"), h.pop != null && h.pop >= 30 ? React.createElement("span", {
