@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-<script>window.__MG_BUILD='20260815024055';</script>
+<script>window.__MG_BUILD='20260815030134';</script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover">
 <title>connec+a — 出会いが、まちを変えていく。</title>
@@ -10471,6 +10471,34 @@ async function _ev_weatherFor(placeCandidates, dateStr, geoStr, startTime, endTi
   } catch (e) {
     const stale = _ev_wxRead(key);
     return stale && stale.__stale ? stale.d : null;
+  }
+}
+async function _ev_weeklyFor(lat, lng) {
+  if (lat == null || lng == null || typeof _ev_wxKey !== 'function') return null;
+  const key = 'mg_wk1_' + lat + ',' + lng;
+  const cached = _ev_wxRead(key);
+  if (cached && !cached.__stale) return cached;
+  try {
+    const u = 'https://api.open-meteo.com/v1/forecast?latitude=' + lat + '&longitude=' + lng + '&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max&timezone=Asia%2FTokyo&forecast_days=7';
+    const r = await fetch(u);
+    const j = await r.json();
+    const d = j && j.daily;
+    if (!d || !d.time || !d.time.length) return cached && cached.__stale ? cached.d : null;
+    const days = d.time.map((t, i) => ({
+      date: t,
+      code: d.weather_code[i],
+      tmax: Math.round(d.temperature_2m_max[i]),
+      tmin: Math.round(d.temperature_2m_min[i]),
+      pop: d.precipitation_probability_max ? d.precipitation_probability_max[i] : null
+    }));
+    const out = {
+      days
+    };
+    _ev_wxWrite(key, out);
+    return out;
+  } catch (e) {
+    const s = _ev_wxRead(key);
+    return s && s.__stale ? s.d : null;
   }
 }
 const _ev_BELONG = [{
@@ -23248,6 +23276,153 @@ function _info_ArticleSheet({
     }
   }, body));
 }
+const _INFO_DOW = {
+  ja: ['日', '月', '火', '水', '木', '金', '土'],
+  en: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
+};
+function _info_TownWeather({
+  rec,
+  lang
+}) {
+  const H = (ja, easy, en) => lang === 'easy' ? easy : lang === 'en' ? en : ja;
+  const lat = rec ? rec[2] : null,
+    lng = rec ? rec[3] : null;
+  const [wk, setWk] = React.useState(() => {
+    try {
+      if (lat == null || typeof _ev_wxRead !== 'function') return null;
+      const c = _ev_wxRead('mg_wk1_' + lat + ',' + lng);
+      return c ? c.__stale ? c.d : c : null;
+    } catch (e) {
+      return null;
+    }
+  });
+  React.useEffect(() => {
+    if (lat == null || typeof _ev_weeklyFor !== 'function') return undefined;
+    let dead = false;
+    (async () => {
+      const w = await _ev_weeklyFor(lat, lng);
+      if (!dead && w) setWk(w);
+    })();
+    return () => {
+      dead = true;
+    };
+  }, [lat, lng]);
+  const days = wk && Array.isArray(wk.days) ? wk.days : [];
+  if (!days.length) return null;
+  const dow = dstr => {
+    const d = new Date(dstr + 'T00:00:00+09:00');
+    const arr = _INFO_DOW[lang === 'en' ? 'en' : 'ja'];
+    return arr[d.getDay()];
+  };
+  const wmo = code => typeof _ev_WMO === 'function' ? _ev_WMO(code) : null;
+  const svgFor = code => {
+    const m = wmo(code);
+    return m && typeof _ev_WX_SVG !== 'undefined' ? _ev_WX_SVG[m.mi] || '' : '';
+  };
+  const t0 = days[0],
+    m0 = wmo(t0.code);
+  return React.createElement("div", {
+    style: {
+      marginBottom: 10
+    }
+  }, React.createElement("div", {
+    style: {
+      display: 'flex',
+      alignItems: 'center',
+      gap: 12,
+      padding: '10px 12px',
+      borderRadius: 16,
+      background: 'rgba(255,255,255,.55)'
+    }
+  }, React.createElement("span", {
+    "aria-hidden": "true",
+    style: {
+      width: 46,
+      height: 46,
+      flex: 'none',
+      display: 'inline-block'
+    },
+    dangerouslySetInnerHTML: {
+      __html: svgFor(t0.code)
+    }
+  }), React.createElement("div", {
+    style: {
+      flex: 1,
+      minWidth: 0
+    }
+  }, React.createElement("div", {
+    style: {
+      fontSize: 12,
+      color: 'var(--mg-ink4, #5b7796)'
+    }
+  }, H('今日', 'きょう', 'Today'), m0 ? ' · ' + (m0[lang] || m0.ja) : ''), React.createElement("div", {
+    className: "mg-num",
+    style: {
+      fontSize: 20,
+      lineHeight: 1.1,
+      color: 'var(--mg-ink, #22314a)'
+    }
+  }, t0.tmax, "\xB0", React.createElement("span", {
+    style: {
+      fontSize: 13,
+      color: 'var(--mg-ink4, #5b7796)'
+    }
+  }, " / ", t0.tmin, "\xB0"), t0.pop != null ? React.createElement("span", {
+    className: "mg-num",
+    style: {
+      fontSize: 12,
+      color: '#4a7bd0',
+      marginLeft: 8
+    }
+  }, "\u2602", t0.pop, "%") : null))), React.createElement("div", {
+    style: {
+      display: 'flex',
+      gap: 4,
+      marginTop: 6,
+      overflowX: 'auto'
+    }
+  }, days.map((d, i) => React.createElement("div", {
+    key: i,
+    style: {
+      flex: '1 0 0',
+      minWidth: 40,
+      display: 'flex',
+      flexDirection: 'column',
+      alignItems: 'center',
+      gap: 2,
+      padding: '6px 2px',
+      borderRadius: 12,
+      background: i === 0 ? 'rgba(110,134,224,.12)' : 'transparent'
+    }
+  }, React.createElement("span", {
+    style: {
+      fontSize: 10.5,
+      color: 'var(--mg-ink4, #5b7796)'
+    }
+  }, i === 0 ? H('今日', 'きょう', 'Now') : dow(d.date)), React.createElement("span", {
+    "aria-hidden": "true",
+    style: {
+      width: 26,
+      height: 26,
+      display: 'inline-block'
+    },
+    dangerouslySetInnerHTML: {
+      __html: svgFor(d.code)
+    }
+  }), React.createElement("span", {
+    className: "mg-num",
+    style: {
+      fontSize: 11.5,
+      color: 'var(--mg-ink, #22314a)'
+    }
+  }, d.tmax, "\xB0"), React.createElement("span", {
+    className: "mg-num",
+    style: {
+      fontSize: 10,
+      color: 'var(--mg-ink5, #8ba0b6)'
+    }
+  }, d.tmin, "\xB0")))));
+}
 function TabLife() {
   const A = useMg() || {};
   const lang = A.lang || 'ja';
@@ -23301,6 +23476,24 @@ function TabLife() {
       en: 'Local events & festivals'
     },
     url: _q(_cityFull + ' イベント 祭り')
+  }] : [];
+  const _transitArea = _u.prefecture || _cityFull;
+  const transitLinks = _u.city ? [{
+    ic: 'train',
+    label: {
+      ja: '鉄道の運行情報',
+      easy: 'でんしゃ の うんこう じょうほう',
+      en: 'Train status'
+    },
+    url: _q(_transitArea + ' 電車 運行情報')
+  }, {
+    ic: 'directions_car',
+    label: {
+      ja: '道路の交通情報',
+      easy: 'どうろ の こうつう じょうほう',
+      en: 'Road traffic'
+    },
+    url: _q(_transitArea + ' 道路 交通情報')
   }] : [];
   useEffect(() => {
     if (A.tab !== 2 && article) setArticle(null);
@@ -23496,9 +23689,75 @@ function TabLife() {
     className: "mg-card",
     style: {
       borderRadius: 22,
-      padding: 6,
+      padding: 12
+    }
+  }, _cRec ? React.createElement(_info_TownWeather, {
+    rec: _cRec,
+    lang: lang
+  }) : null, React.createElement("div", {
+    className: "mg-label-accent",
+    style: {
+      margin: '10px 2px 6px'
+    }
+  }, _info_text(lang, {
+    ja: '交通・運行情報',
+    easy: 'こうつう・うんこう じょうほう',
+    en: 'Transit & traffic'
+  })), React.createElement("div", {
+    style: {
+      borderRadius: 14,
+      overflow: 'hidden',
+      background: 'rgba(255,255,255,.5)'
+    }
+  }, transitLinks.map((t, i) => React.createElement("a", {
+    key: i,
+    href: t.url,
+    target: "_blank",
+    rel: "noopener noreferrer",
+    className: "mg-tap",
+    style: {
       display: 'flex',
-      flexDirection: 'column'
+      alignItems: 'center',
+      gap: 10,
+      padding: '10px 12px',
+      textDecoration: 'none',
+      color: 'var(--mg-ink, #22314a)',
+      borderTop: i ? '1px solid rgba(34,49,74,.07)' : 'none'
+    }
+  }, React.createElement(Icon, {
+    name: t.ic,
+    size: 19,
+    style: {
+      color: 'var(--mg-accent, #6e86e0)',
+      flex: 'none'
+    }
+  }), React.createElement("span", {
+    style: {
+      flex: 1,
+      minWidth: 0,
+      fontSize: 13.5
+    }
+  }, _info_text(lang, t.label)), React.createElement(Icon, {
+    name: "open_in_new",
+    size: 15,
+    style: {
+      color: 'var(--mg-ink5, #8ba0b6)',
+      flex: 'none'
+    }
+  })))), React.createElement("div", {
+    className: "mg-label-accent",
+    style: {
+      margin: '12px 2px 6px'
+    }
+  }, _info_text(lang, {
+    ja: 'くらしの窓口',
+    easy: 'くらし の まどぐち',
+    en: 'Living & services'
+  })), React.createElement("div", {
+    style: {
+      borderRadius: 14,
+      overflow: 'hidden',
+      background: 'rgba(255,255,255,.5)'
     }
   }, townLinks.map((t, i) => React.createElement("a", {
     key: i,
@@ -23510,7 +23769,7 @@ function TabLife() {
       display: 'flex',
       alignItems: 'center',
       gap: 10,
-      padding: '11px 12px',
+      padding: '10px 12px',
       textDecoration: 'none',
       color: 'var(--mg-ink, #22314a)',
       borderTop: i ? '1px solid rgba(34,49,74,.07)' : 'none'
@@ -23539,13 +23798,13 @@ function TabLife() {
     style: {
       fontSize: 10.5,
       color: 'var(--mg-ink5, #8ba0b6)',
-      margin: '6px 2px 0'
+      margin: '8px 2px 0'
     }
   }, _info_text(lang, {
-    ja: '外部の公式サイト・検索へ移動します',
-    easy: 'そとの こうしきサイト に いきます',
-    en: 'Opens official sites / search'
-  }))) : React.createElement("div", {
+    ja: '天気=Open-Meteo / リンクは外部サイト・検索へ',
+    easy: 'てんき=Open-Meteo / リンクは そとへ',
+    en: 'Weather by Open-Meteo · links open externally'
+  })))) : React.createElement("div", {
     style: {
       padding: '0 18px 4px'
     }
