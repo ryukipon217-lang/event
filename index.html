@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-<script>window.__MG_BUILD='20260815031753';</script>
+<script>window.__MG_BUILD='20260815032336';</script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover">
 <title>connec+a — 出会いが、まちを変えていく。</title>
@@ -23321,24 +23321,20 @@ function _info_TownWeather({
   };
   const t0 = days[0],
     m0 = wmo(t0.code);
-  return React.createElement("div", {
-    style: {
-      marginBottom: 10
-    }
-  }, React.createElement("div", {
+  return React.createElement("div", null, React.createElement("div", {
     style: {
       display: 'flex',
       alignItems: 'center',
-      gap: 12,
-      padding: '10px 12px',
-      borderRadius: 16,
-      background: 'rgba(255,255,255,.55)'
+      gap: 6,
+      padding: '16px 16px 18px',
+      borderRadius: 20,
+      background: 'linear-gradient(150deg, rgba(190,214,244,.5), rgba(244,224,235,.42))'
     }
   }, React.createElement("span", {
     "aria-hidden": "true",
     style: {
-      width: 46,
-      height: 46,
+      width: 96,
+      height: 96,
       flex: 'none',
       display: 'inline-block'
     },
@@ -23352,58 +23348,82 @@ function _info_TownWeather({
     }
   }, React.createElement("div", {
     style: {
-      fontSize: 12,
-      color: 'var(--mg-ink4, #5b7796)'
+      fontSize: 14,
+      color: 'var(--mg-ink3, #3d5877)',
+      fontWeight: 600
     }
   }, H('今日', 'きょう', 'Today'), m0 ? ' · ' + (m0[lang] || m0.ja) : ''), React.createElement("div", {
     className: "mg-num",
     style: {
-      fontSize: 20,
-      lineHeight: 1.1,
-      color: 'var(--mg-ink, #22314a)'
+      fontSize: 54,
+      lineHeight: 1,
+      color: 'var(--mg-ink, #22314a)',
+      marginTop: 3,
+      letterSpacing: '-.02em'
     }
-  }, t0.tmax, "\xB0", React.createElement("span", {
+  }, t0.tmax, React.createElement("span", {
     style: {
-      fontSize: 13,
-      color: 'var(--mg-ink4, #5b7796)'
+      fontSize: 28
     }
-  }, " / ", t0.tmin, "\xB0"), t0.pop != null ? React.createElement("span", {
-    className: "mg-num",
-    style: {
-      fontSize: 12,
-      color: '#4a7bd0',
-      marginLeft: 8
-    }
-  }, "\u2602", t0.pop, "%") : null))), React.createElement("div", {
+  }, "\xB0")), React.createElement("div", {
     style: {
       display: 'flex',
-      gap: 4,
-      marginTop: 6,
-      overflowX: 'auto'
+      alignItems: 'center',
+      gap: 14,
+      marginTop: 6
+    }
+  }, React.createElement("span", {
+    className: "mg-num",
+    style: {
+      fontSize: 14.5,
+      color: 'var(--mg-ink4, #5b7796)'
+    }
+  }, H('最低', 'さいてい', 'Low'), " ", t0.tmin, "\xB0"), t0.pop != null ? React.createElement("span", {
+    className: "mg-num",
+    style: {
+      fontSize: 14.5,
+      color: '#4a7bd0',
+      display: 'inline-flex',
+      alignItems: 'center',
+      gap: 3
+    }
+  }, React.createElement(Icon, {
+    name: "water_drop",
+    size: 16,
+    fill: true,
+    style: {
+      color: '#4a7bd0'
+    }
+  }), t0.pop, "%") : null))), React.createElement("div", {
+    style: {
+      display: 'flex',
+      gap: 3,
+      marginTop: 10
     }
   }, days.map((d, i) => React.createElement("div", {
     key: i,
     style: {
       flex: '1 0 0',
-      minWidth: 40,
+      minWidth: 0,
       display: 'flex',
       flexDirection: 'column',
       alignItems: 'center',
-      gap: 2,
-      padding: '6px 2px',
-      borderRadius: 12,
-      background: i === 0 ? 'rgba(110,134,224,.12)' : 'transparent'
+      gap: 3,
+      padding: '9px 1px',
+      borderRadius: 13,
+      background: i === 0 ? 'rgba(110,134,224,.15)' : 'rgba(255,255,255,.42)'
     }
   }, React.createElement("span", {
     style: {
-      fontSize: 10.5,
-      color: 'var(--mg-ink4, #5b7796)'
+      fontSize: 11.5,
+      fontWeight: 600,
+      color: i === 0 ? 'var(--mg-accent, #6e86e0)' : 'var(--mg-ink4, #5b7796)'
     }
   }, i === 0 ? H('今日', 'きょう', 'Now') : dow(d.date)), React.createElement("span", {
     "aria-hidden": "true",
     style: {
-      width: 26,
-      height: 26,
+      width: 38,
+      height: 38,
       display: 'inline-block'
     },
     dangerouslySetInnerHTML: {
@@ -23412,13 +23432,14 @@ function _info_TownWeather({
   }), React.createElement("span", {
     className: "mg-num",
     style: {
-      fontSize: 11.5,
+      fontSize: 14,
+      fontWeight: 600,
       color: 'var(--mg-ink, #22314a)'
     }
   }, d.tmax, "\xB0"), React.createElement("span", {
     className: "mg-num",
     style: {
-      fontSize: 10,
+      fontSize: 11.5,
       color: 'var(--mg-ink5, #8ba0b6)'
     }
   }, d.tmin, "\xB0")))));
