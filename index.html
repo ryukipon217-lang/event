@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-<script>window.__MG_BUILD='20260815041032';</script>
+<script>window.__MG_BUILD='20260815051345';</script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover">
 <title>connec+a — 出会いが、まちを変えていく。</title>
@@ -23463,6 +23463,58 @@ function _info_TownWeather({
   }, d.tmin, "\xB0")))));
 }
 const _TOWN_KANTO = ['東京都', '神奈川県', '埼玉県', '千葉県', '茨城県', '栃木県', '群馬県'];
+const _TOWN_YAHOO_AREA = {
+  '北海道': 2,
+  '青森県': 3,
+  '岩手県': 3,
+  '宮城県': 3,
+  '秋田県': 3,
+  '山形県': 3,
+  '福島県': 3,
+  '茨城県': 4,
+  '栃木県': 4,
+  '群馬県': 4,
+  '埼玉県': 4,
+  '千葉県': 4,
+  '東京都': 4,
+  '神奈川県': 4,
+  '新潟県': 5,
+  '富山県': 5,
+  '石川県': 5,
+  '福井県': 5,
+  '山梨県': 5,
+  '長野県': 5,
+  '岐阜県': 5,
+  '静岡県': 5,
+  '愛知県': 5,
+  '三重県': 6,
+  '滋賀県': 6,
+  '京都府': 6,
+  '大阪府': 6,
+  '兵庫県': 6,
+  '奈良県': 6,
+  '和歌山県': 6,
+  '鳥取県': 8,
+  '島根県': 8,
+  '岡山県': 8,
+  '広島県': 8,
+  '山口県': 8,
+  '徳島県': 9,
+  '香川県': 9,
+  '愛媛県': 9,
+  '高知県': 9,
+  '福岡県': 7,
+  '佐賀県': 7,
+  '長崎県': 7,
+  '熊本県': 7,
+  '大分県': 7,
+  '宮崎県': 7,
+  '鹿児島県': 7
+};
+function _town_trainUrl(pref, cityFull) {
+  var a = _TOWN_YAHOO_AREA[pref];
+  return a ? 'https://transit.yahoo.co.jp/diainfo/area/' + a : 'https://www.google.com/search?q=' + encodeURIComponent((pref || cityFull) + ' 電車 運行情報');
+}
 function _town_TrainLive({
   lang
 }) {
@@ -23599,7 +23651,7 @@ function PageTown() {
       easy: 'でんしゃ の うんこう じょうほう',
       en: 'Train status'
     },
-    url: _q(transitArea + ' 電車 運行情報')
+    url: _town_trainUrl(_u.prefecture, _cityFull)
   }, {
     ic: 'directions_car',
     label: {
