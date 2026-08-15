@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-<script>window.__MG_BUILD='20260815030134';</script>
+<script>window.__MG_BUILD='20260815031753';</script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover">
 <title>connec+a — 出会いが、まちを変えていく。</title>
@@ -18089,7 +18089,7 @@ function TabMyPage() {
   const regs = A && Array.isArray(A.regs) ? A.regs : [];
   const userKey = user ? user.id || user.userId || user.email || '1' : '';
   useEffect(() => {
-    if (A && A.tab === 3 && userKey) A.refreshRegs(false);
+    if (A && A.tab === 4 && userKey) A.refreshRegs(false);
   }, [A && A.tab, userKey]);
   const [surveys, setSurveys] = useState([]);
   useEffect(() => {
@@ -23423,28 +23423,35 @@ function _info_TownWeather({
     }
   }, d.tmin, "\xB0")))));
 }
-function TabLife() {
+function PageTown() {
   const A = useMg() || {};
   const lang = A.lang || 'ja';
-  const L = o => _info_L(lang, o);
-  const doc = _info_useLifeDoc();
-  const D = React.useMemo(() => _info_resolve(doc), [doc]);
-  const [article, setArticle] = useState(null);
-  const openCat = cat => setArticle({
-    kind: 'cat',
-    cat
-  });
-  const openNews = n => setArticle({
-    kind: 'news',
-    news: n
-  });
-  const disasterCat = D.categories.find(c => c && c.id === 'disaster') || null;
-  const hints = D.news.slice(0, 3);
+  const T = o => _info_text(lang, o);
   const _u = A.user || {};
   const _cRec = typeof mgCityRec === 'function' && _u.prefecture && _u.city ? mgCityRec(_u.prefecture, _u.city) : null;
   const _cityFull = _u.city ? _u.prefecture && _u.prefecture !== _u.city ? _u.prefecture + _u.city : _u.city : '';
   const _q = s => 'https://www.google.com/search?q=' + encodeURIComponent(s);
-  const townLinks = _u.city ? [{
+  const cityDisp = typeof mgCityLabel === 'function' && _u.city ? mgCityLabel(_u.prefecture, _u.city, lang) : _u.city;
+  const prefDisp = typeof mgOptLabel === 'function' && _u.prefecture ? mgOptLabel(_u.prefecture, lang) : _u.prefecture || '';
+  const transitArea = _u.prefecture || _cityFull;
+  const transitLinks = [{
+    ic: 'train',
+    label: {
+      ja: '鉄道の運行情報',
+      easy: 'でんしゃ の うんこう じょうほう',
+      en: 'Train status'
+    },
+    url: _q(transitArea + ' 電車 運行情報')
+  }, {
+    ic: 'directions_car',
+    label: {
+      ja: '道路の交通情報',
+      easy: 'どうろ の こうつう じょうほう',
+      en: 'Road traffic'
+    },
+    url: _q(transitArea + ' 道路 交通情報')
+  }];
+  const townLinks = [{
     ic: 'account_balance',
     label: {
       ja: '市区町村の窓口（公式サイト）',
@@ -23476,27 +23483,239 @@ function TabLife() {
       en: 'Local events & festivals'
     },
     url: _q(_cityFull + ' イベント 祭り')
-  }] : [];
-  const _transitArea = _u.prefecture || _cityFull;
-  const transitLinks = _u.city ? [{
-    ic: 'train',
-    label: {
-      ja: '鉄道の運行情報',
-      easy: 'でんしゃ の うんこう じょうほう',
-      en: 'Train status'
+  }];
+  const Row = (t, i) => React.createElement("a", {
+    key: i,
+    href: t.url,
+    target: "_blank",
+    rel: "noopener noreferrer",
+    className: "mg-tap",
+    style: {
+      display: 'flex',
+      alignItems: 'center',
+      gap: 11,
+      padding: '13px 14px',
+      textDecoration: 'none',
+      color: 'var(--mg-ink, #22314a)',
+      borderTop: i ? '1px solid rgba(34,49,74,.07)' : 'none'
+    }
+  }, React.createElement(Icon, {
+    name: t.ic,
+    size: 21,
+    style: {
+      color: 'var(--mg-accent, #6e86e0)',
+      flex: 'none'
+    }
+  }), React.createElement("span", {
+    style: {
+      flex: 1,
+      minWidth: 0,
+      fontSize: 14
+    }
+  }, T(t.label)), React.createElement(Icon, {
+    name: "open_in_new",
+    size: 16,
+    style: {
+      color: 'var(--mg-ink5, #8ba0b6)',
+      flex: 'none'
+    }
+  }));
+  const Section = (labelObj, rows) => React.createElement("div", {
+    style: {
+      marginBottom: 14
+    }
+  }, React.createElement("div", {
+    className: "mg-label-accent",
+    style: {
+      margin: '0 2px 7px'
+    }
+  }, T(labelObj)), React.createElement("div", {
+    className: "mg-card",
+    style: {
+      borderRadius: 20,
+      overflow: 'hidden',
+      padding: 0
+    }
+  }, rows));
+  return React.createElement("div", {
+    className: "mg-ui",
+    style: {
+      color: 'var(--mg-ink, #22314a)'
+    }
+  }, React.createElement("div", {
+    style: {
+      height: 112
     },
-    url: _q(_transitArea + ' 電車 運行情報')
-  }, {
-    ic: 'directions_car',
-    label: {
-      ja: '道路の交通情報',
-      easy: 'どうろ の こうつう じょうほう',
-      en: 'Road traffic'
+    "aria-hidden": "true"
+  }), React.createElement("div", {
+    style: {
+      padding: '0 22px 14px'
+    }
+  }, React.createElement("div", {
+    className: "mg-h-tab mg-onphoto"
+  }, T({
+    ja: 'あなたのまち',
+    easy: 'あなた の まち',
+    en: 'Your town'
+  })), _u.city ? React.createElement("div", {
+    style: {
+      marginTop: 9
+    }
+  }, React.createElement("span", {
+    style: {
+      display: 'inline-flex',
+      alignItems: 'center',
+      gap: 5,
+      padding: '7px 14px',
+      borderRadius: 16,
+      background: 'rgba(255,255,255,.9)',
+      border: '1px solid rgba(255,255,255,.9)',
+      boxShadow: '0 8px 18px rgba(34,49,74,.16)',
+      fontSize: 12.5,
+      color: 'var(--mg-ink2, #33456a)'
+    }
+  }, React.createElement(Icon, {
+    name: "location_on",
+    size: 15,
+    style: {
+      color: 'var(--mg-accent, #6e86e0)'
+    }
+  }), prefDisp ? prefDisp + ' ' : '', cityDisp)) : null), _u.city ? React.createElement("div", {
+    style: {
+      padding: '0 18px 22px'
+    }
+  }, React.createElement("div", {
+    style: {
+      marginBottom: 14
+    }
+  }, React.createElement("div", {
+    className: "mg-label-accent",
+    style: {
+      margin: '0 2px 7px'
+    }
+  }, T({
+    ja: '天気・週間予報',
+    easy: 'てんき・しゅうかん よほう',
+    en: 'Weather & 7-day'
+  })), React.createElement("div", {
+    className: "mg-card",
+    style: {
+      borderRadius: 20,
+      padding: 12
+    }
+  }, _cRec ? React.createElement(_info_TownWeather, {
+    rec: _cRec,
+    lang: lang
+  }) : React.createElement("div", {
+    style: {
+      fontSize: 12,
+      color: 'var(--mg-ink5, #8ba0b6)',
+      padding: '8px 4px'
+    }
+  }, T({
+    ja: '天気を取得中…',
+    easy: 'てんき を よみこみちゅう…',
+    en: 'Loading weather…'
+  })))), Section({
+    ja: '交通・運行情報',
+    easy: 'こうつう・うんこう じょうほう',
+    en: 'Transit & traffic'
+  }, transitLinks.map(Row)), Section({
+    ja: 'くらしの窓口',
+    easy: 'くらし の まどぐち',
+    en: 'Living & services'
+  }, townLinks.map(Row)), React.createElement("div", {
+    style: {
+      fontSize: 10.5,
+      color: 'var(--mg-ink5, #8ba0b6)',
+      margin: '2px 2px 0'
+    }
+  }, T({
+    ja: '天気=Open-Meteo / リンクは外部サイト・検索へ移動します',
+    easy: 'てんき=Open-Meteo / リンクは そとへ',
+    en: 'Weather by Open-Meteo · links open externally'
+  }))) : React.createElement("div", {
+    style: {
+      padding: '0 22px'
+    }
+  }, React.createElement("div", {
+    className: "mg-card",
+    style: {
+      borderRadius: 24,
+      padding: '30px 24px',
+      textAlign: 'center'
+    }
+  }, React.createElement(Icon, {
+    name: "add_location_alt",
+    size: 42,
+    style: {
+      color: 'var(--mg-accent, #6e86e0)'
+    }
+  }), React.createElement("div", {
+    className: "mg-serif",
+    style: {
+      fontSize: 18,
+      marginTop: 12
+    }
+  }, T({
+    ja: 'あなたのまちを登録',
+    easy: 'あなた の まち を とうろく',
+    en: 'Set your town'
+  })), React.createElement("div", {
+    style: {
+      fontSize: 12.5,
+      color: 'var(--mg-ink4, #5b7796)',
+      marginTop: 8,
+      lineHeight: 1.6
+    }
+  }, T({
+    ja: 'プロフィールで市区町村を選ぶと、天気・週間予報・運行情報・まちの窓口がここに出ます。',
+    easy: 'プロフィール で しくちょうそん を えらぶ と、てんき や まち の じょうほう が でます。',
+    en: 'Choose your city in your profile to see weather, forecast, transit and local links here.'
+  })), React.createElement("button", {
+    type: "button",
+    className: "mg-tap",
+    onClick: () => {
+      if (A.user && A.openSheet) A.openSheet('profileEdit');else if (A.go) A.go('/mypage');
     },
-    url: _q(_transitArea + ' 道路 交通情報')
-  }] : [];
+    style: {
+      marginTop: 16,
+      appearance: 'none',
+      border: 0,
+      cursor: 'pointer',
+      padding: '11px 22px',
+      borderRadius: 22,
+      color: '#fff',
+      fontSize: 13.5,
+      fontWeight: 700,
+      background: 'linear-gradient(140deg, #7ba6ec 0%, #9f8fe0 55%, #e6a6c6 100%)',
+      boxShadow: '0 8px 18px rgba(110,134,224,.4)'
+    }
+  }, T({
+    ja: 'プロフィールで設定',
+    easy: 'プロフィール で せってい',
+    en: 'Set in profile'
+  })))));
+}
+function TabLife() {
+  const A = useMg() || {};
+  const lang = A.lang || 'ja';
+  const L = o => _info_L(lang, o);
+  const doc = _info_useLifeDoc();
+  const D = React.useMemo(() => _info_resolve(doc), [doc]);
+  const [article, setArticle] = useState(null);
+  const openCat = cat => setArticle({
+    kind: 'cat',
+    cat
+  });
+  const openNews = n => setArticle({
+    kind: 'news',
+    news: n
+  });
+  const disasterCat = D.categories.find(c => c && c.id === 'disaster') || null;
+  const hints = D.news.slice(0, 3);
   useEffect(() => {
-    if (A.tab !== 2 && article) setArticle(null);
+    if (A.tab !== 3 && article) setArticle(null);
   }, [A.tab]);
   return React.createElement("div", {
     className: "mg-ui",
@@ -23658,199 +23877,7 @@ function TabLife() {
       color: 'var(--mg-ink4, #5b7796)',
       flex: 'none'
     }
-  })) : null)), townLinks.length > 0 ? React.createElement("div", {
-    style: {
-      padding: '0 18px 4px'
-    }
-  }, React.createElement("div", {
-    style: {
-      display: 'flex',
-      alignItems: 'center',
-      gap: 6,
-      margin: '0 2px 8px'
-    }
-  }, React.createElement(Icon, {
-    name: "location_on",
-    size: 17,
-    style: {
-      color: 'var(--mg-accent, #6e86e0)',
-      flex: 'none'
-    }
-  }), React.createElement("span", {
-    className: "mg-serif mg-clamp1",
-    style: {
-      fontSize: 15
-    }
-  }, _info_text(lang, {
-    ja: 'あなたのまち',
-    easy: 'あなた の まち',
-    en: 'Your city'
-  }), "\u30FB", typeof mgCityLabel === 'function' ? mgCityLabel(_u.prefecture, _u.city, lang) : _u.city)), React.createElement("div", {
-    className: "mg-card",
-    style: {
-      borderRadius: 22,
-      padding: 12
-    }
-  }, _cRec ? React.createElement(_info_TownWeather, {
-    rec: _cRec,
-    lang: lang
-  }) : null, React.createElement("div", {
-    className: "mg-label-accent",
-    style: {
-      margin: '10px 2px 6px'
-    }
-  }, _info_text(lang, {
-    ja: '交通・運行情報',
-    easy: 'こうつう・うんこう じょうほう',
-    en: 'Transit & traffic'
-  })), React.createElement("div", {
-    style: {
-      borderRadius: 14,
-      overflow: 'hidden',
-      background: 'rgba(255,255,255,.5)'
-    }
-  }, transitLinks.map((t, i) => React.createElement("a", {
-    key: i,
-    href: t.url,
-    target: "_blank",
-    rel: "noopener noreferrer",
-    className: "mg-tap",
-    style: {
-      display: 'flex',
-      alignItems: 'center',
-      gap: 10,
-      padding: '10px 12px',
-      textDecoration: 'none',
-      color: 'var(--mg-ink, #22314a)',
-      borderTop: i ? '1px solid rgba(34,49,74,.07)' : 'none'
-    }
-  }, React.createElement(Icon, {
-    name: t.ic,
-    size: 19,
-    style: {
-      color: 'var(--mg-accent, #6e86e0)',
-      flex: 'none'
-    }
-  }), React.createElement("span", {
-    style: {
-      flex: 1,
-      minWidth: 0,
-      fontSize: 13.5
-    }
-  }, _info_text(lang, t.label)), React.createElement(Icon, {
-    name: "open_in_new",
-    size: 15,
-    style: {
-      color: 'var(--mg-ink5, #8ba0b6)',
-      flex: 'none'
-    }
-  })))), React.createElement("div", {
-    className: "mg-label-accent",
-    style: {
-      margin: '12px 2px 6px'
-    }
-  }, _info_text(lang, {
-    ja: 'くらしの窓口',
-    easy: 'くらし の まどぐち',
-    en: 'Living & services'
-  })), React.createElement("div", {
-    style: {
-      borderRadius: 14,
-      overflow: 'hidden',
-      background: 'rgba(255,255,255,.5)'
-    }
-  }, townLinks.map((t, i) => React.createElement("a", {
-    key: i,
-    href: t.url,
-    target: "_blank",
-    rel: "noopener noreferrer",
-    className: "mg-tap",
-    style: {
-      display: 'flex',
-      alignItems: 'center',
-      gap: 10,
-      padding: '10px 12px',
-      textDecoration: 'none',
-      color: 'var(--mg-ink, #22314a)',
-      borderTop: i ? '1px solid rgba(34,49,74,.07)' : 'none'
-    }
-  }, React.createElement(Icon, {
-    name: t.ic,
-    size: 19,
-    style: {
-      color: 'var(--mg-accent, #6e86e0)',
-      flex: 'none'
-    }
-  }), React.createElement("span", {
-    style: {
-      flex: 1,
-      minWidth: 0,
-      fontSize: 13.5
-    }
-  }, _info_text(lang, t.label)), React.createElement(Icon, {
-    name: "open_in_new",
-    size: 15,
-    style: {
-      color: 'var(--mg-ink5, #8ba0b6)',
-      flex: 'none'
-    }
-  })))), React.createElement("div", {
-    style: {
-      fontSize: 10.5,
-      color: 'var(--mg-ink5, #8ba0b6)',
-      margin: '8px 2px 0'
-    }
-  }, _info_text(lang, {
-    ja: '天気=Open-Meteo / リンクは外部サイト・検索へ',
-    easy: 'てんき=Open-Meteo / リンクは そとへ',
-    en: 'Weather by Open-Meteo · links open externally'
-  })))) : React.createElement("div", {
-    style: {
-      padding: '0 18px 4px'
-    }
-  }, React.createElement("div", {
-    className: "mg-tap",
-    onClick: () => {
-      try {
-        A.go('/mypage');
-      } catch (e) {}
-    },
-    style: {
-      display: 'flex',
-      alignItems: 'center',
-      gap: 8,
-      padding: '11px 14px',
-      borderRadius: 18,
-      cursor: 'pointer',
-      background: 'rgba(255,255,255,.5)',
-      border: '1px dashed rgba(110,134,224,.5)',
-      fontSize: 12,
-      color: 'var(--mg-ink3, #3d5877)'
-    }
-  }, React.createElement(Icon, {
-    name: "add_location_alt",
-    size: 17,
-    style: {
-      color: 'var(--mg-accent, #6e86e0)',
-      flex: 'none'
-    }
-  }), React.createElement("span", {
-    style: {
-      flex: 1,
-      minWidth: 0
-    }
-  }, _info_text(lang, {
-    ja: 'プロフィールで市区町村を選ぶと、あなたのまちの情報が出ます',
-    easy: 'プロフィール で しくちょうそん を えらぶ と、まち の じょうほう が でます',
-    en: 'Set your city in your profile to see local info'
-  })), React.createElement(Icon, {
-    name: "chevron_right",
-    size: 16,
-    style: {
-      color: 'var(--mg-ink4, #5b7796)',
-      flex: 'none'
-    }
-  }))), D.categories.length === 0 ? React.createElement("div", {
+  })) : null)), D.categories.length === 0 ? React.createElement("div", {
     style: {
       padding: '0 18px'
     }
@@ -29645,7 +29672,7 @@ const MgCtx = React.createContext(null);
 function useMg() {
   return React.useContext(MgCtx);
 }
-const _shell_TAB_PATHS = ['/', '/events', '/life', '/mypage'];
+const _shell_TAB_PATHS = ['/', '/events', '/town', '/life', '/mypage'];
 const _shell_EMPTY_BUNDLE = {
   events: [],
   news: [],
@@ -29747,11 +29774,14 @@ function _shell_parseHash() {
       }
     };
   }
-  if (seg[0] === 'life') return {
+  if (seg[0] === 'town') return {
     tab: 2
   };
-  if (seg[0] === 'mypage') return {
+  if (seg[0] === 'life') return {
     tab: 3
+  };
+  if (seg[0] === 'mypage') return {
+    tab: 4
   };
   if (seg[0] === 'news') {
     if (seg[1]) return {
@@ -29776,7 +29806,7 @@ function _shell_parseHash() {
     }
   };
   if (seg[0] === 'ticket' && seg[1]) return {
-    tab: 3,
+    tab: 4,
     sheet: {
       name: 'ticket',
       props: {
@@ -30155,6 +30185,14 @@ function MgTabBar({
       en: 'Events'
     }
   }, {
+    icon: 'location_city',
+    label: {
+      ja: 'まち',
+      easy: 'まち',
+      en: 'Town'
+    },
+    center: true
+  }, {
     icon: 'menu_book',
     label: {
       ja: '生活',
@@ -30175,13 +30213,12 @@ function MgTabBar({
       position: 'fixed',
       left: '50%',
       bottom: 'calc(14px + env(safe-area-inset-bottom) - var(--mg-vp-gap, 0px))',
-      width: 'min(390px, calc(100vw - 40px))',
+      width: 'min(408px, calc(100vw - 28px))',
       height: 64,
       borderRadius: 32,
       zIndex: 40,
       transform: hidden ? 'translate(-50%, 160%)' : 'translate(-50%, 0)',
-      transition: 'transform .46s ' + _shell_EASE,
-      overflow: 'hidden'
+      transition: 'transform .46s ' + _shell_EASE
     }
   }, React.createElement("div", {
     "aria-hidden": "true",
@@ -30189,22 +30226,73 @@ function MgTabBar({
       position: 'absolute',
       top: 6,
       left: 6,
-      width: 'calc((100% - 12px) / 4)',
+      width: 'calc((100% - 12px) / 5)',
       height: 52,
       borderRadius: 26,
       background: 'linear-gradient(150deg, rgba(110,134,224,.14), rgba(110,134,224,.06))',
       border: '1px solid rgba(110,134,224,.18)',
       transform: 'translateX(' + tab * 100 + '%)',
-      transition: 'transform .46s ' + _shell_EASE
+      transition: 'transform .46s ' + _shell_EASE,
+      opacity: tab === 2 ? 0 : 1
     }
   }), React.createElement("div", {
     style: {
       position: 'relative',
       display: 'grid',
-      gridTemplateColumns: 'repeat(4, 1fr)',
+      gridTemplateColumns: 'repeat(5, 1fr)',
       height: '100%'
     }
-  }, items.map((it, i) => React.createElement("button", {
+  }, items.map((it, i) => it.center ? React.createElement("button", {
+    key: it.icon,
+    type: "button",
+    className: "mg-tap",
+    onClick: () => onTab(i),
+    "aria-label": it.label[lang] || it.label.ja,
+    "aria-current": tab === i ? 'page' : undefined,
+    style: {
+      background: 'none',
+      border: 0,
+      padding: 0,
+      cursor: 'pointer',
+      display: 'flex',
+      flexDirection: 'column',
+      alignItems: 'center',
+      justifyContent: 'center',
+      gap: 2,
+      WebkitTapHighlightColor: 'transparent'
+    }
+  }, React.createElement("span", {
+    style: {
+      width: 46,
+      height: 46,
+      borderRadius: 23,
+      marginTop: -4,
+      flex: 'none',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      background: 'linear-gradient(140deg, #7ba6ec 0%, #9f8fe0 55%, #e6a6c6 100%)',
+      boxShadow: tab === i ? '0 9px 20px rgba(110,134,224,.5)' : '0 5px 12px rgba(110,134,224,.32)',
+      border: '2px solid rgba(255,255,255,.78)',
+      transition: 'box-shadow .3s, transform .3s',
+      transform: tab === i ? 'translateY(-1px) scale(1.04)' : 'none'
+    }
+  }, React.createElement("span", {
+    className: "msr",
+    style: {
+      fontSize: 25,
+      color: '#fff'
+    }
+  }, it.icon)), React.createElement("span", {
+    className: "mg-ui",
+    style: {
+      fontSize: 9.5,
+      letterSpacing: '.08em',
+      fontWeight: 700,
+      color: tab === i ? '#4a63c0' : '#6e86e0',
+      transition: 'color .3s'
+    }
+  }, it.label[lang] || it.label.ja)) : React.createElement("button", {
     key: it.icon,
     type: "button",
     className: "mg-tap",
@@ -30387,10 +30475,10 @@ function _ShellRoot() {
     try {
       if (v) sessionStorage.setItem('mg_guest', '1');else sessionStorage.removeItem('mg_guest');
     } catch (e) {}
-    if (v && _tabRef.current === 3) go('/');
+    if (v && _tabRef.current === 4) go('/');
   }, [go]);
   const setTab = React.useCallback(i => {
-    const n = Math.max(0, Math.min(3, i | 0));
+    const n = Math.max(0, Math.min(4, i | 0));
     _setTab(n);
     go(_shell_TAB_PATHS[n]);
   }, [go]);
@@ -30545,7 +30633,7 @@ function _ShellRoot() {
     setIntro(false);
   }, []);
   const authRequiredSheet = !!sheet && ['ticket', 'profileEdit', 'survey'].indexOf(sheet.name) >= 0;
-  const showGate = !authScreen && !standalone && !auth.loading && !user && (!guest || tab === 3 || authRequiredSheet);
+  const showGate = !authScreen && !standalone && !auth.loading && !user && (!guest || tab === 4 || authRequiredSheet);
   const hasActiveReg = Array.isArray(regs) && regs.some(r => r && r.status && String(r.status).indexOf('キャンセル') === -1);
   const showTicketPill = !!user && hasActiveReg && !sheet && !authScreen && !standalone && !complete && !showGate;
   const ctx = React.useMemo(() => ({
@@ -30615,8 +30703,8 @@ function _ShellRoot() {
       inset: 0,
       zIndex: 1
     }
-  }, [0, 1, 2, 3].map(i => {
-    const Pane = [TabHome, TabEvents, TabLife, TabMyPage][i];
+  }, [0, 1, 2, 3, 4].map(i => {
+    const Pane = [TabHome, TabEvents, PageTown, TabLife, TabMyPage][i];
     const active = tab === i;
     return React.createElement("div", {
       key: i,
