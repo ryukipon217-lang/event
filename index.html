@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-<script>window.__MG_BUILD='20260815002816';</script>
+<script>window.__MG_BUILD='20260815005334';</script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover">
 <title>connec+a — 出会いが、まちを変えていく。</title>
@@ -7878,8 +7878,49 @@ const _home_T = {
     ja: 'お知らせは、まだありません。',
     easy: 'おしらせは まだ ありません。',
     en: 'No news yet.'
+  },
+  wxTitle: {
+    ja: '今日の天気',
+    easy: 'きょうの てんき',
+    en: "Today's weather"
+  },
+  wxDetail: {
+    ja: '時間ごとの天気',
+    easy: 'じかんごとの てんき',
+    en: 'Hourly'
+  },
+  notifTitle: {
+    ja: 'お知らせ',
+    easy: 'おしらせ',
+    en: 'Notifications'
+  },
+  notifEmpty: {
+    ja: '新しいお知らせはありません',
+    easy: 'あたらしい おしらせは ありません',
+    en: 'No new notifications'
+  },
+  notifAll: {
+    ja: 'すべて見る',
+    easy: 'ぜんぶ みる',
+    en: 'See all'
   }
 };
+const _home_PREF_EN = {
+  '北海道': 'Hokkaido',
+  '東京都': 'Tokyo',
+  '大阪府': 'Osaka',
+  '京都府': 'Kyoto',
+  '神奈川県': 'Kanagawa',
+  '愛知県': 'Aichi',
+  '福岡県': 'Fukuoka',
+  '埼玉県': 'Saitama',
+  '千葉県': 'Chiba',
+  '兵庫県': 'Hyogo',
+  '北海道 ': 'Hokkaido'
+};
+function _home_regionLabel(region, lang) {
+  return lang === 'en' && _home_PREF_EN[region] ? _home_PREF_EN[region] : region;
+}
 function _home_i18nField(obj, fieldName, lang) {
   if (!obj) return '';
   const langKey = lang === 'easy' || lang === 'en' ? lang : '';
@@ -8021,12 +8062,16 @@ function _home_WeatherChip({
   lang
 }) {
   const [open, setOpen] = React.useState(false);
+  const [detail, setDetail] = React.useState(false);
+  const H = (ja, easy, en) => lang === 'easy' ? easy : lang === 'en' ? en : ja;
   const n0 = new Date();
   const todayYmd = n0.getFullYear() + '-' + String(n0.getMonth() + 1).padStart(2, '0') + '-' + String(n0.getDate()).padStart(2, '0');
+  const WSTART = '06:00',
+    WEND = '21:00';
   const [wx, setWx] = React.useState(() => {
     try {
       if (!region || typeof _ev_wxKey !== 'function') return null;
-      const c = _ev_wxRead(_ev_wxKey(region, todayYmd, '', '', ''));
+      const c = _ev_wxRead(_ev_wxKey(region, todayYmd, '', WSTART, WEND));
       return c ? c.__stale ? c.d : c : null;
     } catch (e) {
       return null;
@@ -8036,7 +8081,7 @@ function _home_WeatherChip({
     if (!region || typeof _ev_weatherFor !== 'function') return undefined;
     let dead = false;
     (async () => {
-      const w = await _ev_weatherFor([region], todayYmd, '', '', '');
+      const w = await _ev_weatherFor([region], todayYmd, '', WSTART, WEND);
       if (!dead && w) setWx(w);
     })();
     return () => {
@@ -8047,38 +8092,47 @@ function _home_WeatherChip({
   const wm = wx && typeof _ev_WMO === 'function' ? _ev_WMO(wx.code) : null;
   const svg = wm && typeof _ev_WX_SVG !== 'undefined' ? _ev_WX_SVG[wm.mi] || '' : '';
   const cond = wm ? wm[lang] || wm.ja : '';
-  return React.createElement("button", {
+  const hours = wx && Array.isArray(wx.hours) ? wx.hours : [];
+  const regionLabel = _home_regionLabel(region, lang);
+  const toggle = () => {
+    setOpen(o => {
+      const nx = !o;
+      if (!nx) setDetail(false);
+      return nx;
+    });
+  };
+  return React.createElement("div", {
+    style: {
+      position: 'relative'
+    }
+  }, React.createElement("button", {
     type: "button",
     className: "mg-tap mg-ui",
-    "aria-label": "\u4ECA\u65E5\u306E\u5929\u6C17",
+    "aria-label": H('今日の天気', 'きょうの てんき', "Today's weather"),
     "aria-expanded": open,
-    onClick: () => setOpen(o => !o),
+    onClick: toggle,
     style: {
-      position: 'absolute',
-      top: 'calc(env(safe-area-inset-top, 0px) + 14px)',
-      right: 16,
-      zIndex: 6,
-      height: 46,
-      width: open ? 178 : 46,
-      borderRadius: 23,
+      height: 50,
+      width: open ? 214 : 50,
+      borderRadius: 25,
       overflow: 'hidden',
       cursor: 'pointer',
       padding: 0,
       display: 'flex',
       alignItems: 'center',
       textAlign: 'left',
-      background: 'rgba(255,255,255,.5)',
-      border: '1px solid rgba(255,255,255,.62)',
-      backdropFilter: 'blur(16px) saturate(165%)',
-      WebkitBackdropFilter: 'blur(16px) saturate(165%)',
-      boxShadow: '0 8px 22px -10px rgba(20,32,50,.32), inset 0 1px 0 rgba(255,255,255,.65)',
+      background: 'rgba(255,255,255,.9)',
+      border: '1px solid rgba(255,255,255,.85)',
+      backdropFilter: 'blur(14px) saturate(150%)',
+      WebkitBackdropFilter: 'blur(14px) saturate(150%)',
+      boxShadow: '0 10px 24px -10px rgba(20,32,50,.28), inset 0 1px 0 rgba(255,255,255,.9)',
       transition: 'width .44s cubic-bezier(.16,1,.3,1)'
     }
   }, React.createElement("span", {
     "aria-hidden": "true",
     style: {
-      width: 46,
-      height: 46,
+      width: 50,
+      height: 50,
       flex: 'none',
       display: 'inline-flex',
       alignItems: 'center',
@@ -8086,8 +8140,8 @@ function _home_WeatherChip({
     }
   }, svg ? React.createElement("span", {
     style: {
-      width: 40,
-      height: 40,
+      width: 42,
+      height: 42,
       display: 'inline-block',
       filter: 'drop-shadow(0 1px 3px rgba(20,40,70,.12))'
     },
@@ -8096,7 +8150,7 @@ function _home_WeatherChip({
     }
   }) : React.createElement(Icon, {
     name: "partly_cloudy_day",
-    size: 22,
+    size: 24,
     style: {
       color: 'var(--mg-accent, #6e86e0)'
     }
@@ -8109,35 +8163,344 @@ function _home_WeatherChip({
       flexDirection: 'column',
       gap: 1,
       minWidth: 0,
-      paddingRight: 12
+      flex: 1
     }
   }, wx ? React.createElement(React.Fragment, null, React.createElement("span", {
     className: "mg-num",
     style: {
-      fontSize: 17,
-      lineHeight: 1,
+      fontSize: 20,
+      lineHeight: 1.05,
       color: 'var(--mg-ink, #22314a)'
     }
   }, wx.tmax, "\xB0", React.createElement("span", {
     style: {
-      fontSize: 11,
+      fontSize: 13,
       color: 'var(--mg-ink4, #5b7796)'
     }
   }, " / ", wx.tmin, "\xB0")), React.createElement("span", {
     className: "mg-clamp1",
     style: {
-      fontSize: 10,
-      color: 'var(--mg-ink4, #5b7796)',
-      maxWidth: 118
+      fontSize: 11.5,
+      color: 'var(--mg-ink3, #3d5877)',
+      maxWidth: 128
     }
-  }, region, cond ? ' · ' + cond : '')) : React.createElement("span", {
+  }, regionLabel, cond ? ' · ' + cond : '')) : React.createElement("span", {
     className: "mg-clamp1",
     style: {
-      fontSize: 10.5,
-      color: 'var(--mg-ink4, #5b7796)',
-      maxWidth: 118
+      fontSize: 12,
+      color: 'var(--mg-ink3, #3d5877)',
+      maxWidth: 128
     }
-  }, region)));
+  }, regionLabel)), open ? React.createElement("span", {
+    role: "button",
+    tabIndex: 0,
+    "aria-label": H('時間ごとの天気', 'じかんごとの てんき', 'Hourly'),
+    onClick: e => {
+      e.stopPropagation();
+      if (hours.length) setDetail(d => !d);
+    },
+    style: {
+      width: 40,
+      height: 50,
+      flex: 'none',
+      display: 'inline-flex',
+      alignItems: 'center',
+      justifyContent: 'center'
+    }
+  }, React.createElement(Icon, {
+    name: detail ? 'expand_less' : 'chevron_right',
+    size: 22,
+    style: {
+      color: 'var(--mg-accent, #6e86e0)'
+    }
+  })) : null), open && detail && hours.length > 0 ? React.createElement("div", {
+    className: "mg-card",
+    style: {
+      position: 'absolute',
+      top: 58,
+      right: 0,
+      width: 262,
+      borderRadius: 20,
+      padding: '13px 14px',
+      zIndex: 8,
+      animation: 'mgLineUp .3s cubic-bezier(.16,1,.3,1) both'
+    }
+  }, React.createElement("div", {
+    className: "mg-ui",
+    style: {
+      fontSize: 11,
+      fontWeight: 600,
+      color: 'var(--mg-ink3, #3d5877)',
+      marginBottom: 9,
+      display: 'flex',
+      alignItems: 'center',
+      gap: 6
+    }
+  }, React.createElement(Icon, {
+    name: "schedule",
+    size: 15,
+    style: {
+      color: 'var(--mg-accent, #35618f)'
+    }
+  }), regionLabel, " \xB7 ", H('今日の天気', 'きょうの てんき', 'Today')), React.createElement("div", {
+    style: {
+      display: 'flex',
+      gap: 5,
+      justifyContent: 'space-between'
+    }
+  }, hours.map((h, i) => {
+    const hm = typeof _ev_WMO === 'function' ? _ev_WMO(h.code) : null;
+    const hs = hm ? _ev_WX_SVG[hm.mi] || '' : '';
+    return React.createElement("div", {
+      key: i,
+      style: {
+        flex: 1,
+        minWidth: 0,
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        gap: 2
+      }
+    }, React.createElement("span", {
+      className: "mg-num",
+      style: {
+        fontSize: 11,
+        color: 'var(--mg-ink4, #5b7796)'
+      }
+    }, h.hm), React.createElement("span", {
+      "aria-hidden": "true",
+      style: {
+        width: 30,
+        height: 30,
+        display: 'inline-block'
+      },
+      dangerouslySetInnerHTML: {
+        __html: hs
+      }
+    }), React.createElement("span", {
+      className: "mg-num",
+      style: {
+        fontSize: 13,
+        color: 'var(--mg-ink, #22314a)'
+      }
+    }, h.temp, "\xB0"), h.pop != null && h.pop >= 30 ? React.createElement("span", {
+      className: "mg-num",
+      style: {
+        fontSize: 9,
+        color: '#4a7bd0'
+      }
+    }, h.pop, "%") : null);
+  }))) : null);
+}
+function _home_NotifBell({
+  news,
+  lang,
+  onOpen
+}) {
+  const H = (ja, easy, en) => lang === 'easy' ? easy : lang === 'en' ? en : ja;
+  const items = (Array.isArray(news) ? news.slice() : []).sort((a, b) => _home_newsTime(b) - _home_newsTime(a)).slice(0, 8);
+  const [open, setOpen] = React.useState(false);
+  const [seen, setSeen] = React.useState(() => {
+    try {
+      return JSON.parse(localStorage.getItem('mg_notif_seen') || '{}') || {};
+    } catch (e) {
+      return {};
+    }
+  });
+  const idOf = (n, i) => String(n && n.id != null ? n.id : i);
+  const unseen = items.filter((n, i) => !seen[idOf(n, i)]).length;
+  const markSeen = id => {
+    setSeen(s => {
+      const nx = Object.assign({}, s, {
+        [id]: 1
+      });
+      try {
+        localStorage.setItem('mg_notif_seen', JSON.stringify(nx));
+      } catch (e) {}
+      return nx;
+    });
+  };
+  const markAll = () => {
+    const nx = Object.assign({}, seen);
+    items.forEach((n, i) => {
+      nx[idOf(n, i)] = 1;
+    });
+    setSeen(nx);
+    try {
+      localStorage.setItem('mg_notif_seen', JSON.stringify(nx));
+    } catch (e) {}
+  };
+  const openNews = (n, i) => {
+    const id = idOf(n, i);
+    markSeen(id);
+    setOpen(false);
+    if (typeof onOpen === 'function') onOpen(id);
+  };
+  const fmtMd = n => {
+    const s = String(n && (n.publishedAt || n.publishAt || n.date) || '');
+    const m = s.match(/(\d{1,2})[-/.](\d{1,2})(?!\d)/) || s.match(/\d{4}[-/.](\d{1,2})[-/.](\d{1,2})/);
+    if (!m) return '';
+    return s.match(/\d{4}/) ? Number(RegExp.$1) + '.' + Number(RegExp.$2) : '';
+  };
+  const title = n => lang === 'en' && n.title_en ? n.title_en : lang === 'easy' && n.title_easy ? n.title_easy : n.title || '';
+  return React.createElement("div", {
+    style: {
+      position: 'relative'
+    }
+  }, React.createElement("button", {
+    type: "button",
+    className: "mg-tap",
+    "aria-label": H('お知らせ', 'おしらせ', 'Notifications'),
+    "aria-expanded": open,
+    onClick: () => {
+      setOpen(o => !o);
+    },
+    style: {
+      width: 50,
+      height: 50,
+      borderRadius: 25,
+      flex: 'none',
+      cursor: 'pointer',
+      padding: 0,
+      display: 'inline-flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      position: 'relative',
+      background: 'rgba(255,255,255,.9)',
+      border: '1px solid rgba(255,255,255,.85)',
+      backdropFilter: 'blur(14px) saturate(150%)',
+      WebkitBackdropFilter: 'blur(14px) saturate(150%)',
+      boxShadow: '0 10px 24px -10px rgba(20,32,50,.28), inset 0 1px 0 rgba(255,255,255,.9)'
+    }
+  }, React.createElement(Icon, {
+    name: "notifications",
+    size: 23,
+    fill: unseen > 0,
+    style: {
+      color: unseen > 0 ? 'var(--mg-accent, #6e86e0)' : 'var(--mg-ink3, #3d5877)'
+    }
+  }), unseen > 0 ? React.createElement("span", {
+    className: "mg-num",
+    style: {
+      position: 'absolute',
+      top: 6,
+      right: 6,
+      minWidth: 17,
+      height: 17,
+      padding: '0 4px',
+      borderRadius: 9,
+      background: 'linear-gradient(122deg, #ef7a86, #e8608f)',
+      color: '#fff',
+      fontSize: 10.5,
+      lineHeight: '17px',
+      textAlign: 'center',
+      boxShadow: '0 2px 6px rgba(220,80,120,.5)'
+    }
+  }, unseen > 9 ? '9+' : unseen) : null), React.createElement(SheetShell, {
+    open: open,
+    onClose: () => setOpen(false),
+    z: 90,
+    height: "640px",
+    header: React.createElement("div", {
+      style: {
+        display: 'flex',
+        alignItems: 'center',
+        gap: 9,
+        minWidth: 0
+      }
+    }, React.createElement(Icon, {
+      name: "notifications",
+      size: 18,
+      fill: true,
+      style: {
+        color: 'var(--mg-accent, #35618f)'
+      }
+    }), React.createElement("span", {
+      className: "mg-serif",
+      style: {
+        fontSize: 18,
+        color: 'var(--mg-ink, #22314a)'
+      }
+    }, H('お知らせ', 'おしらせ', 'Notifications')), unseen > 0 ? React.createElement("button", {
+      type: "button",
+      className: "mg-tap mg-ui",
+      onClick: markAll,
+      style: {
+        marginLeft: 'auto',
+        fontSize: 11.5,
+        color: 'var(--mg-accent, #6e86e0)',
+        fontWeight: 600,
+        cursor: 'pointer',
+        background: 'none',
+        border: 0
+      }
+    }, H('すべて既読', 'ぜんぶ よんだ', 'Mark all read')) : null)
+  }, React.createElement("div", {
+    style: {
+      padding: '4px 20px 30px'
+    }
+  }, items.length === 0 ? React.createElement("div", {
+    className: "mg-empty mg-ui",
+    style: {
+      padding: '40px 12px'
+    }
+  }, React.createElement("div", null, React.createElement("span", {
+    className: "msr"
+  }, "notifications_off")), H('新しいお知らせはありません', 'あたらしい おしらせは ありません', 'No new notifications')) : items.map((n, i) => {
+    const id = idOf(n, i);
+    const isUnseen = !seen[id];
+    return React.createElement("div", {
+      key: id,
+      className: "mg-tap mg-card",
+      onClick: () => openNews(n, i),
+      style: {
+        display: 'flex',
+        gap: 12,
+        padding: '15px 16px',
+        cursor: 'pointer',
+        borderRadius: 18,
+        marginBottom: 10,
+        alignItems: 'flex-start'
+      }
+    }, React.createElement("span", {
+      style: {
+        width: 9,
+        height: 9,
+        borderRadius: '50%',
+        flex: 'none',
+        marginTop: 6,
+        background: isUnseen ? 'var(--mg-accent, #6e86e0)' : 'rgba(34,49,74,.16)'
+      }
+    }), React.createElement("div", {
+      style: {
+        flex: 1,
+        minWidth: 0
+      }
+    }, React.createElement("div", {
+      className: "mg-serif mg-clamp2",
+      style: {
+        fontSize: 14.5,
+        lineHeight: 1.45,
+        color: 'var(--mg-ink, #22314a)',
+        fontWeight: isUnseen ? 600 : 400
+      }
+    }, title(n)), React.createElement("div", {
+      className: "mg-num",
+      style: {
+        fontSize: 12,
+        color: 'var(--mg-ink4, #5b7796)',
+        marginTop: 4
+      }
+    }, fmtMd(n))), React.createElement(Icon, {
+      name: "chevron_right",
+      size: 18,
+      style: {
+        color: 'var(--mg-ink5, #8ba0b6)',
+        flex: 'none',
+        marginTop: 3
+      }
+    }));
+  }))));
 }
 function TabHome() {
   const A = useMg();
@@ -8296,10 +8659,24 @@ function TabHome() {
       color: 'var(--mg-ink, #22314a)',
       position: 'relative'
     }
+  }, React.createElement("div", {
+    style: {
+      position: 'absolute',
+      top: 'calc(env(safe-area-inset-top, 0px) + 14px)',
+      right: 16,
+      zIndex: 6,
+      display: 'flex',
+      gap: 8,
+      alignItems: 'flex-start'
+    }
   }, React.createElement(_home_WeatherChip, {
     region: A.user && A.user.prefecture || '東京都',
     lang: lang
-  }), React.createElement("div", {
+  }), React.createElement(_home_NotifBell, {
+    news: newsAll,
+    lang: lang,
+    onOpen: id => A.go('/news/' + encodeURIComponent(id))
+  })), React.createElement("div", {
     style: {
       height: 132
     },
