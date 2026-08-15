@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-<script>window.__MG_BUILD='20260815010000';</script>
+<script>window.__MG_BUILD='20260815012119';</script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover">
 <title>connec+a — 出会いが、まちを変えていく。</title>
@@ -8094,12 +8094,8 @@ function _home_WeatherChip({
   const cond = wm ? wm[lang] || wm.ja : '';
   const hours = wx && Array.isArray(wx.hours) ? wx.hours : [];
   const regionLabel = _home_regionLabel(region, lang);
-  const toggle = () => {
-    setOpen(o => {
-      const nx = !o;
-      if (!nx) setDetail(false);
-      return nx;
-    });
+  const onMain = () => {
+    if (!open) setOpen(true);else if (hours.length) setDetail(true);
   };
   return React.createElement("div", {
     style: {
@@ -8108,9 +8104,9 @@ function _home_WeatherChip({
   }, React.createElement("button", {
     type: "button",
     className: "mg-tap mg-ui",
-    "aria-label": H('今日の天気', 'きょうの てんき', "Today's weather"),
+    "aria-label": open ? H('時間ごとの天気を見る', 'じかんごとの てんき', 'See hourly') : H('今日の天気', 'きょうの てんき', "Today's weather"),
     "aria-expanded": open,
-    onClick: toggle,
+    onClick: onMain,
     style: {
       height: 50,
       width: open ? 214 : 50,
@@ -8129,7 +8125,13 @@ function _home_WeatherChip({
       transition: 'width .44s cubic-bezier(.16,1,.3,1)'
     }
   }, React.createElement("span", {
-    "aria-hidden": "true",
+    onClick: e => {
+      if (open) {
+        e.stopPropagation();
+        setOpen(false);
+        setDetail(false);
+      }
+    },
     style: {
       width: 50,
       height: 50,
@@ -8139,6 +8141,7 @@ function _home_WeatherChip({
       justifyContent: 'center'
     }
   }, svg ? React.createElement("span", {
+    "aria-hidden": "true",
     style: {
       width: 42,
       height: 42,
@@ -8192,15 +8195,9 @@ function _home_WeatherChip({
       maxWidth: 128
     }
   }, regionLabel)), open ? React.createElement("span", {
-    role: "button",
-    tabIndex: 0,
-    "aria-label": H('時間ごとの天気', 'じかんごとの てんき', 'Hourly'),
-    onClick: e => {
-      e.stopPropagation();
-      if (hours.length) setDetail(d => !d);
-    },
+    "aria-hidden": "true",
     style: {
-      width: 40,
+      width: 42,
       height: 50,
       flex: 'none',
       display: 'inline-flex',
@@ -8208,15 +8205,15 @@ function _home_WeatherChip({
       justifyContent: 'center'
     }
   }, React.createElement(Icon, {
-    name: detail ? 'expand_less' : 'chevron_right',
+    name: "chevron_right",
     size: 22,
     style: {
       color: 'var(--mg-accent, #6e86e0)'
     }
-  })) : null), React.createElement(SheetShell, {
+  })) : null), ReactDOM.createPortal(React.createElement(SheetShell, {
     open: open && detail,
     onClose: () => setDetail(false),
-    z: 90,
+    z: 95,
     height: "560px",
     header: React.createElement("div", {
       style: {
@@ -8394,7 +8391,7 @@ function _home_WeatherChip({
       color: 'var(--mg-ink5, #8ba0b6)',
       marginTop: 8
     }
-  }, H('予報: Open-Meteo(変わることがあります)', 'てんきよほう。かわるかも', 'Forecast by Open-Meteo'))) : null)));
+  }, H('予報: Open-Meteo(変わることがあります)', 'てんきよほう。かわるかも', 'Forecast by Open-Meteo'))) : null)), document.body));
 }
 function _home_NotifBell({
   news,
@@ -8441,10 +8438,10 @@ function _home_NotifBell({
     if (typeof onOpen === 'function') onOpen(id);
   };
   const fmtMd = n => {
-    const s = String(n && (n.publishedAt || n.publishAt || n.date) || '');
-    const m = s.match(/(\d{1,2})[-/.](\d{1,2})(?!\d)/) || s.match(/\d{4}[-/.](\d{1,2})[-/.](\d{1,2})/);
-    if (!m) return '';
-    return s.match(/\d{4}/) ? Number(RegExp.$1) + '.' + Number(RegExp.$2) : '';
+    const t = _home_newsTime(n);
+    if (!t) return '';
+    const d = new Date(t);
+    return d.getMonth() + 1 + '.' + d.getDate();
   };
   const title = n => lang === 'en' && n.title_en ? n.title_en : lang === 'easy' && n.title_easy ? n.title_easy : n.title || '';
   return React.createElement("div", {
@@ -8500,10 +8497,10 @@ function _home_NotifBell({
       textAlign: 'center',
       boxShadow: '0 2px 6px rgba(220,80,120,.5)'
     }
-  }, unseen > 9 ? '9+' : unseen) : null), React.createElement(SheetShell, {
+  }, unseen > 9 ? '9+' : unseen) : null), ReactDOM.createPortal(React.createElement(SheetShell, {
     open: open,
     onClose: () => setOpen(false),
-    z: 90,
+    z: 95,
     height: "640px",
     header: React.createElement("div", {
       style: {
@@ -8604,7 +8601,7 @@ function _home_NotifBell({
         marginTop: 3
       }
     }));
-  }))));
+  }))), document.body));
 }
 function TabHome() {
   const A = useMg();
