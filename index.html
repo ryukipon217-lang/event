@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-<script>window.__MG_BUILD='20260814154704';</script>
+<script>window.__MG_BUILD='20260815000638';</script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover">
 <title>connec+a — 出会いが、まちを変えていく。</title>
@@ -8574,9 +8574,9 @@ function TabHome() {
       padding: 20,
       display: 'grid',
       gridTemplateColumns: '1fr 1fr 1fr',
-      background: 'linear-gradient(150deg, #b7cef2 0%, #c6d8f5 50%, #d5e2f8 100%)',
-      border: '1px solid rgba(255,255,255,.6)',
-      boxShadow: '0 16px 36px -18px rgba(90,110,190,.4), inset 0 1px 0 rgba(255,255,255,.7)'
+      background: 'radial-gradient(120% 95% at 102% 108%, rgba(244,200,214,.6), rgba(244,200,214,0) 55%), radial-gradient(110% 90% at 0% 0%, rgba(190,214,244,.5), rgba(190,214,244,0) 52%), linear-gradient(150deg, #c4dcf3 0%, #d6cfec 52%, #f0d8e3 100%)',
+      border: '1px solid rgba(255,255,255,.66)',
+      boxShadow: '0 16px 36px -18px rgba(120,120,190,.34), inset 0 1px 0 rgba(255,255,255,.75)'
     }
   }, stats.map((s, i) => React.createElement("div", {
     key: s.icon,
@@ -8645,16 +8645,17 @@ function TabHome() {
       right: 16,
       bottom: 16,
       borderRadius: 24,
-      padding: '16px 18px'
-    },
-    className: "mg-navy"
+      padding: '16px 18px',
+      background: 'transparent'
+    }
   }, React.createElement("div", {
     className: "mg-serif",
     style: {
       fontSize: 19,
       lineHeight: 1.45,
       marginBottom: 10,
-      color: '#f4f7fb'
+      color: '#fff',
+      textShadow: '0 1px 10px rgba(20,32,50,.6), 0 1px 3px rgba(20,32,50,.5)'
     }
   }, L(_home_T.yourTurn)), React.createElement("div", {
     className: "mg-tap",
@@ -8664,8 +8665,9 @@ function TabHome() {
       alignItems: 'center',
       gap: 8,
       fontSize: 13,
-      color: '#cfe0f3',
-      cursor: 'pointer'
+      color: '#eef5fc',
+      cursor: 'pointer',
+      textShadow: '0 1px 8px rgba(20,32,50,.6)'
     }
   }, React.createElement(Icon, {
     name: "arrow_forward",
