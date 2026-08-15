@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-<script>window.__MG_BUILD='20260815012459';</script>
+<script>window.__MG_BUILD='20260815012800';</script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover">
 <title>connec+a — 出会いが、まちを変えていく。</title>
@@ -34,8 +34,8 @@ window.__earlyBundlePromise = fetch('https://script.google.com/macros/s/AKfycbxL
 <link rel="preconnect" href="https://script.google.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Zen+Old+Mincho:wght@400;500;600&family=Zen+Kaku+Gothic+New:wght@400;500&family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&display=swap" rel="stylesheet">
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,200,0,0&display=block" rel="stylesheet">
-<script src="https://unpkg.com/react@18.3.1/umd/react.production.min.js" crossorigin></script>
-<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.production.min.js" crossorigin></script>
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" crossorigin></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" crossorigin></script>
 <script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.js"></script>
 <style>
 /* ==== 01-design.css: 定義するグローバル: (CSSのみ・JSグローバルなし) ====
@@ -8362,7 +8362,7 @@ function _home_WeatherChip({
         fontSize: 14,
         color: 'var(--mg-ink3, #3d5877)'
       }
-    }, parseInt(String(h.hm).slice(0, 2), 10), lang === 'en' ? '' : '時'), React.createElement("span", {
+    }, parseInt(String(h.hm).slice(0, 2), 10)), React.createElement("span", {
       "aria-hidden": "true",
       style: {
         width: 42,
@@ -8375,7 +8375,7 @@ function _home_WeatherChip({
     }), React.createElement("span", {
       className: "mg-num",
       style: {
-        fontSize: 23,
+        fontSize: 17,
         lineHeight: 1,
         color: 'var(--mg-ink, #22314a)'
       }
@@ -10191,7 +10191,7 @@ function _ev_WxCard({
         fontWeight: on ? 700 : 500,
         color: on ? 'var(--mg-ink, #22314a)' : 'var(--mg-ink3, #3d5877)'
       }
-    }, parseInt(String(h.hm).slice(0, 2), 10), lang === 'en' ? '' : '時'), React.createElement("span", {
+    }, parseInt(String(h.hm).slice(0, 2), 10)), React.createElement("span", {
       "aria-hidden": "true",
       style: {
         width: 42,
@@ -10206,7 +10206,7 @@ function _ev_WxCard({
     }), React.createElement("span", {
       className: "mg-num",
       style: {
-        fontSize: 22,
+        fontSize: 17,
         lineHeight: 1,
         color: on ? 'var(--mg-ink, #22314a)' : 'var(--mg-ink4, #5b7796)'
       }
