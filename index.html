@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-<script>window.__MG_BUILD='20260815054523';</script>
+<script>window.__MG_BUILD='20260815085315';</script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover">
 <title>connec+a — 出会いが、まちを変えていく。</title>
@@ -1765,7 +1765,7 @@ const authApi = {
       fields
     });
   },
-  async registerEvent(sessionToken, eventId, paymentMethod, selectedSessionIds, couponCode, companions, lang) {
+  async registerEvent(sessionToken, eventId, paymentMethod, selectedSessionIds, couponCode, companions, lang, photo) {
     return postToGAS('auth.registerEvent', {
       sessionToken,
       eventId,
@@ -1774,6 +1774,7 @@ const authApi = {
       couponCode: couponCode || '',
       companions: Array.isArray(companions) ? companions : [],
       lang: lang || 'ja',
+      photo: photo || '',
       referral: getStoredReferral()
     });
   },
@@ -13103,6 +13104,51 @@ const _reg_T = {
     easy: 'イベントの やくそく',
     en: 'EVENT POLICY'
   },
+  secPhoto: {
+    ja: '記念写真について',
+    easy: 'きねん しゃしん について',
+    en: 'EVENT PHOTOS'
+  },
+  photoLead: {
+    ja: 'イベントの記念写真について、ご希望を選べます',
+    easy: 'きねん しゃしん の きぼう を えらべます',
+    en: 'Choose your preference for event photos'
+  },
+  photoOkT: {
+    ja: 'みんなの思い出に',
+    easy: 'おもいで に のこす',
+    en: "Happy to be in photos"
+  },
+  photoOkD: {
+    ja: '撮影・公開OK。記念ギャラリーに載ってもうれしい',
+    easy: 'さつえい も こうかい も OK',
+    en: 'OK to photograph and publish'
+  },
+  photoNoPubT: {
+    ja: '公開はしないで',
+    easy: 'こうかい は しないで',
+    en: "Don't publish my photo"
+  },
+  photoNoPubD: {
+    ja: '撮影はOK、でも記念ギャラリー等には載せないで',
+    easy: 'さつえい は OK。でも みんな に みせない',
+    en: 'OK to photograph, but do not publish'
+  },
+  photoNoShotT: {
+    ja: '撮影もNG',
+    easy: 'さつえい も しない で',
+    en: "Please don't photograph me"
+  },
+  photoNoShotD: {
+    ja: '写真に写りたくない（スタッフに伝わります）',
+    easy: 'しゃしん に うつり たくない',
+    en: 'I prefer not to be photographed (staff will be informed)'
+  },
+  photoNote: {
+    ja: '同伴者を含む申込全体に適用されます。あとでマイページからも変更できます。',
+    easy: 'この もうしこみ ぜんたい に てきよう。あとで かえられます。',
+    en: 'Applies to the whole booking (incl. companions). You can change it later from My Page.'
+  },
   secPayment: {
     ja: '支払い方法',
     easy: 'はらいかた',
@@ -14587,6 +14633,7 @@ function SheetRegister({
   const [myCoupons, setMyCoupons] = useState([]);
   const [unclaimedEventCoupons, setUnclaimedEventCoupons] = useState([]);
   const [companions, setCompanions] = useState([]);
+  const [photoPref, setPhotoPref] = useState('ok');
   const [paypayNameModalOpen, setPaypayNameModalOpen] = useState(false);
   const [fetchedEvent, setFetchedEvent] = useState(null);
   const [evFetchDone, setEvFetchDone] = useState(false);
@@ -15001,7 +15048,7 @@ function SheetRegister({
       const sessionIdsToSend = isMultiEvent ? selectedSessionIds : [];
       const couponToSend = appliedCoupon ? appliedCoupon.code : '';
       const companionsToSend = allowComp ? companions : [];
-      const result = await authApi.registerEvent(token, eventId, isPaid ? paymentMethod : '', sessionIdsToSend, couponToSend, companionsToSend, lang);
+      const result = await authApi.registerEvent(token, eventId, isPaid ? paymentMethod : '', sessionIdsToSend, couponToSend, companionsToSend, lang, photoPref);
       const regId = result && result.registrationId ? result.registrationId : '';
       const allRegIds = Array.isArray(result.registrationIds) && result.registrationIds.length > 0 ? result.registrationIds : regId ? [regId] : [];
       if (isMultiEvent && allRegIds.length > 0) {
@@ -16090,7 +16137,124 @@ function SheetRegister({
         color: 'var(--mg-accent, #6e86e0)',
         marginLeft: 4
       }
-    }, "*")))), 'secPolicy'), isPaid && card(React.createElement("div", null, secTitle('03 — ' + L(_reg_T.secPayment), true), (isCouponApplied || hasPaidCompanions) && React.createElement("div", {
+    }, "*")))), 'secPolicy'), card(React.createElement("div", null, secTitle(L(_reg_T.secPhoto)), React.createElement("p", {
+      style: {
+        fontSize: 12.5,
+        color: 'var(--mg-ink4, #5b7796)',
+        lineHeight: 1.6,
+        margin: '-4px 0 14px'
+      }
+    }, L(_reg_T.photoLead)), React.createElement("div", {
+      style: {
+        display: 'flex',
+        flexDirection: 'column',
+        gap: 10
+      }
+    }, [{
+      val: 'ok',
+      ic: 'photo_camera',
+      bg: 'linear-gradient(145deg, rgba(120,196,150,.24), rgba(150,210,170,.12))',
+      fg: '#2f9d6f',
+      t: _reg_T.photoOkT,
+      d: _reg_T.photoOkD
+    }, {
+      val: 'nopublish',
+      ic: 'visibility_off',
+      bg: 'linear-gradient(145deg, rgba(232,180,90,.26), rgba(240,200,120,.12))',
+      fg: '#c07a1e',
+      t: _reg_T.photoNoPubT,
+      d: _reg_T.photoNoPubD
+    }, {
+      val: 'nophoto',
+      ic: 'no_photography',
+      bg: 'linear-gradient(145deg, rgba(230,140,160,.26), rgba(238,170,190,.12))',
+      fg: '#c8618f',
+      t: _reg_T.photoNoShotT,
+      d: _reg_T.photoNoShotD
+    }].map(o => {
+      const on = photoPref === o.val;
+      return React.createElement("button", {
+        key: o.val,
+        type: "button",
+        className: "mg-tap",
+        onClick: () => setPhotoPref(o.val),
+        "aria-pressed": on,
+        style: {
+          display: 'flex',
+          alignItems: 'center',
+          gap: 13,
+          textAlign: 'left',
+          width: '100%',
+          cursor: 'pointer',
+          padding: '12px 13px',
+          borderRadius: 18,
+          border: on ? '1.5px solid var(--mg-accent, #6e86e0)' : '1px solid rgba(34,49,74,.1)',
+          background: on ? 'rgba(110,134,224,.07)' : 'rgba(255,255,255,.7)',
+          boxShadow: on ? '0 8px 18px rgba(110,134,224,.16)' : 'none',
+          transition: 'border-color .2s, background .2s, box-shadow .2s'
+        }
+      }, React.createElement("span", {
+        style: {
+          width: 52,
+          height: 52,
+          borderRadius: 15,
+          flex: 'none',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          background: o.bg
+        }
+      }, React.createElement(Icon, {
+        name: o.ic,
+        size: 27,
+        style: {
+          color: o.fg
+        }
+      })), React.createElement("span", {
+        style: {
+          flex: 1,
+          minWidth: 0
+        }
+      }, React.createElement("span", {
+        style: {
+          display: 'block',
+          fontSize: 14,
+          fontWeight: 700,
+          color: 'var(--mg-ink, #22314a)'
+        }
+      }, L(o.t)), React.createElement("span", {
+        style: {
+          display: 'block',
+          fontSize: 11.5,
+          color: 'var(--mg-ink4, #5b7796)',
+          lineHeight: 1.5,
+          marginTop: 2
+        }
+      }, L(o.d))), React.createElement("span", {
+        style: {
+          width: 22,
+          height: 22,
+          borderRadius: 11,
+          flex: 'none',
+          display: 'inline-flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          border: on ? '0' : '1.5px solid rgba(34,49,74,.25)',
+          background: on ? 'linear-gradient(122deg, #7ba6ec, #cdadd9 60%, #ecabc6)' : 'transparent',
+          color: '#fff'
+        }
+      }, on ? React.createElement(Icon, {
+        name: "check",
+        size: 15
+      }) : null));
+    })), React.createElement("p", {
+      style: {
+        fontSize: 10.5,
+        color: 'var(--mg-ink5, #8ba0b6)',
+        lineHeight: 1.6,
+        margin: '12px 2px 0'
+      }
+    }, L(_reg_T.photoNote))), 'secPhoto'), isPaid && card(React.createElement("div", null, secTitle('03 — ' + L(_reg_T.secPayment), true), (isCouponApplied || hasPaidCompanions) && React.createElement("div", {
       className: "mg-cream mg-ui",
       style: {
         padding: '12px 15px',
