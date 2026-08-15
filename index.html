@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-<script>window.__MG_BUILD='20260815001200';</script>
+<script>window.__MG_BUILD='20260815002816';</script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover">
 <title>connec+a — 出会いが、まちを変えていく。</title>
@@ -8016,6 +8016,129 @@ function _home_stat(settings, keys, fallback) {
   }
   return Number(fallback) || 0;
 }
+function _home_WeatherChip({
+  region,
+  lang
+}) {
+  const [open, setOpen] = React.useState(false);
+  const n0 = new Date();
+  const todayYmd = n0.getFullYear() + '-' + String(n0.getMonth() + 1).padStart(2, '0') + '-' + String(n0.getDate()).padStart(2, '0');
+  const [wx, setWx] = React.useState(() => {
+    try {
+      if (!region || typeof _ev_wxKey !== 'function') return null;
+      const c = _ev_wxRead(_ev_wxKey(region, todayYmd, '', '', ''));
+      return c ? c.__stale ? c.d : c : null;
+    } catch (e) {
+      return null;
+    }
+  });
+  React.useEffect(() => {
+    if (!region || typeof _ev_weatherFor !== 'function') return undefined;
+    let dead = false;
+    (async () => {
+      const w = await _ev_weatherFor([region], todayYmd, '', '', '');
+      if (!dead && w) setWx(w);
+    })();
+    return () => {
+      dead = true;
+    };
+  }, [region]);
+  if (!region) return null;
+  const wm = wx && typeof _ev_WMO === 'function' ? _ev_WMO(wx.code) : null;
+  const svg = wm && typeof _ev_WX_SVG !== 'undefined' ? _ev_WX_SVG[wm.mi] || '' : '';
+  const cond = wm ? wm[lang] || wm.ja : '';
+  return React.createElement("button", {
+    type: "button",
+    className: "mg-tap mg-ui",
+    "aria-label": "\u4ECA\u65E5\u306E\u5929\u6C17",
+    "aria-expanded": open,
+    onClick: () => setOpen(o => !o),
+    style: {
+      position: 'absolute',
+      top: 'calc(env(safe-area-inset-top, 0px) + 14px)',
+      right: 16,
+      zIndex: 6,
+      height: 46,
+      width: open ? 178 : 46,
+      borderRadius: 23,
+      overflow: 'hidden',
+      cursor: 'pointer',
+      padding: 0,
+      display: 'flex',
+      alignItems: 'center',
+      textAlign: 'left',
+      background: 'rgba(255,255,255,.5)',
+      border: '1px solid rgba(255,255,255,.62)',
+      backdropFilter: 'blur(16px) saturate(165%)',
+      WebkitBackdropFilter: 'blur(16px) saturate(165%)',
+      boxShadow: '0 8px 22px -10px rgba(20,32,50,.32), inset 0 1px 0 rgba(255,255,255,.65)',
+      transition: 'width .44s cubic-bezier(.16,1,.3,1)'
+    }
+  }, React.createElement("span", {
+    "aria-hidden": "true",
+    style: {
+      width: 46,
+      height: 46,
+      flex: 'none',
+      display: 'inline-flex',
+      alignItems: 'center',
+      justifyContent: 'center'
+    }
+  }, svg ? React.createElement("span", {
+    style: {
+      width: 40,
+      height: 40,
+      display: 'inline-block',
+      filter: 'drop-shadow(0 1px 3px rgba(20,40,70,.12))'
+    },
+    dangerouslySetInnerHTML: {
+      __html: svg
+    }
+  }) : React.createElement(Icon, {
+    name: "partly_cloudy_day",
+    size: 22,
+    style: {
+      color: 'var(--mg-accent, #6e86e0)'
+    }
+  })), React.createElement("span", {
+    style: {
+      opacity: open ? 1 : 0,
+      transition: 'opacity .3s ease .06s',
+      whiteSpace: 'nowrap',
+      display: 'flex',
+      flexDirection: 'column',
+      gap: 1,
+      minWidth: 0,
+      paddingRight: 12
+    }
+  }, wx ? React.createElement(React.Fragment, null, React.createElement("span", {
+    className: "mg-num",
+    style: {
+      fontSize: 17,
+      lineHeight: 1,
+      color: 'var(--mg-ink, #22314a)'
+    }
+  }, wx.tmax, "\xB0", React.createElement("span", {
+    style: {
+      fontSize: 11,
+      color: 'var(--mg-ink4, #5b7796)'
+    }
+  }, " / ", wx.tmin, "\xB0")), React.createElement("span", {
+    className: "mg-clamp1",
+    style: {
+      fontSize: 10,
+      color: 'var(--mg-ink4, #5b7796)',
+      maxWidth: 118
+    }
+  }, region, cond ? ' · ' + cond : '')) : React.createElement("span", {
+    className: "mg-clamp1",
+    style: {
+      fontSize: 10.5,
+      color: 'var(--mg-ink4, #5b7796)',
+      maxWidth: 118
+    }
+  }, region)));
+}
 function TabHome() {
   const A = useMg();
   const lang = A.lang || 'ja';
@@ -8170,9 +8293,13 @@ function TabHome() {
   return React.createElement("div", {
     className: "mg-ui",
     style: {
-      color: 'var(--mg-ink, #22314a)'
+      color: 'var(--mg-ink, #22314a)',
+      position: 'relative'
     }
-  }, React.createElement("div", {
+  }, React.createElement(_home_WeatherChip, {
+    region: A.user && A.user.prefecture || '東京都',
+    lang: lang
+  }), React.createElement("div", {
     style: {
       height: 132
     },
@@ -9622,12 +9749,35 @@ function _ev_WxCard({
     }), h.pop, "%") : null);
   }))));
 }
-async function _ev_weatherFor(placeCandidates, dateStr, geoStr, startTime, endTime) {
-  const key = 'mg_wx2_' + String(geoStr || placeCandidates[0] || '') + '_' + dateStr + '_' + (startTime || '') + '_' + (endTime || '');
+const _EV_WX_TTL = 3600e3;
+function _ev_wxKey(place, dateStr, geoStr, startTime, endTime) {
+  return 'mg_wx3_' + String(geoStr || place || '') + '_' + dateStr + '_' + (startTime || '') + '_' + (endTime || '');
+}
+function _ev_wxRead(key) {
   try {
-    const c = sessionStorage.getItem(key);
-    if (c) return JSON.parse(c);
+    const c = localStorage.getItem(key);
+    if (!c) return null;
+    const o = JSON.parse(c);
+    if (o && o.t && o.d && Date.now() - o.t < _EV_WX_TTL) return o.d;
+    if (o && o.t && o.d) return {
+      __stale: true,
+      d: o.d
+    };
   } catch (e) {}
+  return null;
+}
+function _ev_wxWrite(key, data) {
+  try {
+    localStorage.setItem(key, JSON.stringify({
+      t: Date.now(),
+      d: data
+    }));
+  } catch (e) {}
+}
+async function _ev_weatherFor(placeCandidates, dateStr, geoStr, startTime, endTime) {
+  const key = _ev_wxKey(placeCandidates[0], dateStr, geoStr, startTime, endTime);
+  const cached = _ev_wxRead(key);
+  if (cached && !cached.__stale) return cached;
   let geo = null;
   if (geoStr) {
     const mm = String(geoStr).split(',').map(Number);
@@ -9704,12 +9854,11 @@ async function _ev_weatherFor(placeCandidates, dateStr, geoStr, startTime, endTi
       s: startTime || '',
       e: endTime || ''
     };
-    try {
-      sessionStorage.setItem(key, JSON.stringify(out));
-    } catch (e) {}
+    _ev_wxWrite(key, out);
     return out;
   } catch (e) {
-    return null;
+    const stale = _ev_wxRead(key);
+    return stale && stale.__stale ? stale.d : null;
   }
 }
 const _ev_BELONG = [{
@@ -9911,7 +10060,17 @@ function _ev_Guide({
   const limYmd = lim.getFullYear() + '-' + String(lim.getMonth() + 1).padStart(2, '0') + '-' + String(lim.getDate()).padStart(2, '0');
   const wxOk = s2 => s2.date >= todayYmd && s2.date <= limYmd;
   const wxDays = days.filter(wxOk).slice(0, 4);
-  const [wx, setWx] = React.useState({});
+  const [wx, setWx] = React.useState(() => {
+    const o = {};
+    try {
+      for (const s2 of wxDays) {
+        const k = _ev_wxKey(s2.venue, s2.date, s2.geo || ev.geo || '', s2.startTime || '', s2.endTime || '');
+        const c = _ev_wxRead(k);
+        if (c) o[s2.id] = c.__stale ? c.d : c;
+      }
+    } catch (e) {}
+    return o;
+  });
   React.useEffect(() => {
     let dead = false;
     (async () => {
