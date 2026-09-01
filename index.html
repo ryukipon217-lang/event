@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-<script>window.__MG_BUILD='20260815094526';</script>
+<script>window.__MG_BUILD='20260901230439';</script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover">
 <title>connec+a — 出会いが、まちを変えていく。</title>
@@ -1782,6 +1782,19 @@ const authApi = {
     return postToGAS('auth.cancelRegistration', {
       sessionToken,
       regId
+    });
+  },
+  async joinWaitlist(sessionToken, eventId, sessionId) {
+    return postToGAS('auth.joinWaitlist', {
+      sessionToken,
+      eventId,
+      sessionId: sessionId || ''
+    });
+  },
+  async cancelWaitlist(sessionToken, id) {
+    return postToGAS('auth.cancelWaitlist', {
+      sessionToken,
+      id
     });
   },
   async resolveUnassignedRegistration(sessionToken, regId, sessionIds) {
@@ -9805,6 +9818,36 @@ const _ev_T = {
     easy: 'セッションで ちがいます',
     en: 'Varies by session'
   },
+  wlJoin: {
+    ja: 'キャンセル待ちに登録',
+    easy: 'キャンセルまち に とうろく',
+    en: 'Join waitlist'
+  },
+  wlDone: {
+    ja: '登録済み・空きが出たらメールで案内します',
+    easy: 'とうろく しました。あきが でたら メールで おしらせします',
+    en: "You're on the waitlist. We'll email you if a spot opens."
+  },
+  wlRemove: {
+    ja: '取り消す',
+    easy: 'とりけす',
+    en: 'Remove'
+  },
+  wlJoinErr: {
+    ja: 'キャンセル待ちに登録できませんでした。時間をおいて、もう一度お試しください。',
+    easy: 'キャンセルまちに とうろく できませんでした。すこし まってから もういちど ためして ください。',
+    en: 'We could not add you to the waitlist. Please try again in a moment.'
+  },
+  wlCancelErr: {
+    ja: '取り消しできませんでした。時間をおいて、もう一度お試しください。',
+    easy: 'とりけし できませんでした。すこし まってから もういちど ためして ください。',
+    en: 'We could not remove you from the waitlist. Please try again in a moment.'
+  },
+  wlPromoted: {
+    ja: '繰上げのご案内をお送りしているため取り消せません。届いたメールをご確認ください。',
+    easy: 'あなたの じゅんばんが きました。とどいた メールを みて ください。',
+    en: 'A spot has already been offered to you, so this cannot be removed. Please check your email.'
+  },
   easyLabel: {
     ja: 'やさしい にほんご',
     easy: 'やさしい にほんご',
@@ -11375,6 +11418,27 @@ function _ev_hashQuerySessions() {
 function _ev_isActiveReg(r) {
   return r.status !== 'キャンセル' && r.status !== '返金' && r.status !== '返金待ち';
 }
+const _WL_KEY = 'mg.waitlist.v1';
+function _wl_read() {
+  try {
+    const o = JSON.parse(localStorage.getItem(_WL_KEY) || '{}');
+    return o && typeof o === 'object' && !Array.isArray(o) ? o : {};
+  } catch (e) {
+    return {};
+  }
+}
+function _wl_get(userId, eventId) {
+  const e = _wl_read()[String(userId) + '|' + String(eventId)];
+  return e && e.id ? e : null;
+}
+function _wl_set(userId, eventId, entry) {
+  try {
+    const m = _wl_read();
+    const k = String(userId) + '|' + String(eventId);
+    if (entry) m[k] = entry;else delete m[k];
+    localStorage.setItem(_WL_KEY, JSON.stringify(m));
+  } catch (e) {}
+}
 function _ev_isOnsiteMethod(myReg) {
   const pm = myReg && myReg.paymentMethod;
   if (pm) {
@@ -12004,6 +12068,9 @@ function SheetEventDetail({
   const [sessLoaded, setSessLoaded] = useState(false);
   const [regsLoaded, setRegsLoaded] = useState(false);
   const _defaulted = useRef(false);
+  const [wlEntry, setWlEntry] = useState(null);
+  const [wlBusy, setWlBusy] = useState(false);
+  const [wlErr, setWlErr] = useState('');
   useEffect(() => {
     if (!open || !eventId) return undefined;
     let cancelled = false;
@@ -12115,6 +12182,15 @@ function SheetEventDetail({
       cancelled = true;
     };
   }, [open, user, eventId]);
+  const _wlUserId = user ? String(user.id || user.userId || user.email || '1') : '';
+  useEffect(() => {
+    setWlErr('');
+    if (!open || !eventId || !_wlUserId) {
+      setWlEntry(null);
+      return;
+    }
+    setWlEntry(_wl_get(_wlUserId, eventId));
+  }, [open, eventId, _wlUserId]);
   useEffect(() => {
     if (_hydrated.current) return;
     if (!sessions || sessions.length === 0) return;
@@ -12238,6 +12314,40 @@ function SheetEventDetail({
     if (!myReg || !myReg.regId) return;
     A.go('/cancel/' + myReg.regId);
   };
+  const handleJoinWaitlist = async () => {
+    if (wlBusy || !user) return;
+    const token = typeof authStore !== 'undefined' && authStore && authStore.getToken ? authStore.getToken() : null;
+    if (!token) return;
+    setWlBusy(true);
+    setWlErr('');
+    try {
+      const r = await authApi.joinWaitlist(token, eventId, '');
+      const entry = {
+        id: String(r && r.id || '')
+      };
+      setWlEntry(entry);
+      _wl_set(_wlUserId, eventId, entry);
+    } catch (e) {
+      setWlErr(L(_ev_T.wlJoinErr));
+    }
+    setWlBusy(false);
+  };
+  const handleCancelWaitlist = async () => {
+    if (wlBusy || !wlEntry || !wlEntry.id) return;
+    const token = typeof authStore !== 'undefined' && authStore && authStore.getToken ? authStore.getToken() : null;
+    if (!token) return;
+    setWlBusy(true);
+    setWlErr('');
+    try {
+      await authApi.cancelWaitlist(token, wlEntry.id);
+      setWlEntry(null);
+      _wl_set(_wlUserId, eventId, null);
+    } catch (e) {
+      const msg = String(e && e.message || '');
+      setWlErr(msg.indexOf('繰上') >= 0 ? L(_ev_T.wlPromoted) : L(_ev_T.wlCancelErr));
+    }
+    setWlBusy(false);
+  };
   const toggleSession = sid => {
     setSelectedSessionIds(prev => prev.indexOf(sid) >= 0 ? prev.filter(x => x !== sid) : prev.concat([sid]));
   };
@@ -12323,25 +12433,106 @@ function SheetEventDetail({
         }
       }, st.cancel));
     } else {
-      const n = selectedSessionIds.length;
-      let label = L(_ev_T.proceed);
-      if (cantRegister) {
-        label = regStatus.label || '—';
-      } else if (!user) {
-        label = L(_ev_T.loginProceed);
-      } else if (isMulti) {
-        if (!sessLoaded) label = L(_ev_T.loadingDays);else if (n === 0) label = L(_ev_T.selectFirst);else {
-          const hasActive = stateValues.indexOf('active') >= 0;
-          const allCancelled = stateValues.length > 0 && stateValues.every(s => s === 'cancelled' || s === 'pending');
-          if (allCancelled) label = L(_ev_T.reapplyN).replace('%n%', n);else if (hasActive) label = L(_ev_T.addN).replace('%n%', n);else if (n > 1) label = String(t.detail && t.detail.sessionsRegister || L(_ev_T.proceed)).replace('{n}', n);
+      const wlCap = Number(ev.capacity) || 0;
+      const isFull = !alreadyRegistered && (regStatus.reason === 'full' || regStatus.open && !isMultiEvt && wlCap > 0 && spotsLeft <= 0);
+      if (isFull && user) {
+        footer = wlEntry ? React.createElement("div", {
+          className: "mg-ui",
+          style: {
+            display: 'flex',
+            alignItems: 'center',
+            gap: 10,
+            flexWrap: 'wrap'
+          }
+        }, React.createElement("span", {
+          style: {
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: 6,
+            padding: '9px 14px',
+            borderRadius: 17,
+            background: 'rgba(110,134,224,.10)',
+            border: '1px solid rgba(110,134,224,.35)',
+            color: 'var(--mg-accent, #6E86E0)',
+            fontSize: 12.5,
+            fontWeight: 500,
+            letterSpacing: '.02em',
+            flex: '1 1 auto',
+            minWidth: 0
+          }
+        }, React.createElement(Icon, {
+          name: "hourglass_top",
+          size: 16
+        }), React.createElement("span", {
+          style: {
+            minWidth: 0
+          }
+        }, L(_ev_T.wlDone))), React.createElement("button", {
+          type: "button",
+          className: "mg-tap mg-ui",
+          onClick: handleCancelWaitlist,
+          disabled: wlBusy,
+          style: {
+            marginLeft: 'auto',
+            padding: '10px 4px',
+            borderRadius: 8,
+            cursor: 'pointer',
+            background: 'transparent',
+            border: 'none',
+            textDecoration: 'underline',
+            textUnderlineOffset: 3,
+            color: '#8f3542',
+            fontSize: 12.5,
+            fontWeight: 500,
+            letterSpacing: '.04em',
+            opacity: wlBusy ? .55 : 1
+          }
+        }, L(_ev_T.wlRemove)), wlErr ? React.createElement("div", {
+          className: "mg-ui",
+          style: {
+            flexBasis: '100%',
+            color: '#8f3542',
+            fontSize: 12,
+            lineHeight: 1.6
+          }
+        }, wlErr) : null) : React.createElement("div", {
+          className: "mg-ui"
+        }, React.createElement(PrimaryBtn, {
+          label: L(_ev_T.wlJoin),
+          icon: "hourglass_top",
+          loading: wlBusy,
+          onClick: handleJoinWaitlist
+        }), wlErr ? React.createElement("div", {
+          className: "mg-ui",
+          style: {
+            marginTop: 8,
+            color: '#8f3542',
+            fontSize: 12,
+            lineHeight: 1.6,
+            textAlign: 'center'
+          }
+        }, wlErr) : null);
+      } else {
+        const n = selectedSessionIds.length;
+        let label = L(_ev_T.proceed);
+        if (cantRegister) {
+          label = regStatus.label || '—';
+        } else if (!user) {
+          label = L(_ev_T.loginProceed);
+        } else if (isMulti) {
+          if (!sessLoaded) label = L(_ev_T.loadingDays);else if (n === 0) label = L(_ev_T.selectFirst);else {
+            const hasActive = stateValues.indexOf('active') >= 0;
+            const allCancelled = stateValues.length > 0 && stateValues.every(s => s === 'cancelled' || s === 'pending');
+            if (allCancelled) label = L(_ev_T.reapplyN).replace('%n%', n);else if (hasActive) label = L(_ev_T.addN).replace('%n%', n);else if (n > 1) label = String(t.detail && t.detail.sessionsRegister || L(_ev_T.proceed)).replace('{n}', n);
+          }
         }
+        footer = React.createElement(PrimaryBtn, {
+          label: label,
+          icon: "edit_note",
+          disabled: cantRegister || isMulti && (!sessLoaded || n === 0),
+          onClick: handleRegister
+        });
       }
-      footer = React.createElement(PrimaryBtn, {
-        label: label,
-        icon: "edit_note",
-        disabled: cantRegister || isMulti && (!sessLoaded || n === 0),
-        onClick: handleRegister
-      });
     }
   }
   let body = null;
