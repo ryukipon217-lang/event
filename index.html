@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-<script>window.__MG_BUILD='20260901230439';</script>
+<script>window.__MG_BUILD='20260902153410';</script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover">
 <title>connec+a — 出会いが、まちを変えていく。</title>
@@ -34,8 +34,8 @@ window.__earlyBundlePromise = fetch('https://script.google.com/macros/s/AKfycbxL
 <link rel="preconnect" href="https://script.google.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Zen+Old+Mincho:wght@400;500;600&family=Zen+Kaku+Gothic+New:wght@400;500&family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&display=swap" rel="stylesheet">
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,200,0,0&display=block" rel="stylesheet">
-<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" crossorigin></script>
-<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" crossorigin></script>
+<script src="https://unpkg.com/react@18.3.1/umd/react.production.min.js" crossorigin></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.production.min.js" crossorigin></script>
 <script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.js"></script>
 <style>
 /* ==== 01-design.css: 定義するグローバル: (CSSのみ・JSグローバルなし) ====
@@ -72,7 +72,7 @@ window.__earlyBundlePromise = fetch('https://script.google.com/macros/s/AKfycbxL
   --mg-ink3:#3d5877;
   --mg-ink3b:#4c6584;   /* ink3 の明るい方(タブ非選択・本文副) */
   --mg-ink4:#5b7796;
-  --mg-ink5:#8ba0b6;
+  --mg-ink5:#7f94ab;   /* (2026-09) #8ba0b6→#7f94ab: メタ文字の視認性底上げ(くっきり) */
 
   /* アクセント(モネの藍) */
   --mg-accent:#6e86e0;
@@ -114,12 +114,13 @@ window.__earlyBundlePromise = fetch('https://script.google.com/macros/s/AKfycbxL
   --mg-r-chip:19px;
   --mg-r-field:14px;
 
-  /* 影 */
-  --mg-sh-card:0 16px 34px rgba(34,49,74,.18), inset 0 1px 0 rgba(255,255,255,.9);
-  --mg-sh-card-lg:0 22px 46px rgba(34,49,74,.22);
-  --mg-sh-sheet:0 -24px 60px rgba(34,49,74,.28);
-  --mg-sh-btn:0 14px 30px rgba(79,99,196,.32);
-  --mg-sh-pill:0 8px 20px rgba(34,49,74,.16), inset 0 1px 0 rgba(255,255,255,.9);
+  /* 影 (2026-09 上質感: 単発のぼんやり影を「接地影+環境影+inset白ハイライト」の多層へ。
+     接地(0 1px 2px)が輪郭を締め、環境(-6px負スプレッド)が裾を引き締める=くっきり) */
+  --mg-sh-card:0 1px 2px rgba(34,49,74,.05), 0 14px 30px -8px rgba(34,49,74,.17), inset 0 1px 0 rgba(255,255,255,.9);
+  --mg-sh-card-lg:0 1px 2px rgba(34,49,74,.06), 0 12px 26px -8px rgba(34,49,74,.15), 0 30px 60px -20px rgba(34,49,74,.24);
+  --mg-sh-sheet:0 -2px 6px rgba(34,49,74,.05), 0 -28px 66px rgba(34,49,74,.28);
+  --mg-sh-btn:0 1px 2px rgba(52,70,150,.26), 0 12px 26px -6px rgba(79,99,196,.40);
+  --mg-sh-pill:0 1px 2px rgba(34,49,74,.05), 0 8px 18px -5px rgba(34,49,74,.15), inset 0 1px 0 rgba(255,255,255,.9);
   --mg-ts:0 1px 8px rgba(20,32,50,.42);          /* 写真上文字 */
   --mg-ts-strong:0 3px 18px rgba(34,49,74,.42);  /* 写真上文字(強) */
 
@@ -215,15 +216,17 @@ html{ background:#e9edfc; }
   box-shadow:0 18px 40px rgba(34,49,74,.24), inset 0 1px 0 rgba(255,255,255,.8);
 }
 
-/* カード(ブラー無し・高不透明ペーパー+シャボン玉の淡い虹彩=白一辺倒を脱する) */
+/* カード(ブラー無し・高不透明ペーパー+シャボン玉の淡い虹彩=白一辺倒を脱する)
+   (2026-09) 不透明度を上げ(.92/.80→.95/.87)背景写真からの文字を保護+インクのヘアライン輪郭で
+   「印刷物の縁」を作る。影は接地+環境の多層(くっきり) */
 .mg-card{
   background:
     radial-gradient(125% 95% at 8% -6%, rgba(255,216,236,.20), rgba(255,216,236,0) 46%),
     radial-gradient(125% 95% at 96% 104%, rgba(210,222,255,.20), rgba(210,222,255,0) 46%),
     radial-gradient(110% 80% at 82% 8%, rgba(214,240,222,.14), rgba(214,240,222,0) 44%),
-    linear-gradient(155deg,rgba(255,255,255,.92),rgba(255,255,255,.80));
+    linear-gradient(155deg,rgba(255,255,255,.95),rgba(255,255,255,.87));
   border:1px solid rgba(255,255,255,.9);
-  box-shadow:0 16px 34px rgba(60,64,120,.16), inset 0 1px 0 rgba(255,255,255,.8), inset 0 0 0 1px rgba(255,255,255,.3);
+  box-shadow:0 0 0 1px rgba(34,49,74,.05), 0 1px 2px rgba(34,49,74,.05), 0 14px 30px -8px rgba(60,64,120,.18), inset 0 1px 0 rgba(255,255,255,.8), inset 0 0 0 1px rgba(255,255,255,.3);
   border-radius:var(--mg-r-card);
 }
 /* (2026-08-12 代表指定) 紺パネル: 白ガラス一辺倒のリズムを破る反転面(紺地+白文字)。数字バンド・CTAの強調面に使う */
@@ -234,19 +237,19 @@ html{ background:#e9edfc; }
   color:#f4f7fb;
 }
 
-/* 大カード */
+/* 大カード ((2026-09) 不透明度上げ+ヘアライン輪郭+多層影) */
 .mg-card-lg{
-  background:linear-gradient(155deg,rgba(255,255,255,.92),rgba(255,255,255,.80));
+  background:linear-gradient(155deg,rgba(255,255,255,.95),rgba(255,255,255,.88));
   border:1px solid rgba(255,255,255,.9);
-  box-shadow:0 22px 46px rgba(34,49,74,.22), inset 0 1px 0 rgba(255,255,255,.9);
+  box-shadow:0 0 0 1px rgba(34,49,74,.05), 0 1px 2px rgba(34,49,74,.06), 0 24px 48px -14px rgba(34,49,74,.24), inset 0 1px 0 rgba(255,255,255,.9);
   border-radius:var(--mg-r-card-lg);
 }
 
 /* ピル(ブラー無し半透明。タブバー内アクティブピル等) */
 .mg-pill{
-  background:linear-gradient(150deg,rgba(255,255,255,.75),rgba(255,255,255,.42));
-  border:1px solid rgba(255,255,255,.75);
-  box-shadow:0 8px 20px rgba(34,49,74,.16), inset 0 1px 0 rgba(255,255,255,.9);
+  background:linear-gradient(150deg,rgba(255,255,255,.80),rgba(255,255,255,.52));
+  border:1px solid rgba(255,255,255,.78);
+  box-shadow:0 1px 2px rgba(34,49,74,.05), 0 8px 18px -5px rgba(34,49,74,.16), inset 0 1px 0 rgba(255,255,255,.9);
   border-radius:26px;
 }
 
@@ -263,7 +266,7 @@ html{ background:#e9edfc; }
 .mg-cream{
   background:linear-gradient(155deg,rgba(250,243,215,.97),rgba(244,232,196,.94));
   border:1px solid rgba(233,208,106,.7);
-  box-shadow:0 16px 32px rgba(34,49,74,.16), inset 0 1px 0 rgba(255,255,255,.8);
+  box-shadow:0 1px 2px rgba(34,49,74,.05), 0 12px 26px -8px rgba(34,49,74,.16), inset 0 1px 0 rgba(255,255,255,.8);
   border-radius:20px;
 }
 
@@ -279,7 +282,9 @@ html{ background:#e9edfc; }
 }
 .mg-tap:active{ transform:scale(.965); filter:brightness(.96); }
 
-/* 一次ボタン(h54 r27) */
+/* 一次ボタン(h54 r27)
+   (2026-09 AI感排除) 青→紫→ピンクの多色オーロラを廃止し、単一色相(ペリウィンクル)の
+   深みグラデ+上端の白い光沢へ。影も同色相の多層(接地+環境)で精密に */
 .mg-btn-primary{
   position:relative;
   overflow:hidden;
@@ -290,12 +295,11 @@ html{ background:#e9edfc; }
   height:54px;
   padding:0 24px;
   border-radius:var(--mg-r-btn);
-  /* (パステル) 空色→ペリウィンクル→藤→淡ローズの多段オーロラ。上に白い光沢のにじみ。 */
   background:
-    radial-gradient(130% 120% at 0% -10%, rgba(255,255,255,.30), rgba(255,255,255,0) 46%),
-    linear-gradient(122deg, #7ba6ec 0%, #88a6ea 34%, #cdadd9 64%, #ecabc6 100%);
-  border:1px solid rgba(255,255,255,.42);
-  box-shadow:0 12px 26px rgba(123,131,224,.34), 0 6px 16px rgba(244,196,212,.22), inset 0 1px 0 rgba(255,255,255,.55);
+    radial-gradient(130% 120% at 0% -10%, rgba(255,255,255,.26), rgba(255,255,255,0) 46%),
+    linear-gradient(180deg, #7e93e8 0%, #5f76d6 100%);
+  border:1px solid rgba(255,255,255,.34);
+  box-shadow:0 1px 2px rgba(52,70,150,.26), 0 12px 26px -6px rgba(79,99,196,.42), inset 0 1px 0 rgba(255,255,255,.5);
   color:#fff;
   font-size:15.5px;
   font-weight:600;
@@ -304,7 +308,11 @@ html{ background:#e9edfc; }
   cursor:pointer;
   transition:box-shadow .25s ease, transform .12s ease, filter .2s ease;
 }
-.mg-btn-primary:active{ transform:translateY(1px) scale(.995); filter:brightness(1.03); }
+/* 押下=沈み込み(影が浅くなり接地する。マイクロモーション) */
+.mg-btn-primary:active{
+  transform:translateY(1.5px) scale(.99);
+  box-shadow:0 1px 2px rgba(52,70,150,.30), 0 5px 12px -4px rgba(79,99,196,.36), inset 0 1px 0 rgba(255,255,255,.5);
+}
 .mg-btn-primary:disabled,
 .mg-btn-primary[data-disabled],
 .mg-btn-primary.is-disabled{
@@ -504,9 +512,9 @@ html{ background:#e9edfc; }
   gap:9px;
   padding:0 16px;
   z-index:var(--mg-z-ticketpill);
-  background:linear-gradient(155deg,rgba(255,255,255,.93),rgba(255,255,255,.82));
+  background:linear-gradient(155deg,rgba(255,255,255,.95),rgba(255,255,255,.86));
   border:1px solid rgba(255,255,255,.9);
-  box-shadow:0 12px 26px rgba(34,49,74,.22), inset 0 1px 0 rgba(255,255,255,.8);
+  box-shadow:0 0 0 1px rgba(34,49,74,.05), 0 1px 2px rgba(34,49,74,.05), 0 10px 22px -6px rgba(34,49,74,.20), inset 0 1px 0 rgba(255,255,255,.8);
   cursor:pointer;
 }
 
@@ -689,8 +697,10 @@ select.mg-field,
   font-weight:400;
   letter-spacing:.06em;
 }
-/* 大数字(カード日付52/チケット番号34/統計30 用) */
-.mg-num-xl{ font-weight:300; line-height:.9; letter-spacing:.02em; }
+/* 大数字(カード日付52/チケット番号34/統計30 用)
+   (2026-09) line-height .9→1.04: Cormorant伊体のディセンダーが直下のラベル(DAY 1/2等)に
+   かぶる構造を根治。字面に呼吸を持たせる */
+.mg-num-xl{ font-weight:300; line-height:1.04; letter-spacing:.02em; }
 
 /* Material Symbols Rounded */
 .msr{
@@ -806,6 +816,19 @@ select.mg-field,
 }
 .mg-blot-yellow{ background:radial-gradient(circle, var(--mg-blot-yellow), transparent 70%); }
 .mg-blot-fuji{ background:radial-gradient(circle, var(--mg-blot-fuji), transparent 70%); }
+
+/* (2026-09 上質感) 紙目: 静的SVGノイズタイル1枚を全画面固定(160px繰り返し・約5%)。
+   のっぺりしたデジタル面を「印刷された水彩画」の手触りへ。アニメ無し=コンポジット常駐のみで安価 */
+.mg-grain{
+  position:fixed;
+  inset:0;
+  z-index:96;
+  pointer-events:none;
+  opacity:.05;
+  mix-blend-mode:multiply;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size:160px 160px;
+}
 
 /* 点線区切り */
 .mg-dashed{
@@ -3898,7 +3921,7 @@ function PWAInstallBanner({
       width: 44,
       height: 44,
       flexShrink: 0,
-      background: 'linear-gradient(122deg, #7ba6ec 0%, #88a6ea 34%, #cdadd9 64%, #ecabc6 100%)',
+      background: 'linear-gradient(180deg, #7e93e8 0%, #5f76d6 100%)',
       borderRadius: 10,
       display: 'flex',
       alignItems: 'center',
@@ -4635,7 +4658,7 @@ function Chip({
       cursor: 'pointer',
       whiteSpace: 'nowrap',
       ...(on ? {
-        background: 'linear-gradient(122deg, #7ba6ec 0%, #88a6ea 34%, #cdadd9 64%, #ecabc6 100%)',
+        background: 'linear-gradient(180deg, #7e93e8 0%, #5f76d6 100%)',
         color: '#f2f7fc',
         border: '1px solid rgba(255,255,255,.35)',
         boxShadow: '0 8px 18px rgba(79,99,196,.28)'
@@ -5385,7 +5408,7 @@ function MgSwitch({
       padding: 2,
       border: 0,
       flex: 'none',
-      background: on ? 'linear-gradient(122deg, #7ba6ec 0%, #88a6ea 34%, #cdadd9 64%, #ecabc6 100%)' : 'rgba(34,49,74,.18)',
+      background: on ? 'linear-gradient(180deg, #7e93e8 0%, #5f76d6 100%)' : 'rgba(34,49,74,.18)',
       boxShadow: on ? 'inset 0 1px 2px rgba(20,32,50,.2)' : 'inset 0 1px 2px rgba(20,32,50,.14)',
       transition: 'background .3s ease',
       cursor: 'pointer'
@@ -6246,7 +6269,7 @@ function _auth_LangRow({
           justifyContent: 'center',
           textAlign: 'center',
           border: on ? '1px solid transparent' : '1px solid rgba(110,134,224,.3)',
-          background: on ? 'linear-gradient(122deg, #80a8ec 0%, #bfabdf 58%, #ecabc6 100%)' : 'rgba(255,255,255,.62)',
+          background: on ? 'linear-gradient(180deg, #7e93e8 0%, #5f76d6 100%)' : 'rgba(255,255,255,.62)',
           color: on ? '#fff' : 'var(--mg-ink2, #2b3d57)',
           fontSize: 12,
           fontWeight: on ? 700 : 500,
@@ -6293,7 +6316,7 @@ function _auth_LangRow({
         justifyContent: 'center',
         textAlign: 'center',
         border: on ? '1px solid transparent' : '1px solid rgba(110,134,224,.32)',
-        background: on ? 'linear-gradient(122deg, #80a8ec 0%, #bfabdf 58%, #ecabc6 100%)' : 'rgba(255,255,255,.62)',
+        background: on ? 'linear-gradient(180deg, #7e93e8 0%, #5f76d6 100%)' : 'rgba(255,255,255,.62)',
         color: on ? '#fff' : 'var(--mg-ink2, #2b3d57)',
         fontSize: 13,
         fontWeight: on ? 700 : 600,
@@ -8982,11 +9005,14 @@ function TabHome() {
       color: 'var(--mg-ink, #22314a)'
     }
   }, fDp.md), React.createElement("div", {
+    className: "mg-ui",
     style: {
-      fontSize: 11,
-      letterSpacing: '.16em',
+      fontSize: 10.5,
+      fontWeight: 600,
+      letterSpacing: '.22em',
       color: 'var(--mg-ink4, #5b7796)',
-      marginTop: 2
+      marginTop: 8,
+      whiteSpace: 'nowrap'
     }
   }, fDayLabel)) : React.createElement("div", null, React.createElement("div", {
     className: "mg-serif",
@@ -8996,11 +9022,14 @@ function TabHome() {
       paddingTop: 6
     }
   }, L(_home_T.multiDay)), fDayLabel && fDayLabel !== L(_home_T.multiDay) ? React.createElement("div", {
+    className: "mg-ui",
     style: {
-      fontSize: 11,
-      letterSpacing: '.16em',
+      fontSize: 10.5,
+      fontWeight: 600,
+      letterSpacing: '.22em',
       color: 'var(--mg-ink4, #5b7796)',
-      marginTop: 2
+      marginTop: 8,
+      whiteSpace: 'nowrap'
     }
   }, fDayLabel) : null)), React.createElement("div", {
     style: {
@@ -10881,7 +10910,7 @@ function _ev_Guide({
       style: {
         appearance: 'none',
         border: act ? '1px solid transparent' : '1px solid rgba(110,134,224,.28)',
-        background: act ? 'linear-gradient(122deg, #7ba6ec 0%, #88a6ea 34%, #cdadd9 64%, #ecabc6 100%)' : 'rgba(255,255,255,.6)',
+        background: act ? 'linear-gradient(180deg, #7e93e8 0%, #5f76d6 100%)' : 'rgba(255,255,255,.6)',
         color: act ? '#f2f7fc' : 'var(--mg-ink3, #3d5877)',
         borderRadius: 999,
         padding: '6px 13px',
@@ -10968,7 +10997,7 @@ function _ev_Guide({
         fontWeight: 600,
         letterSpacing: '.1em',
         color: '#f2f7fc',
-        background: 'linear-gradient(122deg, #7ba6ec 0%, #88a6ea 34%, #cdadd9 64%, #ecabc6 100%)',
+        background: 'linear-gradient(180deg, #7e93e8 0%, #5f76d6 100%)',
         padding: '3px 10px',
         borderRadius: 11,
         flex: 'none'
@@ -11030,7 +11059,7 @@ function _ev_Guide({
           height: isEdge ? 12 : 8,
           marginLeft: isEdge ? 2 : 4,
           borderRadius: '50%',
-          background: isEdge ? 'linear-gradient(122deg, #7ba6ec 0%, #88a6ea 34%, #cdadd9 64%, #ecabc6 100%)' : 'rgba(255,255,255,.95)',
+          background: isEdge ? 'linear-gradient(180deg, #7e93e8 0%, #5f76d6 100%)' : 'rgba(255,255,255,.95)',
           border: isEdge ? '2px solid rgba(255,255,255,.85)' : '2px solid rgba(110,134,224,.55)',
           boxShadow: '0 2px 6px rgba(34,49,74,.25)'
         }
@@ -11819,13 +11848,15 @@ function TabEvents() {
       className: "mg-num",
       style: {
         fontSize: 30,
-        lineHeight: .95
+        lineHeight: 1.04
       }
     }, dp.d), React.createElement("div", {
       style: {
         fontSize: 10,
-        letterSpacing: '.12em',
-        color: 'var(--mg-ink4, #5b7796)'
+        fontWeight: 600,
+        letterSpacing: '.16em',
+        color: 'var(--mg-ink4, #5b7796)',
+        marginTop: 3
       }
     }, dp.day), ev.format === 'multi' ? React.createElement("div", {
       style: {
@@ -12403,7 +12434,7 @@ function SheetEventDetail({
           gap: 6,
           padding: '10px 18px',
           borderRadius: 20,
-          background: 'linear-gradient(122deg, #7ba6ec 0%, #88a6ea 34%, #cdadd9 64%, #ecabc6 100%)',
+          background: 'linear-gradient(180deg, #7e93e8 0%, #5f76d6 100%)',
           color: '#f2f7fc',
           fontSize: 13,
           fontWeight: 500,
@@ -13043,7 +13074,7 @@ function SheetEventDetail({
           flex: 'none',
           borderRadius: 7,
           border: '2px solid ' + (selected ? 'var(--mg-accent, #6e86e0)' : 'rgba(34,49,74,.25)'),
-          background: selected ? 'linear-gradient(122deg, #7ba6ec 0%, #88a6ea 34%, #cdadd9 64%, #ecabc6 100%)' : 'transparent',
+          background: selected ? 'linear-gradient(180deg, #7e93e8 0%, #5f76d6 100%)' : 'transparent',
           color: '#fbfcfd',
           display: 'inline-flex',
           alignItems: 'center',
@@ -14112,7 +14143,7 @@ function _reg_Dialog({
       fontSize: 13.5,
       fontWeight: 600,
       cursor: 'pointer',
-      background: 'linear-gradient(122deg, #80a8ec 0%, #bfabdf 58%, #ecabc6 100%)',
+      background: 'linear-gradient(180deg, #7e93e8 0%, #5f76d6 100%)',
       color: '#fff',
       border: '1px solid transparent',
       boxShadow: '0 8px 18px -8px rgba(123,131,224,.5), inset 0 1px 0 rgba(255,255,255,.5)'
@@ -14123,7 +14154,7 @@ function _reg_Dialog({
       fontSize: 13.5,
       fontWeight: 500,
       cursor: 'pointer',
-      background: 'linear-gradient(122deg, #7ba6ec 0%, #88a6ea 34%, #cdadd9 64%, #ecabc6 100%)',
+      background: 'linear-gradient(180deg, #7e93e8 0%, #5f76d6 100%)',
       color: '#f2f7fc',
       border: '1px solid rgba(255,255,255,.35)',
       boxShadow: '0 10px 22px rgba(79,99,196,.3)'
@@ -14301,7 +14332,7 @@ function _reg_PayPayNameOverlay({
       fontSize: 13.5,
       fontWeight: 500,
       border: '1px solid rgba(255,255,255,.35)',
-      background: submitting || !name.trim() ? 'rgba(91,119,150,.5)' : 'linear-gradient(122deg, #7ba6ec 0%, #88a6ea 34%, #cdadd9 64%, #ecabc6 100%)',
+      background: submitting || !name.trim() ? 'rgba(91,119,150,.5)' : 'linear-gradient(180deg, #7e93e8 0%, #5f76d6 100%)',
       color: '#f2f7fc',
       cursor: submitting || !name.trim() ? 'not-allowed' : 'pointer',
       boxShadow: '0 10px 22px rgba(79,99,196,.28)'
@@ -14798,7 +14829,7 @@ function _reg_CompanionSection({
       fontSize: 12.5,
       fontWeight: 500,
       cursor: 'pointer',
-      background: 'linear-gradient(122deg, #7ba6ec 0%, #88a6ea 34%, #cdadd9 64%, #ecabc6 100%)',
+      background: 'linear-gradient(180deg, #7e93e8 0%, #5f76d6 100%)',
       color: '#f2f7fc',
       border: '1px solid rgba(255,255,255,.35)',
       boxShadow: '0 8px 18px rgba(79,99,196,.28)'
@@ -15505,7 +15536,7 @@ function SheetRegister({
             alignItems: 'center',
             justifyContent: 'center',
             flexShrink: 0,
-            background: 'linear-gradient(122deg, #7ba6ec 0%, #88a6ea 34%, #cdadd9 64%, #ecabc6 100%)',
+            background: 'linear-gradient(180deg, #7e93e8 0%, #5f76d6 100%)',
             color: '#f2f7fc'
           }
         }, i + 1), React.createElement("div", {
@@ -15968,7 +15999,7 @@ function SheetRegister({
       fontWeight: 500,
       flexShrink: 0,
       whiteSpace: 'nowrap',
-      background: couponValidating || !couponCode.trim() ? 'rgba(91,119,150,.4)' : 'linear-gradient(122deg, #7ba6ec 0%, #88a6ea 34%, #cdadd9 64%, #ecabc6 100%)',
+      background: couponValidating || !couponCode.trim() ? 'rgba(91,119,150,.4)' : 'linear-gradient(180deg, #7e93e8 0%, #5f76d6 100%)',
       color: '#f2f7fc',
       border: '1px solid rgba(255,255,255,.35)',
       cursor: couponValidating || !couponCode.trim() ? 'not-allowed' : 'pointer'
@@ -16030,7 +16061,7 @@ function SheetRegister({
         display: 'inline-flex',
         alignItems: 'center',
         justifyContent: 'center',
-        background: selected ? 'linear-gradient(122deg, #7ba6ec 0%, #88a6ea 34%, #cdadd9 64%, #ecabc6 100%)' : 'rgba(110,134,224,.08)',
+        background: selected ? 'linear-gradient(180deg, #7e93e8 0%, #5f76d6 100%)' : 'rgba(110,134,224,.08)',
         color: selected ? '#f2f7fc' : 'var(--mg-accent, #6e86e0)',
         transition: 'all .25s ease'
       }
@@ -16395,7 +16426,7 @@ function SheetRegister({
         alignItems: 'center',
         justifyContent: 'center',
         border: agreedPolicy ? '1px solid rgba(255,255,255,.35)' : '1px solid rgba(34,49,74,.3)',
-        background: agreedPolicy ? 'linear-gradient(122deg, #7ba6ec 0%, #88a6ea 34%, #cdadd9 64%, #ecabc6 100%)' : 'rgba(255,255,255,.85)',
+        background: agreedPolicy ? 'linear-gradient(180deg, #7e93e8 0%, #5f76d6 100%)' : 'rgba(255,255,255,.85)',
         color: '#f2f7fc',
         transition: 'all .25s ease',
         boxShadow: agreedPolicy ? '0 6px 14px rgba(79,99,196,.28)' : 'none'
@@ -16518,7 +16549,7 @@ function SheetRegister({
           alignItems: 'center',
           justifyContent: 'center',
           border: on ? '0' : '1.5px solid rgba(34,49,74,.25)',
-          background: on ? 'linear-gradient(122deg, #7ba6ec, #cdadd9 60%, #ecabc6)' : 'transparent',
+          background: on ? 'linear-gradient(180deg, #7e93e8, #5f76d6)' : 'transparent',
           color: '#fff'
         }
       }, on ? React.createElement(Icon, {
@@ -17584,7 +17615,7 @@ function OverlayRegisterComplete({
       cursor: 'pointer',
       fontSize: 14,
       fontWeight: 500,
-      background: 'linear-gradient(122deg, #7ba6ec 0%, #88a6ea 34%, #cdadd9 64%, #ecabc6 100%)',
+      background: 'linear-gradient(180deg, #7e93e8 0%, #5f76d6 100%)',
       color: '#f2f7fc',
       border: '1px solid rgba(255,255,255,.3)',
       boxShadow: '0 14px 30px rgba(79,99,196,.32), inset 0 1px 0 rgba(255,255,255,.3)'
@@ -20854,7 +20885,7 @@ function SheetTicket({
       display: 'inline-flex',
       alignItems: 'center',
       justifyContent: 'center',
-      background: bright ? 'linear-gradient(122deg, #7ba6ec 0%, #88a6ea 34%, #cdadd9 64%, #ecabc6 100%)' : 'rgba(34,49,74,.06)',
+      background: bright ? 'linear-gradient(180deg, #7e93e8 0%, #5f76d6 100%)' : 'rgba(34,49,74,.06)',
       border: bright ? '1px solid rgba(255,255,255,.35)' : '1px solid transparent',
       color: bright ? '#f2f7fc' : 'var(--mg-ink3, #4c6584)'
     }
@@ -21054,7 +21085,7 @@ function SheetTicket({
             fontSize: 12.5,
             cursor: cur ? 'default' : 'pointer',
             border: '1px solid ' + (cur ? 'var(--mg-accent, #6e86e0)' : 'rgba(34,49,74,.18)'),
-            background: cur ? 'linear-gradient(122deg, #7ba6ec 0%, #88a6ea 34%, #cdadd9 64%, #ecabc6 100%)' : 'rgba(255,255,255,.8)',
+            background: cur ? 'linear-gradient(180deg, #7e93e8 0%, #5f76d6 100%)' : 'rgba(255,255,255,.8)',
             color: cur ? '#f2f7fc' : 'var(--mg-ink2, #2b3d57)',
             fontWeight: cur ? 600 : 400
           }
@@ -21481,7 +21512,7 @@ function SheetSurvey({
           display: 'inline-flex',
           alignItems: 'center',
           justifyContent: 'center',
-          background: sel ? 'linear-gradient(122deg, #7ba6ec 0%, #88a6ea 34%, #cdadd9 64%, #ecabc6 100%)' : 'rgba(255,255,255,.9)',
+          background: sel ? 'linear-gradient(180deg, #7e93e8 0%, #5f76d6 100%)' : 'rgba(255,255,255,.9)',
           color: sel ? '#f2f7fc' : 'var(--mg-ink2, #2b3d57)',
           border: sel ? '1px solid rgba(255,255,255,.35)' : '1px solid rgba(34,49,74,.12)'
         }
@@ -21565,7 +21596,7 @@ function SheetSurvey({
           borderRadius: 11,
           flex: 'none',
           border: sel ? '0' : '2px solid rgba(34,49,74,.25)',
-          background: sel ? 'linear-gradient(122deg, #7ba6ec 0%, #88a6ea 34%, #cdadd9 64%, #ecabc6 100%)' : 'transparent',
+          background: sel ? 'linear-gradient(180deg, #7e93e8 0%, #5f76d6 100%)' : 'transparent',
           display: 'inline-flex',
           alignItems: 'center',
           justifyContent: 'center',
@@ -21651,7 +21682,7 @@ function SheetSurvey({
         height: 78,
         borderRadius: 39,
         margin: '0 auto 20px',
-        background: 'linear-gradient(122deg, #7ba6ec 0%, #88a6ea 34%, #cdadd9 64%, #ecabc6 100%)',
+        background: 'linear-gradient(180deg, #7e93e8 0%, #5f76d6 100%)',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
@@ -24462,7 +24493,7 @@ function PageTown() {
       color: '#fff',
       fontSize: 13.5,
       fontWeight: 700,
-      background: 'linear-gradient(140deg, #7ba6ec 0%, #9f8fe0 55%, #e6a6c6 100%)',
+      background: 'linear-gradient(180deg, #7e93e8 0%, #5f76d6 100%)',
       boxShadow: '0 8px 18px rgba(110,134,224,.4)'
     }
   }, T({
@@ -24607,7 +24638,7 @@ function TabLife() {
       padding: '10px 8px',
       borderRadius: 20,
       textDecoration: 'none',
-      background: 'linear-gradient(122deg, #7ba6ec 0%, #88a6ea 34%, #cdadd9 64%, #ecabc6 100%)',
+      background: 'linear-gradient(180deg, #7e93e8 0%, #5f76d6 100%)',
       border: '1px solid rgba(255,255,255,.35)',
       color: '#f2f7fc',
       boxShadow: '0 10px 22px rgba(79,99,196,.28)'
@@ -25745,7 +25776,7 @@ function _cs_Bubble({
       fontSize: 13.5,
       lineHeight: 1.85,
       borderRadius: isUser ? '20px 20px 6px 20px' : '20px 20px 20px 6px',
-      background: isUser ? 'linear-gradient(122deg, #7ba6ec 0%, #88a6ea 34%, #cdadd9 64%, #ecabc6 100%)' : 'var(--mg-paper, rgba(255,255,255,.90))',
+      background: isUser ? 'linear-gradient(180deg, #7e93e8 0%, #5f76d6 100%)' : 'var(--mg-paper, rgba(255,255,255,.90))',
       color: isUser ? '#f2f7fc' : 'var(--mg-ink, #22314a)',
       border: isUser ? '1px solid rgba(255,255,255,.28)' : '1px solid rgba(34,49,74,.10)',
       boxShadow: isUser ? '0 8px 18px rgba(79,99,196,.22)' : '0 6px 14px rgba(34,49,74,.08)',
@@ -26140,7 +26171,7 @@ function SheetConsult({
       alignItems: 'center',
       justifyContent: 'center',
       padding: 0,
-      background: input.trim() ? 'linear-gradient(122deg, #7ba6ec 0%, #88a6ea 34%, #cdadd9 64%, #ecabc6 100%)' : 'rgba(34,49,74,.10)',
+      background: input.trim() ? 'linear-gradient(180deg, #7e93e8 0%, #5f76d6 100%)' : 'rgba(34,49,74,.10)',
       border: input.trim() ? '1px solid rgba(255,255,255,.3)' : '1px solid transparent',
       color: input.trim() ? '#f2f7fc' : 'var(--mg-ink5, #8ba0b6)',
       transition: 'background .2s, color .2s'
@@ -29998,7 +30029,7 @@ function ScreenContact() {
         height: 64,
         borderRadius: 32,
         margin: '0 auto 18px',
-        background: 'linear-gradient(122deg, #7ba6ec 0%, #88a6ea 34%, #cdadd9 64%, #ecabc6 100%)',
+        background: 'linear-gradient(180deg, #7e93e8 0%, #5f76d6 100%)',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
@@ -30620,7 +30651,8 @@ function _ShellFull({
 }
 function _ShellCover({
   srcs,
-  innerRef
+  innerRef,
+  wrapRef
 }) {
   const _els = React.useRef([]);
   const _key = srcs.join('|');
@@ -30640,6 +30672,7 @@ function _ShellCover({
     return () => clearInterval(iv);
   }, [_key]);
   return React.createElement("div", {
+    ref: wrapRef,
     "aria-hidden": "true",
     style: {
       position: 'absolute',
@@ -30982,7 +31015,6 @@ function MgTabBar({
     }
   }];
   return React.createElement("nav", {
-    className: "mg-glass",
     style: {
       position: 'fixed',
       left: '50%',
@@ -30991,7 +31023,10 @@ function MgTabBar({
       height: 64,
       borderRadius: 32,
       zIndex: 40,
-      transform: hidden ? 'translate(-50%, 160%)' : 'translate(-50%, 0)',
+      background: 'rgba(255,255,255,.97)',
+      border: '1px solid rgba(34,49,74,.07)',
+      boxShadow: '0 1px 2px rgba(34,49,74,.05), 0 10px 26px -6px rgba(34,49,74,.14), 0 26px 54px -20px rgba(34,49,74,.22), inset 0 1px 0 #fff',
+      transform: hidden ? 'translate(-50%, 220%)' : 'translate(-50%, 0)',
       transition: 'transform .46s ' + _shell_EASE
     }
   }, React.createElement("div", {
@@ -31003,8 +31038,8 @@ function MgTabBar({
       width: 'calc((100% - 12px) / 5)',
       height: 52,
       borderRadius: 26,
-      background: 'linear-gradient(150deg, rgba(110,134,224,.14), rgba(110,134,224,.06))',
-      border: '1px solid rgba(110,134,224,.18)',
+      background: 'rgba(110,134,224,.09)',
+      border: '1px solid rgba(110,134,224,.20)',
       transform: 'translateX(' + tab * 100 + '%)',
       transition: 'transform .46s ' + _shell_EASE,
       opacity: tab === 2 ? 0 : 1
@@ -31028,45 +31063,33 @@ function MgTabBar({
       border: 0,
       padding: 0,
       cursor: 'pointer',
-      display: 'flex',
-      flexDirection: 'column',
-      alignItems: 'center',
-      justifyContent: 'center',
-      gap: 2,
+      position: 'relative',
       WebkitTapHighlightColor: 'transparent'
     }
   }, React.createElement("span", {
     style: {
-      width: 46,
-      height: 46,
-      borderRadius: 23,
-      marginTop: -4,
-      flex: 'none',
+      position: 'absolute',
+      left: '50%',
+      top: -26,
+      width: 58,
+      height: 58,
+      borderRadius: 29,
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
-      background: 'linear-gradient(140deg, #7ba6ec 0%, #9f8fe0 55%, #e6a6c6 100%)',
-      boxShadow: tab === i ? '0 9px 20px rgba(110,134,224,.5)' : '0 5px 12px rgba(110,134,224,.32)',
-      border: '2px solid rgba(255,255,255,.78)',
-      transition: 'box-shadow .3s, transform .3s',
-      transform: tab === i ? 'translateY(-1px) scale(1.04)' : 'none'
+      background: 'linear-gradient(180deg, #7e93e8 0%, #5f76d6 100%)',
+      boxShadow: tab === i ? '0 2px 4px rgba(52,70,150,.30), 0 14px 28px -6px rgba(79,99,196,.52), inset 0 1px 0 rgba(255,255,255,.42)' : '0 2px 4px rgba(52,70,150,.24), 0 9px 20px -5px rgba(79,99,196,.40), inset 0 1px 0 rgba(255,255,255,.42)',
+      border: '3px solid rgba(255,255,255,.97)',
+      transition: 'box-shadow .3s, transform .3s cubic-bezier(.34,1.56,.64,1)',
+      transform: tab === i ? 'translateX(-50%) translateY(-3px) scale(1.05)' : 'translateX(-50%)'
     }
   }, React.createElement("span", {
     className: "msr",
     style: {
-      fontSize: 25,
+      fontSize: 27,
       color: '#fff'
     }
-  }, it.icon)), React.createElement("span", {
-    className: "mg-ui",
-    style: {
-      fontSize: 9.5,
-      letterSpacing: '.08em',
-      fontWeight: 700,
-      color: tab === i ? '#4a63c0' : '#6e86e0',
-      transition: 'color .3s'
-    }
-  }, it.label[lang] || it.label.ja)) : React.createElement("button", {
+  }, it.icon))) : React.createElement("button", {
     key: it.icon,
     type: "button",
     className: "mg-tap",
@@ -31079,30 +31102,19 @@ function MgTabBar({
       padding: 0,
       cursor: 'pointer',
       display: 'flex',
-      flexDirection: 'column',
       alignItems: 'center',
       justifyContent: 'center',
-      gap: 2,
       WebkitTapHighlightColor: 'transparent'
     }
   }, React.createElement("span", {
     className: "msr",
     style: {
-      fontSize: 23,
-      color: tab === i ? '#2b3d57' : '#8ba0b6',
+      fontSize: 26,
+      color: tab === i ? '#22314a' : '#7f94ab',
       transition: 'color .3s',
       animation: tab === i ? 'mgTabPop .5s cubic-bezier(.34,1.56,.64,1)' : 'none'
     }
-  }, it.icon), React.createElement("span", {
-    className: "mg-ui",
-    style: {
-      fontSize: 10,
-      letterSpacing: '.14em',
-      fontWeight: 500,
-      color: tab === i ? '#2b3d57' : '#8ba0b6',
-      transition: 'color .3s'
-    }
-  }, it.label[lang] || it.label.ja)))));
+  }, it.icon)))));
 }
 class _ShellErrorBoundary extends React.Component {
   constructor(props) {
@@ -31159,7 +31171,7 @@ class _ShellErrorBoundary extends React.Component {
           padding: '0 34px',
           borderRadius: 27,
           border: '1px solid rgba(255,255,255,.35)',
-          background: 'linear-gradient(122deg, #7ba6ec 0%, #88a6ea 34%, #cdadd9 64%, #ecabc6 100%)',
+          background: 'linear-gradient(180deg, #7e93e8 0%, #5f76d6 100%)',
           color: '#f2f7fc',
           fontSize: 14,
           letterSpacing: '.08em',
@@ -31206,6 +31218,7 @@ function _ShellRoot() {
   const _toastTimer = React.useRef(0);
   const _paneRefs = React.useRef([]);
   const _coverInner = React.useRef(null);
+  const _coverWrap = React.useRef(null);
   const _scrollRaf = React.useRef(0);
   const go = React.useCallback(path => {
     if (!path) return;
@@ -31387,12 +31400,17 @@ function _ShellRoot() {
     _scrollRaf.current = requestAnimationFrame(() => {
       _scrollRaf.current = 0;
       if (_coverInner.current) _coverInner.current.style.transform = 'translate3d(0,' + (st * 0.09).toFixed(1) + 'px,0)';
+      if (_coverWrap.current) {
+        const o = st <= 60 ? 1 : st >= 420 ? 0 : 1 - (st - 60) / 360;
+        _coverWrap.current.style.opacity = o.toFixed(3);
+      }
     });
   }, []);
   React.useEffect(() => {
     const el = _paneRefs.current[tab];
     if (el) el.scrollTop = 0;
     if (_coverInner.current) _coverInner.current.style.transform = 'translate3d(0,0,0)';
+    if (_coverWrap.current) _coverWrap.current.style.opacity = '1';
   }, [tab]);
   React.useEffect(() => {
     try {
@@ -31470,8 +31488,12 @@ function _ShellRoot() {
     className: [coverSrcs.length ? '' : 'mg-nocover', chromeHidden ? 'mg-chromeless' : ''].filter(Boolean).join(' ') || undefined
   }, React.createElement(_ShellCover, {
     srcs: coverSrcs,
-    innerRef: _coverInner
+    innerRef: _coverInner,
+    wrapRef: _coverWrap
   }), React.createElement(_ShellBubbles, null), React.createElement("div", {
+    className: "mg-grain",
+    "aria-hidden": "true"
+  }), React.createElement("div", {
     style: {
       position: 'absolute',
       inset: 0,
