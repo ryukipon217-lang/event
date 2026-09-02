@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-<script>window.__MG_BUILD='20260902221822';</script>
+<script>window.__MG_BUILD='20260902224850';</script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover">
 <title>connec+a — 出会いが、まちを変えていく。</title>
@@ -30972,11 +30972,6 @@ function MgToast({
     }
   }, err ? 'error' : 'check_circle'), React.createElement("span", null, t.msg)));
 }
-const _shell_TABBAR_SH = '0 1px 2px rgba(34,49,74,.05), 0 10px 26px -6px rgba(34,49,74,.14), 0 26px 54px -20px rgba(34,49,74,.22), inset 0 1px 0 #fff';
-const _shell_TABBAR_SH_LIFT = '0 2px 6px rgba(34,49,74,.09), 0 18px 42px -8px rgba(34,49,74,.26), 0 44px 84px -24px rgba(34,49,74,.30), inset 0 1px 0 #fff';
-function _shell_tabbarXf(off, hidden, lifted) {
-  return 'translate(calc(-50% + ' + (off || 0) + 'px), ' + (hidden ? '220%' : '0px') + ')' + (lifted ? ' scale(1.045)' : '');
-}
 function MgTabBar({
   tab,
   lang,
@@ -31021,84 +31016,87 @@ function MgTabBar({
     }
   }];
   const navRef = React.useRef(null);
-  const [offX, setOffX] = React.useState(() => {
-    try {
-      return parseFloat(localStorage.getItem('mg_tabbar_x')) || 0;
-    } catch (e) {
-      return 0;
-    }
-  });
+  const pillRef = React.useRef(null);
+  const bubbleRef = React.useRef(null);
+  const iconRefs = React.useRef([]);
   const _d = React.useRef({
+    down: false,
     live: false,
     startX: 0,
     startY: 0,
-    base: 0,
-    off: offX,
-    timer: 0,
+    navLeft: 0,
+    cw: 0,
+    px: 0,
+    hover: -1,
     blockClickUntil: 0
   });
-  const _clampOff = React.useCallback(v => {
-    const vw = window.innerWidth || 402;
-    const appW = vw >= 600 ? Math.min(vw, 430) : vw;
-    const barW = navRef.current && navRef.current.offsetWidth || 300;
-    const m = Math.max(0, (appW - barW) / 2 - 6);
-    return Math.max(-m, Math.min(m, v));
-  }, []);
-  React.useEffect(() => {
-    const v = _clampOff(_d.current.off);
-    if (v !== _d.current.off) {
-      _d.current.off = v;
-      setOffX(v);
-    }
-  }, [_clampOff]);
-  const _write = React.useCallback((lifted, transition) => {
-    const el = navRef.current;
-    if (!el) return;
-    if (transition != null) el.style.transition = transition;
-    el.style.transform = _shell_tabbarXf(_d.current.off, false, lifted);
-    el.style.boxShadow = lifted ? _shell_TABBAR_SH_LIFT : _shell_TABBAR_SH;
-  }, []);
   const onDown = React.useCallback(e => {
     if (e.isPrimary === false) return;
     const d = _d.current;
+    d.down = true;
+    d.live = false;
     d.startX = e.clientX;
     d.startY = e.clientY;
-    d.base = d.off;
-    clearTimeout(d.timer);
-    const pid = e.pointerId;
-    d.timer = setTimeout(() => {
-      d.live = true;
-      try {
-        navRef.current.setPointerCapture(pid);
-      } catch (err) {}
-      try {
-        if (navigator.vibrate) navigator.vibrate(8);
-      } catch (err) {}
-      _write(true, 'transform .22s cubic-bezier(.34,1.56,.64,1), box-shadow .22s ease');
-    }, 400);
-  }, [_write]);
+  }, []);
   const onMove = React.useCallback(e => {
     const d = _d.current;
+    if (!d.down) return;
+    const dx = e.clientX - d.startX,
+      dy = e.clientY - d.startY;
     if (!d.live) {
-      if (Math.abs(e.clientX - d.startX) > 10 || Math.abs(e.clientY - d.startY) > 10) clearTimeout(d.timer);
-      return;
+      if (Math.abs(dx) < 7 || Math.abs(dx) < Math.abs(dy) * 1.2) return;
+      d.live = true;
+      const nav = navRef.current;
+      const r = nav.getBoundingClientRect();
+      d.navLeft = r.left;
+      d.cw = (nav.offsetWidth - 12) / 5;
+      d.hover = -1;
+      try {
+        nav.setPointerCapture(e.pointerId);
+      } catch (err) {}
+      try {
+        if (navigator.vibrate) navigator.vibrate(5);
+      } catch (err) {}
+      if (pillRef.current) {
+        pillRef.current.style.transition = 'transform .12s ease-out, opacity .2s ease';
+        pillRef.current.style.opacity = '1';
+      }
+      if (bubbleRef.current) bubbleRef.current.style.transform = 'scaleX(1.14) scaleY(.92)';
     }
-    d.off = _clampOff(d.base + (e.clientX - d.startX));
-    _write(true, 'none');
-  }, [_clampOff, _write]);
+    d.px = Math.max(0, Math.min(4 * d.cw, e.clientX - d.navLeft - 6 - d.cw / 2));
+    if (pillRef.current) pillRef.current.style.transform = 'translateX(' + d.px.toFixed(1) + 'px)';
+    const hover = Math.round(d.px / d.cw);
+    if (hover !== d.hover) {
+      const prev = iconRefs.current[d.hover];
+      if (prev) prev.style.transform = '';
+      const cur = iconRefs.current[hover];
+      if (cur) cur.style.transform = 'translateY(-2px) scale(1.22)';
+      d.hover = hover;
+      try {
+        if (navigator.vibrate) navigator.vibrate(3);
+      } catch (err) {}
+    }
+  }, []);
   const onUp = React.useCallback(() => {
     const d = _d.current;
-    clearTimeout(d.timer);
+    d.down = false;
     if (!d.live) return;
     d.live = false;
-    if (Math.abs(d.off) < 14) d.off = 0;
-    try {
-      localStorage.setItem('mg_tabbar_x', String(Math.round(d.off)));
-    } catch (e2) {}
+    iconRefs.current.forEach(el => {
+      if (el) el.style.transform = '';
+    });
+    const nearest = Math.max(0, Math.min(4, Math.round(d.px / (d.cw || 1))));
+    if (pillRef.current) {
+      const el = pillRef.current;
+      el.style.transition = 'transform .42s cubic-bezier(.22,1.4,.36,1), opacity .3s ease';
+      void el.offsetWidth;
+      el.style.transform = 'translateX(' + nearest * 100 + '%)';
+      el.style.opacity = nearest === 2 ? '0' : '1';
+    }
+    if (bubbleRef.current) bubbleRef.current.style.transform = '';
     d.blockClickUntil = Date.now() + 350;
-    _write(false, 'transform .46s ' + _shell_EASE + ', box-shadow .3s ease');
-    setOffX(d.off);
-  }, [_write]);
+    if (nearest !== tab) onTab(nearest);
+  }, [tab, onTab]);
   const onClickCapture = React.useCallback(e => {
     if (Date.now() < _d.current.blockClickUntil) {
       e.preventDefault();
@@ -31118,14 +31116,14 @@ function MgTabBar({
       position: 'fixed',
       left: '50%',
       bottom: 'calc(14px + env(safe-area-inset-bottom) - var(--mg-vp-gap, 0px))',
-      width: 'min(300px, calc(100vw - 32px))',
+      width: 'min(408px, calc(100vw - 28px))',
       height: 64,
       borderRadius: 32,
       zIndex: 40,
       background: 'rgba(255,255,255,.97)',
       border: '1px solid rgba(34,49,74,.07)',
-      boxShadow: _shell_TABBAR_SH,
-      transform: _shell_tabbarXf(offX, hidden, false),
+      boxShadow: '0 1px 2px rgba(34,49,74,.05), 0 10px 26px -6px rgba(34,49,74,.14), 0 26px 54px -20px rgba(34,49,74,.22), inset 0 1px 0 #fff',
+      transform: hidden ? 'translate(-50%, 220%)' : 'translate(-50%, 0)',
       transition: 'transform .46s ' + _shell_EASE,
       touchAction: 'none',
       userSelect: 'none',
@@ -31133,6 +31131,7 @@ function MgTabBar({
       WebkitTouchCallout: 'none'
     }
   }, React.createElement("div", {
+    ref: pillRef,
     "aria-hidden": "true",
     style: {
       position: 'absolute',
@@ -31140,14 +31139,26 @@ function MgTabBar({
       left: 6,
       width: 'calc((100% - 12px) / 5)',
       height: 52,
-      borderRadius: 26,
-      background: 'rgba(110,134,224,.09)',
-      border: '1px solid rgba(110,134,224,.20)',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
       transform: 'translateX(' + tab * 100 + '%)',
-      transition: 'transform .46s ' + _shell_EASE,
-      opacity: tab === 2 ? 0 : 1
+      transition: 'transform .46s ' + _shell_EASE + ', opacity .3s ease',
+      opacity: tab === 2 ? 0 : 1,
+      pointerEvents: 'none'
     }
-  }), React.createElement("div", {
+  }, React.createElement("div", {
+    ref: bubbleRef,
+    style: {
+      width: 52,
+      height: 52,
+      borderRadius: 26,
+      background: 'rgba(110,134,224,.10)',
+      border: '1px solid rgba(110,134,224,.22)',
+      boxShadow: 'inset 0 1px 0 rgba(255,255,255,.7), 0 2px 8px rgba(110,134,224,.16)',
+      transition: 'transform .18s ease'
+    }
+  })), React.createElement("div", {
     style: {
       position: 'relative',
       display: 'grid',
@@ -31210,11 +31221,14 @@ function MgTabBar({
       WebkitTapHighlightColor: 'transparent'
     }
   }, React.createElement("span", {
+    ref: el => {
+      iconRefs.current[i] = el;
+    },
     className: "msr",
     style: {
       fontSize: 26,
       color: tab === i ? '#22314a' : '#7f94ab',
-      transition: 'color .3s',
+      transition: 'color .3s, transform .2s cubic-bezier(.34,1.56,.64,1)',
       animation: tab === i ? 'mgTabPop .5s cubic-bezier(.34,1.56,.64,1)' : 'none'
     }
   }, it.icon)))));
