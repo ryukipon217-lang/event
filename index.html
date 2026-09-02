@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-<script>window.__MG_BUILD='20260902230123';</script>
+<script>window.__MG_BUILD='20260902231336';</script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover">
 <title>connec+a — 出会いが、まちを変えていく。</title>
@@ -589,9 +589,11 @@ select.mg-field,
   user-select:none;
   white-space:nowrap;
 }
+/* (2026-09 代表指定) 選択チップは藤色でなく赤み(紅藤/ローズ)。アクションボタンは藤色のまま=
+   「選択=ローズ/押す=藤」の2色言語 */
 .mg-chip[data-on]:not([data-on="0"]):not([data-on="false"]),
 .mg-chip.is-on{
-  background:rgba(110,134,224,.93);
+  background:linear-gradient(180deg,#c05e97 0%,#9e4478 100%);
   color:#f2f7fc;
   border-color:rgba(255,255,255,.3);
 }
@@ -4659,10 +4661,10 @@ function Chip({
       cursor: 'pointer',
       whiteSpace: 'nowrap',
       ...(on ? {
-        background: 'linear-gradient(180deg, #7e93e8 0%, #5f76d6 100%)',
+        background: 'linear-gradient(180deg, #c05e97 0%, #9e4478 100%)',
         color: '#f2f7fc',
         border: '1px solid rgba(255,255,255,.35)',
-        boxShadow: '0 8px 18px rgba(79,99,196,.28)'
+        boxShadow: '0 8px 18px rgba(158,68,120,.28)'
       } : {
         color: 'var(--mg-ink2, #2b3d57)'
       })
@@ -6270,12 +6272,12 @@ function _auth_LangRow({
           justifyContent: 'center',
           textAlign: 'center',
           border: on ? '1px solid transparent' : '1px solid rgba(110,134,224,.3)',
-          background: on ? 'linear-gradient(180deg, #7e93e8 0%, #5f76d6 100%)' : 'rgba(255,255,255,.62)',
+          background: on ? 'linear-gradient(180deg, #c05e97 0%, #9e4478 100%)' : 'rgba(255,255,255,.62)',
           color: on ? '#fff' : 'var(--mg-ink2, #2b3d57)',
           fontSize: 12,
           fontWeight: on ? 700 : 500,
           whiteSpace: 'nowrap',
-          boxShadow: on ? '0 6px 14px -7px rgba(123,131,224,.5)' : 'none',
+          boxShadow: on ? '0 6px 14px -7px rgba(158,68,120,.45)' : 'none',
           transition: 'background .25s ease, color .25s ease, border-color .25s ease'
         }
       }, label);
@@ -6317,7 +6319,7 @@ function _auth_LangRow({
         justifyContent: 'center',
         textAlign: 'center',
         border: on ? '1px solid transparent' : '1px solid rgba(110,134,224,.32)',
-        background: on ? 'linear-gradient(180deg, #7e93e8 0%, #5f76d6 100%)' : 'rgba(255,255,255,.62)',
+        background: on ? 'linear-gradient(180deg, #c05e97 0%, #9e4478 100%)' : 'rgba(255,255,255,.62)',
         color: on ? '#fff' : 'var(--mg-ink2, #2b3d57)',
         fontSize: 13,
         fontWeight: on ? 700 : 600,
@@ -10911,7 +10913,7 @@ function _ev_Guide({
       style: {
         appearance: 'none',
         border: act ? '1px solid transparent' : '1px solid rgba(110,134,224,.28)',
-        background: act ? 'linear-gradient(180deg, #7e93e8 0%, #5f76d6 100%)' : 'rgba(255,255,255,.6)',
+        background: act ? 'linear-gradient(180deg, #c05e97 0%, #9e4478 100%)' : 'rgba(255,255,255,.6)',
         color: act ? '#f2f7fc' : 'var(--mg-ink3, #3d5877)',
         borderRadius: 999,
         padding: '6px 13px',
@@ -10998,7 +11000,7 @@ function _ev_Guide({
         fontWeight: 600,
         letterSpacing: '.1em',
         color: '#f2f7fc',
-        background: 'linear-gradient(180deg, #7e93e8 0%, #5f76d6 100%)',
+        background: 'linear-gradient(180deg, #c05e97 0%, #9e4478 100%)',
         padding: '3px 10px',
         borderRadius: 11,
         flex: 'none'
@@ -11060,7 +11062,7 @@ function _ev_Guide({
           height: isEdge ? 12 : 8,
           marginLeft: isEdge ? 2 : 4,
           borderRadius: '50%',
-          background: isEdge ? 'linear-gradient(180deg, #7e93e8 0%, #5f76d6 100%)' : 'rgba(255,255,255,.95)',
+          background: isEdge ? 'linear-gradient(180deg, #c05e97 0%, #9e4478 100%)' : 'rgba(255,255,255,.95)',
           border: isEdge ? '2px solid rgba(255,255,255,.85)' : '2px solid rgba(110,134,224,.55)',
           boxShadow: '0 2px 6px rgba(34,49,74,.25)'
         }
@@ -16062,7 +16064,7 @@ function SheetRegister({
         display: 'inline-flex',
         alignItems: 'center',
         justifyContent: 'center',
-        background: selected ? 'linear-gradient(180deg, #7e93e8 0%, #5f76d6 100%)' : 'rgba(110,134,224,.08)',
+        background: selected ? 'linear-gradient(180deg, #c05e97 0%, #9e4478 100%)' : 'rgba(110,134,224,.08)',
         color: selected ? '#f2f7fc' : 'var(--mg-accent, #6e86e0)',
         transition: 'all .25s ease'
       }
@@ -21085,8 +21087,8 @@ function SheetTicket({
             borderRadius: 17,
             fontSize: 12.5,
             cursor: cur ? 'default' : 'pointer',
-            border: '1px solid ' + (cur ? 'var(--mg-accent, #6e86e0)' : 'rgba(34,49,74,.18)'),
-            background: cur ? 'linear-gradient(180deg, #7e93e8 0%, #5f76d6 100%)' : 'rgba(255,255,255,.8)',
+            border: '1px solid ' + (cur ? 'rgba(158,68,120,.55)' : 'rgba(34,49,74,.18)'),
+            background: cur ? 'linear-gradient(180deg, #c05e97 0%, #9e4478 100%)' : 'rgba(255,255,255,.8)',
             color: cur ? '#f2f7fc' : 'var(--mg-ink2, #2b3d57)',
             fontWeight: cur ? 600 : 400
           }
@@ -21513,7 +21515,7 @@ function SheetSurvey({
           display: 'inline-flex',
           alignItems: 'center',
           justifyContent: 'center',
-          background: sel ? 'linear-gradient(180deg, #7e93e8 0%, #5f76d6 100%)' : 'rgba(255,255,255,.9)',
+          background: sel ? 'linear-gradient(180deg, #c05e97 0%, #9e4478 100%)' : 'rgba(255,255,255,.9)',
           color: sel ? '#f2f7fc' : 'var(--mg-ink2, #2b3d57)',
           border: sel ? '1px solid rgba(255,255,255,.35)' : '1px solid rgba(34,49,74,.12)'
         }
