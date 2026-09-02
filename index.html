@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-<script>window.__MG_BUILD='20260902231336';</script>
+<script>window.__MG_BUILD='20260902232212';</script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover">
 <title>connec+a — 出会いが、まちを変えていく。</title>
@@ -589,11 +589,11 @@ select.mg-field,
   user-select:none;
   white-space:nowrap;
 }
-/* (2026-09 代表指定) 選択チップは藤色でなく赤み(紅藤/ローズ)。アクションボタンは藤色のまま=
-   「選択=ローズ/押す=藤」の2色言語 */
+/* (2026-09 代表指定) 色言語: フィルタチップ=藤紫(ローズと藤の中間)/選択・強調(Dayピル等)=ローズ/
+   アクションボタン=藤。 */
 .mg-chip[data-on]:not([data-on="0"]):not([data-on="false"]),
 .mg-chip.is-on{
-  background:linear-gradient(180deg,#c05e97 0%,#9e4478 100%);
+  background:linear-gradient(180deg,#9f78bf 0%,#7e5da7 100%);
   color:#f2f7fc;
   border-color:rgba(255,255,255,.3);
 }
@@ -4661,10 +4661,10 @@ function Chip({
       cursor: 'pointer',
       whiteSpace: 'nowrap',
       ...(on ? {
-        background: 'linear-gradient(180deg, #c05e97 0%, #9e4478 100%)',
+        background: 'linear-gradient(180deg, #9f78bf 0%, #7e5da7 100%)',
         color: '#f2f7fc',
         border: '1px solid rgba(255,255,255,.35)',
-        boxShadow: '0 8px 18px rgba(158,68,120,.28)'
+        boxShadow: '0 8px 18px rgba(126,93,167,.30)'
       } : {
         color: 'var(--mg-ink2, #2b3d57)'
       })
