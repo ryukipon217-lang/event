@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-<script>window.__MG_BUILD='20260903022920';</script>
+<script>window.__MG_BUILD='20260903074524';</script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover">
 <title>connec+a — 出会いが、まちを変えていく。</title>
@@ -18861,15 +18861,23 @@ function _my_PointsCard({
     d: data,
     lang: lang,
     onOpen: () => A && A.go('/points')
-  }), React.createElement("div", {
-    className: "mg-card",
+  }), React.createElement("button", {
+    type: "button",
+    className: "mg-card mg-tap",
+    onClick: () => A && A.go('/points'),
+    "aria-label": lang === 'en' ? 'Open points shop' : 'ポイントショップを開く',
     style: {
+      width: '100%',
+      textAlign: 'left',
+      border: 0,
+      cursor: 'pointer',
       borderRadius: 20,
       padding: '13px 16px',
       marginTop: 10,
       display: 'flex',
       alignItems: 'center',
-      gap: 12
+      gap: 12,
+      WebkitTapHighlightColor: 'transparent'
     }
   }, React.createElement("div", {
     style: {
@@ -19154,7 +19162,8 @@ function SheetPoints({
   }, React.createElement("div", {
     className: "mg-ui",
     style: {
-      color: 'var(--mg-ink,#22314a)'
+      color: 'var(--mg-ink,#22314a)',
+      padding: '4px 18px 0'
     }
   }, React.createElement("div", {
     style: {
