@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-<script>window.__MG_BUILD='20260902232212';</script>
+<script>window.__MG_BUILD='20260903022920';</script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover">
 <title>connec+a — 出会いが、まちを変えていく。</title>
@@ -1833,6 +1833,22 @@ const authApi = {
   async getMyRegistrations(sessionToken) {
     return postToGAS('auth.getMyRegistrations', {
       sessionToken
+    });
+  },
+  async getMyPoints(sessionToken) {
+    return postToGAS('auth.getMyPoints', {
+      sessionToken
+    });
+  },
+  async listPointRewards(sessionToken) {
+    return postToGAS('auth.listPointRewards', {
+      sessionToken
+    });
+  },
+  async redeemReward(sessionToken, rewardId) {
+    return postToGAS('auth.redeemReward', {
+      sessionToken,
+      rewardId
     });
   },
   async getRegStatus(sessionToken, regId) {
@@ -18575,6 +18591,983 @@ function _my_Confirm({
     }
   }))));
 }
+function _my_rankVisual(key, color) {
+  const K = String(key || '').toLowerCase();
+  if (K === 'gold') return {
+    grad: 'linear-gradient(135deg,#5a4415 0%,#9a7628 20%,#efc978 49%,#a67f2c 73%,#5f4917 100%)',
+    edge: 'rgba(255,238,183,.55)',
+    label: 'GOLD'
+  };
+  if (K === 'silver') return {
+    grad: 'linear-gradient(135deg,#434b55 0%,#79838f 22%,#d3dbe4 49%,#828c98 74%,#474f59 100%)',
+    edge: 'rgba(238,244,251,.55)',
+    label: 'SILVER'
+  };
+  if (K === 'bronze') return {
+    grad: 'linear-gradient(135deg,#33261a 0%,#6b5030 22%,#c0966084 0%,#bd9560 49%,#785936 74%,#3d2d1c 100%)',
+    edge: 'rgba(247,223,183,.5)',
+    label: 'BRONZE'
+  };
+  const c = color || '#5f76d6';
+  return {
+    grad: 'linear-gradient(135deg,#2b3550 0%,' + c + ' 50%,#2b3550 100%)',
+    edge: 'rgba(255,255,255,.5)',
+    label: (key || '').toUpperCase()
+  };
+}
+const _my_rankEN = {
+  bronze: 'Bronze',
+  silver: 'Silver',
+  gold: 'Gold'
+};
+function _my_rankName(rank, lang) {
+  if (!rank) return '';
+  if (lang === 'en') return _my_rankEN[String(rank.key || '').toLowerCase()] || rank.name || '';
+  return rank.name || '';
+}
+function _my_MemberCard({
+  d,
+  lang,
+  onOpen,
+  compact
+}) {
+  const rank = d && d.rank || null;
+  const v = _my_rankVisual(rank && rank.key, rank && rank.color);
+  const unit = d && d.config && d.config.unit || 'pt';
+  const name = d && d.config && d.config.name || 'connec+aポイント';
+  const bal = d ? Number(d.balance) || 0 : null;
+  const cfg = d && d.config || {};
+  const showNo = cfg.showMemberNo !== false;
+  const showSince = cfg.showSince !== false;
+  const tagline = (cfg.cardTagline != null ? cfg.cardTagline : 'MEMBER') || '';
+  const memberNo = d && d.memberNo || '';
+  const memberName = d && d.memberName || '';
+  const since = d && d.memberSince ? String(d.memberSince).slice(0, 4) : '';
+  const sinceLabel = showSince && since ? 'MEMBER SINCE ' + since : tagline;
+  const rankEmoji = rank && rank.emoji || '';
+  return React.createElement("button", {
+    type: "button",
+    onClick: onOpen,
+    className: "mg-tap",
+    style: {
+      display: 'block',
+      width: '100%',
+      textAlign: 'left',
+      border: 0,
+      padding: 0,
+      cursor: onOpen ? 'pointer' : 'default',
+      borderRadius: 22,
+      position: 'relative',
+      overflow: 'hidden',
+      aspectRatio: '1.66 / 1',
+      background: v.grad,
+      boxShadow: '0 1px 2px rgba(20,28,45,.4), 0 18px 40px -14px rgba(20,28,45,.62), inset 0 1px 0 ' + v.edge + ', inset 0 0 0 1px rgba(255,255,255,.10)',
+      color: '#fff',
+      WebkitTapHighlightColor: 'transparent'
+    }
+  }, React.createElement("span", {
+    "aria-hidden": "true",
+    style: {
+      position: 'absolute',
+      inset: 0,
+      opacity: .5,
+      mixBlendMode: 'soft-light',
+      background: 'repeating-radial-gradient(circle at 78% 18%, rgba(255,255,255,.5) 0 1px, rgba(255,255,255,0) 1px 7px)'
+    }
+  }), React.createElement("span", {
+    "aria-hidden": "true",
+    style: {
+      position: 'absolute',
+      top: '-40%',
+      left: '-20%',
+      width: '70%',
+      height: '180%',
+      transform: 'rotate(18deg)',
+      background: 'linear-gradient(90deg, rgba(255,255,255,0), rgba(255,255,255,.28), rgba(255,255,255,0))',
+      pointerEvents: 'none'
+    }
+  }), React.createElement("span", {
+    "aria-hidden": "true",
+    style: {
+      position: 'absolute',
+      inset: 0,
+      background: 'radial-gradient(120% 80% at 50% 120%, rgba(0,0,0,.28), rgba(0,0,0,0) 60%)'
+    }
+  }), React.createElement("div", {
+    style: {
+      position: 'relative',
+      height: '100%',
+      padding: compact ? '16px 18px' : '20px 22px',
+      display: 'flex',
+      flexDirection: 'column',
+      justifyContent: 'space-between'
+    }
+  }, React.createElement("div", {
+    style: {
+      display: 'flex',
+      alignItems: 'flex-start',
+      justifyContent: 'space-between'
+    }
+  }, React.createElement("div", null, React.createElement("div", {
+    className: "mg-num",
+    style: {
+      fontSize: compact ? 17 : 19,
+      letterSpacing: '.06em',
+      textShadow: '0 1px 4px rgba(0,0,0,.35)'
+    }
+  }, "connec+a"), React.createElement("div", {
+    className: "mg-ui",
+    style: {
+      fontSize: 8.5,
+      letterSpacing: '.28em',
+      opacity: .82,
+      marginTop: 1
+    }
+  }, String(name).toUpperCase().slice(0, 22))), React.createElement("div", {
+    className: "mg-ui",
+    style: {
+      display: 'inline-flex',
+      alignItems: 'center',
+      gap: 5,
+      padding: '4px 11px',
+      borderRadius: 999,
+      background: 'rgba(255,255,255,.16)',
+      border: '1px solid ' + v.edge,
+      fontSize: 10,
+      fontWeight: 700,
+      letterSpacing: '.16em',
+      boxShadow: 'inset 0 1px 0 rgba(255,255,255,.4)'
+    }
+  }, rankEmoji ? React.createElement("span", {
+    style: {
+      fontSize: 12
+    }
+  }, rankEmoji) : React.createElement("span", {
+    className: "msr",
+    style: {
+      fontSize: 13
+    }
+  }, "workspace_premium"), _my_rankName(rank, lang) || v.label)), React.createElement("div", null, React.createElement("span", {
+    "aria-hidden": "true",
+    style: {
+      display: 'inline-block',
+      width: 34,
+      height: 25,
+      borderRadius: 6,
+      marginBottom: compact ? 6 : 9,
+      background: 'linear-gradient(135deg,#e8d9a8,#b9975a 55%,#e8d9a8)',
+      boxShadow: 'inset 0 0 0 1px rgba(0,0,0,.15)',
+      backgroundImage: 'linear-gradient(135deg,#e8d9a8,#b9975a 55%,#e8d9a8), linear-gradient(0deg, rgba(0,0,0,.2) 1px, transparent 1px)'
+    }
+  }), React.createElement("div", {
+    style: {
+      display: 'flex',
+      alignItems: 'baseline',
+      gap: 6
+    }
+  }, React.createElement("span", {
+    className: "mg-num mg-num-xl",
+    style: {
+      fontSize: compact ? 34 : 42,
+      textShadow: '0 2px 6px rgba(0,0,0,.32)'
+    }
+  }, bal == null ? '—' : bal.toLocaleString()), React.createElement("span", {
+    className: "mg-num",
+    style: {
+      fontSize: compact ? 15 : 17,
+      opacity: .92
+    }
+  }, unit))), React.createElement("div", {
+    style: {
+      display: 'flex',
+      alignItems: 'flex-end',
+      justifyContent: 'space-between',
+      gap: 10
+    }
+  }, React.createElement("div", {
+    style: {
+      minWidth: 0
+    }
+  }, React.createElement("div", {
+    className: "mg-ui mg-clamp1",
+    style: {
+      fontSize: compact ? 12.5 : 13.5,
+      fontWeight: 600,
+      letterSpacing: '.04em',
+      textShadow: '0 1px 3px rgba(0,0,0,.3)'
+    }
+  }, memberName || ' '), showNo ? React.createElement("div", {
+    className: "mg-num",
+    style: {
+      fontSize: 11,
+      letterSpacing: '.14em',
+      opacity: .82
+    }
+  }, "No. ", memberNo || '----') : null), React.createElement("div", {
+    className: "mg-ui",
+    style: {
+      fontSize: 8.5,
+      letterSpacing: '.18em',
+      opacity: .8,
+      textAlign: 'right',
+      flex: 'none'
+    }
+  }, sinceLabel))));
+}
+function _my_PointsCard({
+  lang,
+  userKey,
+  active
+}) {
+  const A = useMg();
+  const [data, setData] = useState(() => {
+    try {
+      return typeof getSwrCached === 'function' && userKey ? getSwrCached('myPoints_' + userKey) || null : null;
+    } catch (e) {
+      return null;
+    }
+  });
+  useEffect(() => {
+    let dead = false;
+    if (!userKey || !active) return undefined;
+    let token = null;
+    try {
+      token = typeof authStore !== 'undefined' && authStore && authStore.getToken ? authStore.getToken() : null;
+    } catch (e) {}
+    if (!token || typeof authApi === 'undefined' || !authApi || !authApi.getMyPoints) return undefined;
+    authApi.getMyPoints(token).then(res => {
+      if (dead || !res || !res.ok) return;
+      setData(res);
+      try {
+        if (typeof setSwrCache === 'function') setSwrCache('myPoints_' + userKey, res);
+      } catch (e) {}
+    }).catch(() => {});
+    return () => {
+      dead = true;
+    };
+  }, [userKey, active]);
+  const pointsOn = typeof MG_FEATURES === 'undefined' || !!(MG_FEATURES && MG_FEATURES.points);
+  if (!pointsOn) return null;
+  if (data && data.config && data.config.active === false) return null;
+  const rank = data && data.rank;
+  const nextR = rank && rank.next;
+  const lifetime = data ? Number(data.rankBasisValue != null ? data.rankBasisValue : data.lifetimeEarned) || 0 : 0;
+  const TH = data && data.config && data.config.themeColor || '#9e4478';
+  return React.createElement("div", {
+    style: {
+      padding: '0 18px 16px'
+    }
+  }, React.createElement(_my_MemberCard, {
+    d: data,
+    lang: lang,
+    onOpen: () => A && A.go('/points')
+  }), React.createElement("div", {
+    className: "mg-card",
+    style: {
+      borderRadius: 20,
+      padding: '13px 16px',
+      marginTop: 10,
+      display: 'flex',
+      alignItems: 'center',
+      gap: 12
+    }
+  }, React.createElement("div", {
+    style: {
+      flex: 1,
+      minWidth: 0
+    }
+  }, rank && nextR ? React.createElement("div", null, React.createElement("div", {
+    style: {
+      display: 'flex',
+      justifyContent: 'space-between',
+      fontSize: 10.5,
+      marginBottom: 5
+    }
+  }, React.createElement("span", {
+    style: {
+      fontWeight: 700,
+      letterSpacing: '.08em',
+      color: rank.color || TH
+    }
+  }, (rank.emoji ? rank.emoji + ' ' : '') + _my_rankName(rank, lang)), React.createElement("span", {
+    style: {
+      color: 'var(--mg-ink4, #5b7796)'
+    }
+  }, _my_rankName(nextR, lang), "\u307E\u3067 ", Math.max(0, (nextR.min || 0) - lifetime).toLocaleString(), "pt")), React.createElement("div", {
+    style: {
+      height: 6,
+      borderRadius: 3,
+      background: 'rgba(34,49,74,.08)',
+      overflow: 'hidden'
+    }
+  }, React.createElement("div", {
+    style: {
+      height: '100%',
+      width: (Math.max(0.04, Math.min(1, rank.progress || 0)) * 100).toFixed(1) + '%',
+      borderRadius: 3,
+      background: TH,
+      transition: 'width .6s cubic-bezier(.16,1,.3,1)'
+    }
+  }))) : React.createElement("div", {
+    style: {
+      fontSize: 12,
+      color: 'var(--mg-ink3, #3d5877)'
+    }
+  }, lang === 'en' ? 'View the points shop' : lang === 'easy' ? 'ポイントショップを みる' : 'ポイントを景品と交換')), React.createElement("div", {
+    className: "mg-ui",
+    style: {
+      display: 'inline-flex',
+      alignItems: 'center',
+      gap: 3,
+      flex: 'none',
+      fontSize: 12,
+      fontWeight: 600,
+      color: TH
+    }
+  }, lang === 'en' ? 'Shop' : 'ショップ', React.createElement("span", {
+    className: "msr",
+    style: {
+      fontSize: 17
+    }
+  }, "chevron_right"))));
+}
+function _my_RewardCard({
+  r,
+  unit,
+  balance,
+  lang,
+  theme,
+  onTap
+}) {
+  const TH = theme || '#9e4478';
+  const afford = balance >= r.cost;
+  const locked = r.soldOut || r.reachedLimit;
+  const gift = r.type === 'coupon' ? 'local_activity' : 'redeem';
+  return React.createElement("button", {
+    type: "button",
+    onClick: () => onTap(r),
+    className: "mg-tap",
+    style: {
+      display: 'block',
+      textAlign: 'left',
+      border: 0,
+      padding: 0,
+      cursor: 'pointer',
+      background: 'none',
+      width: '100%',
+      WebkitTapHighlightColor: 'transparent'
+    }
+  }, React.createElement("div", {
+    className: "mg-card",
+    style: {
+      borderRadius: 20,
+      overflow: 'hidden',
+      opacity: locked ? .62 : 1
+    }
+  }, React.createElement("div", {
+    style: {
+      position: 'relative',
+      aspectRatio: '1 / 1',
+      background: r.image ? 'transparent' : 'linear-gradient(150deg, rgba(192,94,151,.16), rgba(158,68,120,.10) 60%, rgba(126,93,167,.14))',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center'
+    }
+  }, r.image ? React.createElement("img", {
+    src: r.image,
+    alt: "",
+    style: {
+      position: 'absolute',
+      inset: 0,
+      width: '100%',
+      height: '100%',
+      objectFit: 'cover'
+    }
+  }) : React.createElement("span", {
+    className: "msr",
+    style: {
+      fontSize: 46,
+      color: 'rgba(158,68,120,.5)'
+    }
+  }, gift), r.category ? React.createElement("span", {
+    className: "mg-ui",
+    style: {
+      position: 'absolute',
+      top: 8,
+      left: 8,
+      fontSize: 9,
+      fontWeight: 700,
+      letterSpacing: '.08em',
+      padding: '3px 8px',
+      borderRadius: 999,
+      background: 'rgba(255,255,255,.86)',
+      color: 'var(--mg-ink3, #3d5877)'
+    }
+  }, r.category) : null, locked ? React.createElement("span", {
+    style: {
+      position: 'absolute',
+      inset: 0,
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      background: 'rgba(255,255,255,.5)'
+    }
+  }, React.createElement("span", {
+    className: "mg-ui",
+    style: {
+      fontSize: 11,
+      fontWeight: 700,
+      letterSpacing: '.1em',
+      padding: '4px 12px',
+      borderRadius: 999,
+      background: 'rgba(34,49,74,.72)',
+      color: '#fff'
+    }
+  }, r.soldOut ? lang === 'en' ? 'SOLD OUT' : '在庫なし' : lang === 'en' ? 'CLAIMED' : '交換済')) : null), React.createElement("div", {
+    style: {
+      padding: '10px 12px 12px'
+    }
+  }, React.createElement("div", {
+    className: "mg-serif mg-clamp2",
+    style: {
+      fontSize: 13.5,
+      lineHeight: 1.35,
+      minHeight: 36
+    }
+  }, r.name), React.createElement("div", {
+    style: {
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      marginTop: 8
+    }
+  }, React.createElement("span", {
+    className: "mg-num",
+    style: {
+      display: 'inline-flex',
+      alignItems: 'baseline',
+      gap: 2,
+      fontSize: 17,
+      fontWeight: 600,
+      color: afford ? TH : 'var(--mg-ink4,#5b7796)'
+    }
+  }, r.cost.toLocaleString(), React.createElement("span", {
+    style: {
+      fontSize: 11
+    }
+  }, unit)), !locked ? React.createElement("span", {
+    className: "msr",
+    style: {
+      fontSize: 20,
+      color: afford ? TH : 'var(--mg-ink5,#7f94ab)'
+    }
+  }, afford ? 'add_circle' : 'lock') : null))));
+}
+function SheetPoints({
+  open,
+  props
+}) {
+  const A = useMg();
+  const lang = A && A.lang || 'ja';
+  const [pts, setPts] = useState(null);
+  const [shop, setShop] = useState(null);
+  const [view, setView] = useState('shop');
+  const [cat, setCat] = useState('all');
+  const [sel, setSel] = useState(null);
+  const [busy, setBusy] = useState(false);
+  const [result, setResult] = useState(null);
+  const load = React.useCallback(() => {
+    let token = null;
+    try {
+      token = typeof authStore !== 'undefined' && authStore && authStore.getToken ? authStore.getToken() : null;
+    } catch (e) {}
+    if (!token || typeof authApi === 'undefined') return;
+    if (authApi.getMyPoints) authApi.getMyPoints(token).then(r => {
+      if (r && r.ok) setPts(r);
+    }).catch(() => {});
+    if (authApi.listPointRewards) authApi.listPointRewards(token).then(r => {
+      if (r && r.ok) setShop(r);
+    }).catch(() => {});
+  }, []);
+  useEffect(() => {
+    if (open) load();
+  }, [open, load]);
+  const unit = shop && shop.config && shop.config.unit || pts && pts.config && pts.config.unit || 'pt';
+  const balance = shop ? Number(shop.balance) || 0 : pts ? Number(pts.balance) || 0 : 0;
+  const rewards = shop && Array.isArray(shop.rewards) ? shop.rewards : [];
+  const cats = React.useMemo(() => {
+    const s = [];
+    rewards.forEach(r => {
+      if (r.category && s.indexOf(r.category) < 0) s.push(r.category);
+    });
+    return s;
+  }, [rewards]);
+  const shown = cat === 'all' ? rewards : rewards.filter(r => r.category === cat);
+  const myRed = shop && Array.isArray(shop.myRedemptions) ? shop.myRedemptions : [];
+  const TH = shop && shop.config && shop.config.themeColor || pts && pts.config && pts.config.themeColor || '#9e4478';
+  const shopEnabled = !(shop && shop.config && shop.config.shopEnabled === false);
+  const shopIntro = shop && shop.config && shop.config.shopIntro || '';
+  const programDesc = pts && pts.config && pts.config.programDesc || '';
+  const perk = pts && pts.rank && pts.rank.perk || '';
+  const effView = shopEnabled ? view : 'history';
+  const doRedeem = r => {
+    let token = null;
+    try {
+      token = authStore.getToken();
+    } catch (e) {}
+    if (!token || !authApi.redeemReward) return;
+    setBusy(true);
+    authApi.redeemReward(token, r.id).then(res => {
+      setBusy(false);
+      if (res && res.ok) {
+        setResult({
+          reward: r,
+          res: res
+        });
+        setSel(null);
+        load();
+        if (A) A.toast(lang === 'en' ? 'Redeemed' : '交換しました');
+      }
+    }).catch(e => {
+      setBusy(false);
+      if (A) A.toast(e && e.message || (lang === 'en' ? 'Failed' : '交換できませんでした'), 'err');
+    });
+  };
+  const title = pts && pts.config && pts.config.name || shop && shop.config && shop.config.name || 'connec+aポイント';
+  const header = React.createElement("div", {
+    style: {
+      minWidth: 0
+    }
+  }, React.createElement("div", {
+    className: "mg-serif mg-autotitle",
+    style: {
+      fontSize: 21,
+      lineHeight: 1.2
+    }
+  }, title));
+  return React.createElement(SheetShell, {
+    open: open,
+    onClose: () => A && A.closeSheet(),
+    z: 46,
+    height: "calc(100dvh - 40px)",
+    header: header
+  }, React.createElement("div", {
+    className: "mg-ui",
+    style: {
+      color: 'var(--mg-ink,#22314a)'
+    }
+  }, React.createElement("div", {
+    style: {
+      marginBottom: 12
+    }
+  }, React.createElement(_my_MemberCard, {
+    d: pts,
+    lang: lang
+  })), perk ? React.createElement("div", {
+    className: "mg-card",
+    style: {
+      borderRadius: 14,
+      padding: '10px 14px',
+      marginBottom: 12,
+      display: 'flex',
+      alignItems: 'center',
+      gap: 8
+    }
+  }, React.createElement("span", {
+    className: "msr",
+    style: {
+      fontSize: 18,
+      color: TH,
+      flex: 'none'
+    }
+  }, "redeem"), React.createElement("div", {
+    style: {
+      fontSize: 12,
+      color: 'var(--mg-ink2,#2b3d57)',
+      lineHeight: 1.6
+    }
+  }, pts && pts.rank && pts.rank.emoji + ' ' + _my_rankName(pts.rank, lang) || '', " \u2014 ", perk)) : null, programDesc ? React.createElement("div", {
+    style: {
+      fontSize: 11.5,
+      color: 'var(--mg-ink3,#3d5877)',
+      lineHeight: 1.8,
+      marginBottom: 14
+    }
+  }, programDesc) : null, React.createElement("div", {
+    style: {
+      display: 'grid',
+      gridTemplateColumns: 'repeat(3,1fr)',
+      gap: 8,
+      marginBottom: 18
+    }
+  }, [{
+    k: pts ? Number(pts.totalDays) || 0 : 0,
+    l: lang === 'en' ? 'Days' : lang === 'easy' ? 'さんかにっすう' : '参加日数'
+  }, {
+    k: pts ? (Number(pts.lifetimeEarned) || 0).toLocaleString() : 0,
+    l: lang === 'en' ? 'Lifetime' : lang === 'easy' ? 'これまで' : '累計獲得'
+  }, {
+    k: pts && pts.nextMilestone ? '+' + pts.nextMilestone.bonus : '—',
+    l: lang === 'en' ? 'Next bonus' : lang === 'easy' ? 'つぎの ボーナス' : '次のボーナス'
+  }].map((s, i) => React.createElement("div", {
+    key: i,
+    className: "mg-card",
+    style: {
+      borderRadius: 16,
+      padding: '12px 8px',
+      textAlign: 'center'
+    }
+  }, React.createElement("div", {
+    className: "mg-num",
+    style: {
+      fontSize: 22,
+      color: 'var(--mg-ink,#22314a)'
+    }
+  }, s.k), React.createElement("div", {
+    style: {
+      fontSize: 9.5,
+      letterSpacing: '.06em',
+      color: 'var(--mg-ink4,#5b7796)',
+      marginTop: 2
+    }
+  }, s.l)))), pts && pts.nextMilestone ? React.createElement("div", {
+    style: {
+      fontSize: 11.5,
+      color: 'var(--mg-ink3,#3d5877)',
+      textAlign: 'center',
+      marginTop: -8,
+      marginBottom: 16
+    }
+  }, lang === 'en' ? 'Attend ' + pts.nextMilestone.remain + ' more day(s) for +' + pts.nextMilestone.bonus + unit : lang === 'easy' ? 'あと ' + pts.nextMilestone.remain + 'にちで +' + pts.nextMilestone.bonus + unit : 'あと' + pts.nextMilestone.remain + '日の参加で +' + pts.nextMilestone.bonus + unit) : null, React.createElement("div", {
+    style: {
+      display: 'flex',
+      gap: 8,
+      marginBottom: 14
+    }
+  }, (shopEnabled ? [['shop', lang === 'en' ? 'Shop' : 'ショップ'], ['history', lang === 'en' ? 'History' : '交換履歴']] : [['history', lang === 'en' ? 'History' : '交換履歴']]).map(([k, lbl]) => React.createElement("button", {
+    key: k,
+    type: "button",
+    onClick: () => setView(k),
+    className: "mg-tap",
+    style: {
+      border: 0,
+      cursor: 'pointer',
+      padding: '8px 16px',
+      borderRadius: 999,
+      fontSize: 13,
+      fontWeight: effView === k ? 700 : 500,
+      background: effView === k ? TH : 'rgba(255,255,255,.72)',
+      color: effView === k ? '#fff' : 'var(--mg-ink2,#2b3d57)',
+      boxShadow: effView === k ? '0 6px 14px -6px ' + TH + '88' : 'inset 0 0 0 1px rgba(34,49,74,.08)'
+    }
+  }, lbl))), effView === 'shop' ? React.createElement("div", null, shopIntro ? React.createElement("div", {
+    style: {
+      fontSize: 12,
+      color: 'var(--mg-ink2,#2b3d57)',
+      lineHeight: 1.7,
+      marginBottom: 12
+    }
+  }, shopIntro) : null, cats.length > 0 ? React.createElement("div", {
+    className: "mg-hidebar",
+    style: {
+      display: 'flex',
+      gap: 8,
+      overflowX: 'auto',
+      paddingBottom: 10
+    }
+  }, [['all', lang === 'en' ? 'All' : 'すべて']].concat(cats.map(c => [c, c])).map(([k, lbl]) => React.createElement("button", {
+    key: k,
+    type: "button",
+    onClick: () => setCat(k),
+    className: "mg-tap",
+    style: {
+      flex: 'none',
+      border: 0,
+      cursor: 'pointer',
+      padding: '6px 14px',
+      borderRadius: 999,
+      fontSize: 12,
+      background: cat === k ? TH + '1f' : 'rgba(255,255,255,.7)',
+      color: cat === k ? TH : 'var(--mg-ink3,#3d5877)',
+      fontWeight: cat === k ? 700 : 500,
+      boxShadow: 'inset 0 0 0 1px ' + (cat === k ? TH + '55' : 'rgba(34,49,74,.08)')
+    }
+  }, lbl))) : null, shown.length === 0 ? React.createElement("div", {
+    className: "mg-empty"
+  }, React.createElement("span", {
+    className: "msr"
+  }, "redeem"), React.createElement("div", null, lang === 'en' ? 'No rewards yet' : lang === 'easy' ? 'まだ ありません' : '景品は準備中です')) : React.createElement("div", {
+    style: {
+      display: 'grid',
+      gridTemplateColumns: '1fr 1fr',
+      gap: 12
+    }
+  }, shown.map(r => React.createElement(_my_RewardCard, {
+    key: r.id,
+    r: r,
+    unit: unit,
+    balance: balance,
+    lang: lang,
+    theme: TH,
+    onTap: setSel
+  })))) : React.createElement("div", null, myRed.length === 0 ? React.createElement("div", {
+    className: "mg-empty"
+  }, React.createElement("span", {
+    className: "msr"
+  }, "history"), React.createElement("div", null, lang === 'en' ? 'No redemptions yet' : lang === 'easy' ? 'まだ ありません' : 'まだ交換はありません')) : myRed.map(m => React.createElement("div", {
+    key: m.id,
+    className: "mg-card",
+    style: {
+      borderRadius: 16,
+      padding: '12px 14px',
+      marginBottom: 8,
+      display: 'flex',
+      alignItems: 'center',
+      gap: 10
+    }
+  }, React.createElement("span", {
+    className: "msr",
+    style: {
+      fontSize: 22,
+      color: m.type === 'coupon' ? '#c05e97' : '#7e5da7',
+      flex: 'none'
+    }
+  }, m.type === 'coupon' ? 'local_activity' : 'redeem'), React.createElement("div", {
+    style: {
+      flex: 1,
+      minWidth: 0
+    }
+  }, React.createElement("div", {
+    className: "mg-serif mg-clamp1",
+    style: {
+      fontSize: 13.5
+    }
+  }, m.name), React.createElement("div", {
+    style: {
+      fontSize: 10.5,
+      color: 'var(--mg-ink4,#5b7796)',
+      marginTop: 1
+    }
+  }, m.at ? Number(String(m.at).slice(5, 7)) + '.' + Number(String(m.at).slice(8, 10)) : '', " \xB7 -", m.cost, unit, m.couponCode ? ' · ' + m.couponCode : '')), React.createElement("span", {
+    className: "mg-ui",
+    style: {
+      flex: 'none',
+      fontSize: 10.5,
+      fontWeight: 700,
+      padding: '3px 9px',
+      borderRadius: 999,
+      background: m.status === '完了' ? 'rgba(74,145,110,.14)' : m.status === '却下' ? 'rgba(143,53,66,.12)' : 'rgba(233,168,60,.16)',
+      color: m.status === '完了' ? '#3c7a54' : m.status === '却下' ? '#8f3542' : '#8a6d1c'
+    }
+  }, m.status === '完了' ? lang === 'en' ? 'Done' : '完了' : m.status === '却下' ? lang === 'en' ? 'Rejected' : '却下' : lang === 'en' ? 'Pending' : '申請中')))), React.createElement("div", {
+    style: {
+      height: 20
+    }
+  })), sel ? React.createElement("div", {
+    style: {
+      position: 'absolute',
+      inset: 0,
+      zIndex: 5,
+      display: 'flex',
+      alignItems: 'flex-end',
+      justifyContent: 'center'
+    }
+  }, React.createElement("div", {
+    onClick: () => !busy && setSel(null),
+    style: {
+      position: 'absolute',
+      inset: 0,
+      background: 'rgba(20,32,50,.4)'
+    }
+  }), React.createElement("div", {
+    className: "mg-sheet1",
+    style: {
+      position: 'relative',
+      width: '100%',
+      maxWidth: 'var(--mg-shell-max)',
+      background: 'linear-gradient(180deg,#fcfdfe,#f6f9fc)',
+      borderRadius: '28px 28px 0 0',
+      padding: '22px 22px calc(22px + env(safe-area-inset-bottom))',
+      boxShadow: '0 -20px 50px rgba(34,49,74,.28)'
+    }
+  }, React.createElement("div", {
+    style: {
+      display: 'flex',
+      gap: 14,
+      alignItems: 'center',
+      marginBottom: 16
+    }
+  }, React.createElement("div", {
+    style: {
+      width: 76,
+      height: 76,
+      flex: 'none',
+      borderRadius: 16,
+      overflow: 'hidden',
+      background: 'linear-gradient(150deg,rgba(192,94,151,.16),rgba(126,93,167,.14))',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center'
+    }
+  }, sel.image ? React.createElement("img", {
+    src: sel.image,
+    alt: "",
+    style: {
+      width: '100%',
+      height: '100%',
+      objectFit: 'cover'
+    }
+  }) : React.createElement("span", {
+    className: "msr",
+    style: {
+      fontSize: 34,
+      color: 'rgba(158,68,120,.5)'
+    }
+  }, sel.type === 'coupon' ? 'local_activity' : 'redeem')), React.createElement("div", {
+    style: {
+      minWidth: 0
+    }
+  }, React.createElement("div", {
+    className: "mg-serif",
+    style: {
+      fontSize: 17,
+      lineHeight: 1.3
+    }
+  }, sel.name), React.createElement("div", {
+    className: "mg-num",
+    style: {
+      fontSize: 18,
+      fontWeight: 600,
+      color: '#9e4478',
+      marginTop: 3
+    }
+  }, sel.cost.toLocaleString(), unit))), sel.desc ? React.createElement("div", {
+    style: {
+      fontSize: 12.5,
+      lineHeight: 1.8,
+      color: 'var(--mg-ink3,#3d5877)',
+      marginBottom: 14
+    }
+  }, sel.desc) : null, React.createElement("div", {
+    style: {
+      fontSize: 12,
+      color: 'var(--mg-ink4,#5b7796)',
+      marginBottom: 14
+    }
+  }, lang === 'en' ? 'Balance ' + balance.toLocaleString() + unit + ' → ' + (balance - sel.cost).toLocaleString() + unit : '残高 ' + balance.toLocaleString() + unit + ' → ' + (balance - sel.cost).toLocaleString() + unit, sel.type === 'coupon' ? lang === 'en' ? ' · Coupon issued instantly' : ' · クーポンは即時発行' : lang === 'en' ? ' · Prize fulfilled by staff' : ' · 賞品は運営が対応'), React.createElement("div", {
+    style: {
+      display: 'flex',
+      gap: 10
+    }
+  }, React.createElement("button", {
+    type: "button",
+    className: "mg-tap mg-btn-ghost",
+    style: {
+      flex: 1
+    },
+    onClick: () => !busy && setSel(null)
+  }, lang === 'en' ? 'Cancel' : 'やめる'), React.createElement("button", {
+    type: "button",
+    className: 'mg-tap mg-btn-primary' + (balance < sel.cost ? ' is-disabled' : ''),
+    style: {
+      flex: 1.4
+    },
+    disabled: busy || balance < sel.cost,
+    onClick: () => doRedeem(sel)
+  }, busy ? '…' : balance < sel.cost ? lang === 'en' ? 'Not enough' : 'ポイント不足' : lang === 'en' ? 'Redeem' : '交換する')))) : null, result ? React.createElement("div", {
+    style: {
+      position: 'absolute',
+      inset: 0,
+      zIndex: 6,
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      padding: 24
+    }
+  }, React.createElement("div", {
+    onClick: () => setResult(null),
+    style: {
+      position: 'absolute',
+      inset: 0,
+      background: 'rgba(20,32,50,.5)'
+    }
+  }), React.createElement("div", {
+    className: "mg-card-lg",
+    style: {
+      position: 'relative',
+      width: '100%',
+      maxWidth: 340,
+      padding: '28px 24px',
+      textAlign: 'center',
+      borderRadius: 28
+    }
+  }, React.createElement("div", {
+    style: {
+      width: 60,
+      height: 60,
+      margin: '0 auto 14px',
+      borderRadius: 30,
+      background: 'linear-gradient(150deg,#c05e97,#9e4478)',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      boxShadow: '0 12px 26px -8px rgba(158,68,120,.6)'
+    }
+  }, React.createElement("span", {
+    className: "msr",
+    style: {
+      fontSize: 32,
+      color: '#fff'
+    }
+  }, result.res.type === 'coupon' ? 'local_activity' : 'check')), React.createElement("div", {
+    className: "mg-serif",
+    style: {
+      fontSize: 18,
+      marginBottom: 6
+    }
+  }, lang === 'en' ? 'Redeemed!' : '交換しました'), React.createElement("div", {
+    style: {
+      fontSize: 13,
+      color: 'var(--mg-ink3,#3d5877)',
+      lineHeight: 1.7
+    }
+  }, result.reward.name), result.res.couponCode ? React.createElement("div", {
+    style: {
+      marginTop: 12,
+      padding: '10px 14px',
+      borderRadius: 12,
+      background: 'rgba(158,68,120,.08)',
+      border: '1px dashed rgba(158,68,120,.4)'
+    }
+  }, React.createElement("div", {
+    style: {
+      fontSize: 10,
+      letterSpacing: '.1em',
+      color: 'var(--mg-ink4,#5b7796)'
+    }
+  }, lang === 'en' ? 'COUPON CODE' : 'クーポンコード'), React.createElement("div", {
+    className: "mg-num",
+    style: {
+      fontSize: 20,
+      letterSpacing: '.08em',
+      color: '#9e4478'
+    }
+  }, result.res.couponCode)) : React.createElement("div", {
+    style: {
+      marginTop: 10,
+      fontSize: 12,
+      color: 'var(--mg-ink4,#5b7796)'
+    }
+  }, lang === 'en' ? 'Staff will contact you about fulfillment.' : lang === 'easy' ? 'うけとりは スタッフが たいおうします' : '受け取りは運営がご案内します'), React.createElement("button", {
+    type: "button",
+    className: "mg-tap mg-btn-primary",
+    style: {
+      marginTop: 18,
+      width: '100%'
+    },
+    onClick: () => setResult(null)
+  }, lang === 'en' ? 'Close' : '閉じる'))) : null);
+}
 function TabMyPage() {
   const A = useMg();
   const lang = A && A.lang || 'ja';
@@ -18862,7 +19855,11 @@ function TabMyPage() {
   }, React.createElement(Icon, {
     name: "edit",
     size: 20
-  })))), derived.unpaid.length > 0 && React.createElement("div", {
+  })))), React.createElement(_my_PointsCard, {
+    lang: lang,
+    userKey: userKey,
+    active: A ? A.tab === 4 : false
+  }), derived.unpaid.length > 0 && React.createElement("div", {
     style: {
       padding: '0 18px 16px'
     }
@@ -30474,7 +31471,8 @@ function ScreenPolicy({
 const MG_FEATURES = {
   album: true,
   chat: false,
-  survey: true
+  survey: true,
+  points: true
 };
 const MgCtx = React.createContext(null);
 function useMg() {
@@ -30610,6 +31608,13 @@ function _shell_parseHash() {
   if (seg[0] === 'about') return {
     sheet: {
       name: 'about',
+      props: {}
+    }
+  };
+  if (seg[0] === 'points') return {
+    tab: 4,
+    sheet: {
+      name: 'points',
       props: {}
     }
   };
@@ -31649,7 +32654,7 @@ function _ShellRoot() {
     lang: lang,
     onTab: setTab,
     hidden: chromeHidden
-  }), React.createElement(SheetEventDetail, sh('eventDetail')), React.createElement(SheetRegister, sh('register')), React.createElement(SheetTicket, sh('ticket')), React.createElement(SheetNewsList, sh('newsList')), React.createElement(SheetNewsDetail, sh('newsDetail')), React.createElement(SheetAbout, sh('about')), React.createElement(SheetSearch, sh('search')), React.createElement(SheetSurvey, sh('survey')), React.createElement(SheetAlbum, sh('album')), React.createElement(SheetHideRequest, sh('hideRequest')), React.createElement(SheetProfileEdit, sh('profileEdit')), React.createElement(SheetLanguage, sh('language')), React.createElement(SheetConsult, sh('consult')), React.createElement(OverlayRegisterComplete, {
+  }), React.createElement(SheetEventDetail, sh('eventDetail')), React.createElement(SheetRegister, sh('register')), React.createElement(SheetTicket, sh('ticket')), React.createElement(SheetNewsList, sh('newsList')), React.createElement(SheetNewsDetail, sh('newsDetail')), React.createElement(SheetAbout, sh('about')), React.createElement(SheetSearch, sh('search')), React.createElement(SheetSurvey, sh('survey')), React.createElement(SheetAlbum, sh('album')), React.createElement(SheetHideRequest, sh('hideRequest')), React.createElement(SheetProfileEdit, sh('profileEdit')), React.createElement(SheetLanguage, sh('language')), React.createElement(SheetPoints, sh('points')), React.createElement(SheetConsult, sh('consult')), React.createElement(OverlayRegisterComplete, {
     open: !!complete,
     props: complete || undefined
   }), standalone && React.createElement(_ShellFull, {
