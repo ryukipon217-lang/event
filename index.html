@@ -1,9 +1,9 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-<script>window.__MG_BUILD='20260903074524';</script>
+<script>window.__MG_BUILD='20260906110250';</script>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>connec+a — 出会いが、まちを変えていく。</title>
 <meta name="description" content="在日外国人留学生と日本に住む人をつなぐ国際交流プラットフォーム connec+a">
 <meta property="og:title" content="connec+a">
@@ -34,6 +34,9 @@ window.__earlyBundlePromise = fetch('https://script.google.com/macros/s/AKfycbxL
 <link rel="preconnect" href="https://script.google.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Zen+Old+Mincho:wght@400;500;600&family=Zen+Kaku+Gothic+New:wght@400;500&family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&display=swap" rel="stylesheet">
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,200,0,0&display=block" rel="stylesheet">
+<!-- (A11y/FOUT) アイコンフォント実読込までリガチャ生テキスト(home/event等)を透明化。display=blockの3秒タイムアウト後の露出も防ぐ。読込失敗時は8秒で解除(無表示恒久化はしない) -->
+<style>html:not(.mg-icons-ready) .msr{color:transparent!important}</style>
+<script>(function(){var on=function(){document.documentElement.classList.add('mg-icons-ready')};try{if(document.fonts&&document.fonts.load){document.fonts.load('24px "Material Symbols Rounded"').then(on,on);setTimeout(on,8000);}else{on();}}catch(e){on();}})();</script>
 <script src="https://unpkg.com/react@18.3.1/umd/react.production.min.js" crossorigin></script>
 <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.production.min.js" crossorigin></script>
 <script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.js"></script>
@@ -103,7 +106,7 @@ window.__earlyBundlePromise = fetch('https://script.google.com/macros/s/AKfycbxL
   --mg-iris: conic-gradient(from 200deg at 32% 22%, rgba(255,214,235,.55), rgba(214,224,255,.5), rgba(208,240,224,.5), rgba(247,235,208,.5), rgba(240,214,235,.55), rgba(255,214,235,.55));
 
   /* プレースホルダ縞(周期14px ≥ 9px 規約内) */
-  --mg-ph:repeating-linear-gradient(135deg,#dbe4ee 0 7px,#cfdae7 7px 14px);
+  --mg-ph:radial-gradient(120% 100% at 18% 12%, rgba(214,224,255,.9), rgba(214,224,255,0) 58%), radial-gradient(110% 90% at 85% 80%, rgba(255,220,238,.55), rgba(255,220,238,0) 60%), radial-gradient(100% 100% at 78% 18%, rgba(210,238,226,.5), rgba(210,238,226,0) 55%), linear-gradient(160deg, #f0f3fb 0%, #e7edf8 100%); /* (2026-09) ハッチ縞→水彩ウォッシュ(20-uikit _uk_STRIPE と同値) */
 
   /* 角丸 */
   --mg-r-device:44px;
@@ -691,7 +694,7 @@ select.mg-field,
 /* ============================================================
    10. タイポグラフィ
    ============================================================ */
-.mg-serif{ font-family:var(--mg-font-serif); font-weight:500; }
+.mg-serif{ font-family:var(--mg-font-serif); font-weight:500; word-break:auto-phrase; } /* auto-phrase=日本語の文節改行(サマーフェス/タ問題)。非対応ブラウザは無視 */
 .mg-ui{ font-family:var(--mg-font-ui); }
 .mg-num{
   font-family:var(--mg-font-num);
@@ -4048,13 +4051,15 @@ function CookieConsent({
       bottom: 'calc(92px + env(safe-area-inset-bottom, 0px) - var(--mg-vp-gap, 0px))',
       maxWidth: 480,
       margin: '0 auto',
-      background: 'var(--mg-accent, #6e86e0)',
-      color: '#f2f7fc',
-      padding: '10px 14px',
+      background: 'var(--mg-sheet1, rgba(252,253,254,.98))',
+      backdropFilter: 'blur(14px) saturate(1.15)',
+      WebkitBackdropFilter: 'blur(14px) saturate(1.15)',
+      color: 'var(--mg-ink2, #2b3d57)',
+      padding: '10px 10px 10px 16px',
       zIndex: 39,
-      boxShadow: '0 8px 28px rgba(34,49,74,0.3)',
-      borderTop: '1px solid rgba(255,255,255,0.18)',
-      borderRadius: 16,
+      boxShadow: 'var(--mg-sh-card-lg, 0 12px 26px -8px rgba(34,49,74,.15))',
+      border: '1px solid var(--mg-tint-border, rgba(110,134,224,.18))',
+      borderRadius: 18,
       display: 'flex',
       alignItems: 'center',
       gap: 10,
@@ -4064,7 +4069,7 @@ function CookieConsent({
     style: {
       flex: 1,
       minWidth: 0,
-      fontSize: 12,
+      fontSize: 13,
       lineHeight: 1.5,
       margin: 0,
       fontFamily: "'Zen Kaku Gothic New', 'Hiragino Sans', sans-serif"
@@ -4072,24 +4077,28 @@ function CookieConsent({
   }, lang === 'en' ? 'We use cookies to improve your experience.' : lang === 'easy' ? 'Cookie を つかいます。' : 'サービス向上のためCookieを使用します。', ' ', React.createElement("a", {
     href: "#/privacy",
     style: {
-      color: 'rgba(255,255,255,0.72)',
-      textDecoration: 'underline'
+      color: 'var(--mg-deep, #4f63c4)',
+      fontWeight: 500,
+      textDecoration: 'underline',
+      padding: '8px 2px',
+      margin: '-8px -2px'
     }
   }, lang === 'en' ? 'Policy' : 'ポリシー')), React.createElement("button", {
     onClick: accept,
     style: {
       flex: 'none',
-      height: 32,
-      padding: '0 16px',
-      background: '#ffffff',
-      color: 'var(--mg-accent, #6e86e0)',
+      minHeight: 44,
+      padding: '0 18px',
+      background: 'var(--mg-deep, rgba(79,99,196,.98))',
+      color: '#ffffff',
       border: 'none',
-      borderRadius: 16,
-      fontSize: 12.5,
+      borderRadius: 22,
+      fontSize: 13.5,
       fontWeight: 600,
       fontFamily: "'Zen Kaku Gothic New', 'Hiragino Sans', sans-serif",
       letterSpacing: '0.04em',
-      cursor: 'pointer'
+      cursor: 'pointer',
+      boxShadow: 'var(--mg-sh-btn, 0 12px 26px -6px rgba(79,99,196,.40))'
     }
   }, lang === 'en' ? 'Accept' : '同意する'));
 }
@@ -4176,7 +4185,7 @@ const {
   useEffect,
   useRef
 } = React;
-const _uk_STRIPE = 'repeating-linear-gradient(135deg,#dbe4ee 0 7px,#cfdae7 7px 14px)';
+const _uk_STRIPE = 'radial-gradient(120% 100% at 18% 12%, rgba(214,224,255,.9), rgba(214,224,255,0) 58%), radial-gradient(110% 90% at 85% 80%, rgba(255,220,238,.55), rgba(255,220,238,0) 60%), radial-gradient(100% 100% at 78% 18%, rgba(210,238,226,.5), rgba(210,238,226,0) 55%), linear-gradient(160deg, #f0f3fb 0%, #e7edf8 100%)';
 function _uk_cx() {
   let out = '';
   for (let i = 0; i < arguments.length; i++) {
@@ -4290,7 +4299,7 @@ function ImageSlot({
       opacity: loaded ? 1 : 0,
       transition: 'opacity .5s ease'
     }
-  }), (empty || !loaded) && React.createElement("div", {
+  }), !empty && !loaded && React.createElement("div", {
     style: {
       position: 'absolute',
       inset: 0,
@@ -4308,7 +4317,18 @@ function ImageSlot({
       background: 'linear-gradient(105deg, rgba(255,255,255,0), rgba(255,255,255,.45), rgba(255,255,255,0))',
       animation: 'mgSheen 2.6s ease-in-out .2s infinite'
     }
-  })));
+  })), empty && React.createElement("span", {
+    className: "msr",
+    "aria-hidden": "true",
+    style: {
+      position: 'absolute',
+      inset: 0,
+      display: 'grid',
+      placeItems: 'center',
+      fontSize: 26,
+      color: 'rgba(110,134,224,.38)'
+    }
+  }, "filter_vintage"));
 }
 function Glass({
   level = 'card',
@@ -4433,6 +4453,20 @@ function SheetShell({
     onClick: onClose,
     className: "mg-tap",
     style: {
+      width: 44,
+      height: 44,
+      margin: -5,
+      padding: 0,
+      border: 0,
+      background: 'transparent',
+      display: 'inline-flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      cursor: 'pointer',
+      flex: 'none'
+    }
+  }, React.createElement("span", {
+    style: {
       width: 34,
       height: 34,
       borderRadius: 17,
@@ -4442,15 +4476,12 @@ function SheetShell({
       display: 'inline-flex',
       alignItems: 'center',
       justifyContent: 'center',
-      color: 'var(--mg-ink, #22314a)',
-      cursor: 'pointer',
-      flex: 'none',
-      padding: 0
+      color: 'var(--mg-ink, #22314a)'
     }
   }, React.createElement(Icon, {
     name: "close",
     size: 19
-  }));
+  })));
   return React.createElement("div", {
     style: {
       position: 'fixed',
@@ -4664,9 +4695,9 @@ function Chip({
     onClick: onClick,
     "aria-pressed": !!on,
     style: {
-      height: 38,
-      padding: '0 15px',
-      borderRadius: 19,
+      height: 44,
+      padding: '0 17px',
+      borderRadius: 22,
       flex: 'none',
       display: 'inline-flex',
       alignItems: 'center',
@@ -5412,12 +5443,14 @@ function MgTextArea({
 }
 function MgSwitch({
   on,
-  onChange
+  onChange,
+  ariaLabel
 }) {
   return React.createElement("button", {
     type: "button",
     role: "switch",
     "aria-checked": !!on,
+    "aria-label": ariaLabel || undefined,
     onClick: () => onChange && onChange(!on),
     className: "mg-tap",
     style: {
@@ -5427,8 +5460,8 @@ function MgSwitch({
       padding: 2,
       border: 0,
       flex: 'none',
-      background: on ? 'linear-gradient(180deg, #7e93e8 0%, #5f76d6 100%)' : 'rgba(34,49,74,.18)',
-      boxShadow: on ? 'inset 0 1px 2px rgba(20,32,50,.2)' : 'inset 0 1px 2px rgba(20,32,50,.14)',
+      background: on ? 'linear-gradient(180deg, #7e93e8 0%, #5f76d6 100%)' : 'rgba(34,49,74,.28)',
+      boxShadow: on ? 'inset 0 1px 2px rgba(20,32,50,.2)' : 'inset 0 0 0 1px rgba(34,49,74,.5), inset 0 1px 2px rgba(20,32,50,.14)',
       transition: 'background .3s ease',
       cursor: 'pointer'
     }
@@ -9026,7 +9059,7 @@ function TabHome() {
   }, fDp.md), React.createElement("div", {
     className: "mg-ui",
     style: {
-      fontSize: 10.5,
+      fontSize: 11,
       fontWeight: 600,
       letterSpacing: '.22em',
       color: 'var(--mg-ink4, #5b7796)',
@@ -9043,7 +9076,7 @@ function TabHome() {
   }, L(_home_T.multiDay)), fDayLabel && fDayLabel !== L(_home_T.multiDay) ? React.createElement("div", {
     className: "mg-ui",
     style: {
-      fontSize: 10.5,
+      fontSize: 11,
       fontWeight: 600,
       letterSpacing: '.22em',
       color: 'var(--mg-ink4, #5b7796)',
@@ -9086,7 +9119,7 @@ function TabHome() {
         }, React.createElement("span", {
           className: "mg-ui",
           style: {
-            fontSize: 10,
+            fontSize: 11,
             fontWeight: 600,
             letterSpacing: '.06em',
             color: over ? 'var(--mg-ink5, #8ba0b6)' : 'var(--mg-accent, #6e86e0)',
@@ -9111,7 +9144,7 @@ function TabHome() {
           }
         }, s2.online ? lang === 'en' ? 'Online' : 'オンライン' : s2.venue || ''), over ? React.createElement("span", {
           style: {
-            fontSize: 9.5,
+            fontSize: 10.5,
             flex: 'none'
           }
         }, lang === 'en' ? 'ended' : lang === 'easy' ? 'おわり' : '終了') : null);
@@ -9275,7 +9308,7 @@ function TabHome() {
     }, dp.day) : null, ev.format === 'multi' ? React.createElement("span", {
       className: "mg-ui",
       style: {
-        fontSize: 9.5,
+        fontSize: 10.5,
         letterSpacing: '.12em',
         color: 'var(--mg-accent, #6e86e0)',
         fontWeight: 600
@@ -9297,7 +9330,7 @@ function TabHome() {
         display: 'inline-flex',
         alignItems: 'center',
         gap: 3,
-        fontSize: 9.5,
+        fontSize: 10.5,
         fontWeight: 600,
         letterSpacing: '.06em',
         padding: '2px 8px',
@@ -9314,7 +9347,7 @@ function TabHome() {
         display: 'flex',
         flexDirection: 'column',
         gap: 3,
-        fontSize: 11.5,
+        fontSize: 12,
         color: 'var(--mg-ink3, #4c6584)'
       }
     }, time2 ? React.createElement("span", {
@@ -9404,7 +9437,7 @@ function TabHome() {
     }
   }), React.createElement("span", {
     style: {
-      fontSize: 10.5,
+      fontSize: 11.5,
       color: 'rgba(60,78,140,.75)'
     }
   }, s.label))))), React.createElement("div", {
@@ -11832,7 +11865,7 @@ function TabEvents() {
       alignItems: 'center',
       padding: '6px 13px',
       borderRadius: 15,
-      fontSize: 11,
+      fontSize: 12,
       letterSpacing: '.16em',
       color: 'var(--mg-ink3, #41597a)'
     }
@@ -11871,7 +11904,7 @@ function TabEvents() {
       }
     }, dp.d), React.createElement("div", {
       style: {
-        fontSize: 10,
+        fontSize: 11,
         fontWeight: 600,
         letterSpacing: '.16em',
         color: 'var(--mg-ink4, #5b7796)',
@@ -11879,7 +11912,7 @@ function TabEvents() {
       }
     }, dp.day), ev.format === 'multi' ? React.createElement("div", {
       style: {
-        fontSize: 9,
+        fontSize: 10.5,
         letterSpacing: '.06em',
         color: 'var(--mg-accent, #6e86e0)',
         fontWeight: 500,
@@ -11896,7 +11929,7 @@ function TabEvents() {
       }
     }), React.createElement("div", {
       style: {
-        fontSize: 9,
+        fontSize: 10,
         letterSpacing: '.1em',
         color: 'var(--mg-ink4, #5b7796)',
         marginTop: 2
@@ -11932,13 +11965,13 @@ function TabEvents() {
               display: 'flex',
               alignItems: 'baseline',
               gap: 7,
-              fontSize: 11.5,
+              fontSize: 12,
               color: over ? 'var(--mg-ink5, #8ba0b6)' : 'var(--mg-ink3, #4c6584)',
               minWidth: 0
             }
           }, React.createElement("span", {
             style: {
-              fontSize: 10,
+              fontSize: 11,
               fontWeight: 600,
               color: over ? 'var(--mg-ink5, #8ba0b6)' : 'var(--mg-accent, #6e86e0)',
               flex: 'none',
@@ -11959,7 +11992,7 @@ function TabEvents() {
           }, sdp2.day)) : null, s2.startTime ? React.createElement("span", {
             className: "mg-num",
             style: {
-              fontSize: 11,
+              fontSize: 12,
               flex: 'none'
             }
           }, _ev_fmtTime(s2.startTime)) : null, React.createElement("span", {
@@ -11969,7 +12002,7 @@ function TabEvents() {
             }
           }, s2.online ? lang === 'en' ? 'Online' : 'オンライン' : s2.venue || ''), over ? React.createElement("span", {
             style: {
-              fontSize: 9.5,
+              fontSize: 10.5,
               flex: 'none'
             }
           }, lang === 'en' ? 'ended' : lang === 'easy' ? 'おわり' : '終了') : null);
@@ -11983,7 +12016,7 @@ function TabEvents() {
             display: 'flex',
             alignItems: 'center',
             gap: 4,
-            fontSize: 11.5,
+            fontSize: 12,
             color: 'var(--mg-ink3, #4c6584)',
             marginTop: 2
           }
@@ -12000,7 +12033,7 @@ function TabEvents() {
           display: 'flex',
           gap: 12,
           marginTop: 5,
-          fontSize: 11.5,
+          fontSize: 12,
           color: 'var(--mg-ink3, #4c6584)',
           flexWrap: 'wrap'
         }
@@ -12825,10 +12858,12 @@ function SheetEventDetail({
           display: 'inline-flex',
           alignItems: 'center',
           gap: 3,
-          color: 'var(--mg-accent, #6e86e0)',
+          color: 'var(--mg-deep, #4f63c4)',
           fontSize: 12,
           textDecoration: 'none',
-          flex: 'none'
+          flex: 'none',
+          padding: '12px 8px',
+          margin: '-12px -8px'
         }
       }, (s2.online ? t.detail && t.detail.openInZoom : t.detail && t.detail.openInMaps) || 'Map', React.createElement(Icon, {
         name: "open_in_new",
@@ -12843,10 +12878,11 @@ function SheetEventDetail({
         display: 'inline-flex',
         alignItems: 'center',
         gap: 3,
-        marginLeft: 8,
-        color: 'var(--mg-accent, #6e86e0)',
+        color: 'var(--mg-deep, #4f63c4)',
         fontSize: 12,
-        textDecoration: 'none'
+        textDecoration: 'none',
+        padding: '12px 8px',
+        margin: '-12px -8px -12px 0'
       }
     }, venueLinkLabel || 'Map', React.createElement(Icon, {
       name: "open_in_new",
@@ -13249,14 +13285,14 @@ function SheetEventDetail({
       label: L(_ev_T.earlyBird)
     }, earlyBird) : null, !regMode && cancelPolicy ? React.createElement(_ev_Section, {
       label: t.detail && t.detail.cancelPolicy || 'キャンセルポリシー'
-    }, cancelPolicy) : null, React.createElement("div", {
+    }, cancelPolicy) : null, pastSrcs.length > 0 ? React.createElement("div", {
       style: {
         marginTop: 22,
         display: 'grid',
         gridTemplateColumns: '1fr 1fr',
         gap: 12
       }
-    }, [0, 1].map(i => React.createElement("div", {
+    }, pastSrcs.slice(0, 2).map((src, i) => React.createElement("div", {
       key: i,
       style: {
         height: 96,
@@ -13264,8 +13300,8 @@ function SheetEventDetail({
         overflow: 'hidden',
         position: 'relative'
       }
-    }, pastSrcs[i] ? React.createElement(ImageSlot, {
-      src: _ev_img(pastSrcs[i]),
+    }, React.createElement(ImageSlot, {
+      src: _ev_img(src),
       alt: "",
       style: {
         position: 'absolute',
@@ -13273,21 +13309,7 @@ function SheetEventDetail({
         height: '100%',
         borderRadius: 0
       }
-    }) : React.createElement("div", {
-      className: "mg-ph",
-      style: {
-        position: 'absolute',
-        inset: 0,
-        display: 'grid',
-        placeItems: 'center'
-      }
-    }, React.createElement("span", {
-      style: {
-        fontFamily: 'ui-monospace, monospace',
-        fontSize: 9.5,
-        color: '#6a819a'
-      }
-    }, L(_ev_T.pastPhotos)))))), React.createElement("div", {
+    })))) : null, React.createElement("div", {
       style: {
         height: 26
       },
@@ -18452,7 +18474,7 @@ function _my_Pill({
       background: 'rgba(255,255,255,.88)',
       border: '1px solid rgba(255,255,255,.9)',
       boxShadow: '0 8px 18px rgba(34,49,74,.16)',
-      fontSize: 11,
+      fontSize: 12,
       letterSpacing: '.16em',
       color: '#41597a'
     }
@@ -18913,7 +18935,7 @@ function _my_PointsCard({
       height: '100%',
       width: (Math.max(0.04, Math.min(1, rank.progress || 0)) * 100).toFixed(1) + '%',
       borderRadius: 3,
-      background: TH,
+      background: 'linear-gradient(90deg, ' + (rank.color || TH) + ', ' + (nextR.color || TH) + ')',
       transition: 'width .6s cubic-bezier(.16,1,.3,1)'
     }
   }))) : React.createElement("div", {
@@ -19003,7 +19025,7 @@ function _my_RewardCard({
       position: 'absolute',
       top: 8,
       left: 8,
-      fontSize: 9,
+      fontSize: 10.5,
       fontWeight: 700,
       letterSpacing: '.08em',
       padding: '3px 8px',
@@ -19234,7 +19256,7 @@ function SheetPoints({
     }
   }, s.k), React.createElement("div", {
     style: {
-      fontSize: 9.5,
+      fontSize: 11,
       letterSpacing: '.06em',
       color: 'var(--mg-ink4,#5b7796)',
       marginTop: 2
@@ -19261,7 +19283,10 @@ function SheetPoints({
     style: {
       border: 0,
       cursor: 'pointer',
-      padding: '8px 16px',
+      minHeight: 44,
+      display: 'inline-flex',
+      alignItems: 'center',
+      padding: '8px 18px',
       borderRadius: 999,
       fontSize: 13,
       fontWeight: effView === k ? 700 : 500,
@@ -19293,9 +19318,12 @@ function SheetPoints({
       flex: 'none',
       border: 0,
       cursor: 'pointer',
-      padding: '6px 14px',
+      minHeight: 44,
+      display: 'inline-flex',
+      alignItems: 'center',
+      padding: '6px 16px',
       borderRadius: 999,
-      fontSize: 12,
+      fontSize: 12.5,
       background: cat === k ? TH + '1f' : 'rgba(255,255,255,.7)',
       color: cat === k ? TH : 'var(--mg-ink3,#3d5877)',
       fontWeight: cat === k ? 700 : 500,
@@ -19856,7 +19884,8 @@ function TabMyPage() {
     style: {
       background: 'none',
       border: 0,
-      padding: 6,
+      padding: 12,
+      margin: -6,
       cursor: 'pointer',
       flex: 'none',
       color: 'var(--mg-ink5, #8ba0b6)'
@@ -20253,7 +20282,8 @@ function TabMyPage() {
       }
     }, React.createElement(MgSwitch, {
       on: pushState === 'on',
-      onChange: handlePushToggle
+      onChange: handlePushToggle,
+      ariaLabel: L(_my_T.notifRow)
     }))
   }), (() => {
     const standalone = window.matchMedia && window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
@@ -25486,6 +25516,92 @@ function PageTown() {
     ja: 'プロフィールで市区町村を選ぶと、天気・週間予報・運行情報・まちの窓口がここに出ます。',
     easy: 'プロフィール で しくちょうそん を えらぶ と、てんき や まち の じょうほう が でます。',
     en: 'Choose your city in your profile to see weather, forecast, transit and local links here.'
+  })), React.createElement("div", {
+    "aria-hidden": "true",
+    style: {
+      marginTop: 18,
+      pointerEvents: 'none',
+      display: 'grid',
+      gridTemplateColumns: '1fr 1fr',
+      gap: 10
+    }
+  }, React.createElement("div", {
+    className: "mg-pill",
+    style: {
+      borderRadius: 18,
+      padding: '12px 10px',
+      display: 'flex',
+      flexDirection: 'column',
+      alignItems: 'center',
+      gap: 4
+    }
+  }, React.createElement("span", {
+    className: "msr",
+    style: {
+      fontSize: 24,
+      color: '#e8a33d'
+    }
+  }, "partly_cloudy_day"), React.createElement("span", {
+    className: "mg-num",
+    style: {
+      fontSize: 17,
+      color: 'var(--mg-ink2, #2b3d57)'
+    }
+  }, "22\xB0"), React.createElement("span", {
+    style: {
+      fontSize: 10.5,
+      color: 'var(--mg-ink4, #5b7796)'
+    }
+  }, T({
+    ja: 'きょうの天気',
+    easy: 'きょうの てんき',
+    en: "Today's weather"
+  }))), React.createElement("div", {
+    className: "mg-pill",
+    style: {
+      borderRadius: 18,
+      padding: '12px 10px',
+      display: 'flex',
+      flexDirection: 'column',
+      alignItems: 'center',
+      gap: 4
+    }
+  }, React.createElement("span", {
+    className: "msr",
+    style: {
+      fontSize: 24,
+      color: 'var(--mg-accent, #6e86e0)'
+    }
+  }, "train"), React.createElement("span", {
+    className: "mg-ui",
+    style: {
+      fontSize: 12.5,
+      fontWeight: 600,
+      color: '#16723f'
+    }
+  }, T({
+    ja: '平常運転',
+    easy: 'ふつうどおり',
+    en: 'On time'
+  })), React.createElement("span", {
+    style: {
+      fontSize: 10.5,
+      color: 'var(--mg-ink4, #5b7796)'
+    }
+  }, T({
+    ja: '運行情報',
+    easy: 'でんしゃ の じょうほう',
+    en: 'Transit'
+  })))), React.createElement("div", {
+    style: {
+      fontSize: 10.5,
+      color: 'var(--mg-ink5, #8ba0b6)',
+      marginTop: 6
+    }
+  }, T({
+    ja: '登録するとこうなります(例)',
+    easy: 'とうろく すると こうなります(れい)',
+    en: 'Example of what you will see'
   })), React.createElement("button", {
     type: "button",
     className: "mg-tap",
@@ -25662,7 +25778,7 @@ function TabLife() {
   }, b.num), React.createElement("span", {
     className: "mg-clamp2",
     style: {
-      fontSize: 10.5,
+      fontSize: 11.5,
       lineHeight: 1.35,
       textAlign: 'center',
       overflowWrap: 'anywhere'
@@ -25744,7 +25860,7 @@ function TabLife() {
     }, _info_field(cat, 'title', lang)), React.createElement("div", {
       className: "mg-clamp1",
       style: {
-        fontSize: 11,
+        fontSize: 12,
         color: 'var(--mg-ink4, #5b7796)',
         marginTop: 3
       }
@@ -29542,6 +29658,32 @@ function _ni_HeadBtn({
     size: 19
   }));
 }
+const _ni_SEEN_KEY = 'cca_news_seen_v1';
+let _ni_seenCache = null;
+function _ni_seenMap() {
+  if (_ni_seenCache) return _ni_seenCache;
+  try {
+    const o = JSON.parse(localStorage.getItem(_ni_SEEN_KEY) || '{}');
+    _ni_seenCache = o && typeof o === 'object' ? o : {};
+  } catch (e) {
+    _ni_seenCache = {};
+  }
+  return _ni_seenCache;
+}
+function _ni_markSeen(id) {
+  if (id == null) return;
+  try {
+    const o = _ni_seenMap();
+    const k = String(id);
+    if (o[k]) return;
+    o[k] = Date.now();
+    const ks = Object.keys(o);
+    if (ks.length > 400) ks.sort((a, b) => o[a] - o[b]).slice(0, ks.length - 400).forEach(x => {
+      delete o[x];
+    });
+    localStorage.setItem(_ni_SEEN_KEY, JSON.stringify(o));
+  } catch (e) {}
+}
 function _ni_NewsRow({
   n,
   lang,
@@ -29549,6 +29691,7 @@ function _ni_NewsRow({
   onClick
 }) {
   const isNew = _ni_newsTime(n) > 0 && _ni_newsTime(n) >= Date.now() - 7 * 24 * 60 * 60 * 1000;
+  const unread = isNew && !_ni_seenMap()[String(n && n.id != null ? n.id : '')];
   const md = _ni_fmtMD(n.publishedAt || n.publishAt || n.date);
   const cat = _ni_newsCat(n.category, lang);
   return React.createElement("div", {
@@ -29567,7 +29710,7 @@ function _ni_NewsRow({
       width: 7,
       height: 7,
       borderRadius: '50%',
-      background: isNew ? 'var(--mg-accent, #6e86e0)' : 'rgba(34,49,74,.18)',
+      background: unread ? 'var(--mg-accent, #6e86e0)' : 'rgba(34,49,74,.18)',
       flex: 'none',
       marginTop: 7
     }
@@ -29589,7 +29732,7 @@ function _ni_NewsRow({
       alignItems: 'center',
       gap: 8,
       marginTop: 5,
-      fontSize: 11,
+      fontSize: 12,
       color: 'var(--mg-ink4, #5b7796)'
     }
   }, md ? React.createElement("span", {
@@ -29819,6 +29962,9 @@ function SheetNewsDetail({
   } = _ni_useNewsItems(open);
   const news = newsId == null ? null : items.find(n => n && String(n.id) === String(newsId)) || items[Number(newsId)] || null;
   const related = news ? items.filter(n => n && String(n.id) !== String(news.id)).slice(0, 3) : [];
+  React.useEffect(() => {
+    if (news && news.id != null) _ni_markSeen(news.id);
+  }, [news && news.id]);
   const share = () => {
     const title = news ? _ni_i18nField(news, 'title', lang) || news.title || '' : '';
     const url = window.location.href;
@@ -29926,9 +30072,9 @@ function SheetNewsDetail({
     style: {
       padding: '3px 10px',
       borderRadius: 11,
-      fontSize: 11,
+      fontSize: 12,
       background: 'rgba(110,134,224,.12)',
-      color: 'var(--mg-accent, #6e86e0)'
+      color: 'var(--mg-deep, #4f63c4)'
     }
   }, cat) : null, React.createElement("span", {
     className: "mg-num",
@@ -32195,6 +32341,8 @@ function MgTabBar({
       padding: 0,
       cursor: 'pointer',
       position: 'relative',
+      width: '100%',
+      height: '100%',
       WebkitTapHighlightColor: 'transparent'
     }
   }, React.createElement("span", {
@@ -32220,7 +32368,20 @@ function MgTabBar({
       fontSize: 30,
       color: '#fff'
     }
-  }, it.icon))) : React.createElement("button", {
+  }, it.icon)), React.createElement("span", {
+    className: "mg-ui",
+    style: {
+      position: 'absolute',
+      left: '50%',
+      transform: 'translateX(-50%)',
+      bottom: 3,
+      fontSize: 9,
+      fontWeight: 600,
+      letterSpacing: '.08em',
+      whiteSpace: 'nowrap',
+      color: '#5f76d6'
+    }
+  }, it.label[lang] || it.label.ja)) : React.createElement("button", {
     key: it.icon,
     type: "button",
     className: "mg-tap",
@@ -32233,8 +32394,10 @@ function MgTabBar({
       padding: 0,
       cursor: 'pointer',
       display: 'flex',
+      flexDirection: 'column',
       alignItems: 'center',
       justifyContent: 'center',
+      gap: 1,
       WebkitTapHighlightColor: 'transparent'
     }
   }, React.createElement("span", {
@@ -32243,12 +32406,22 @@ function MgTabBar({
     },
     className: "msr",
     style: {
-      fontSize: 29,
+      fontSize: 24,
       color: tab === i ? '#22314a' : '#7f94ab',
       transition: 'color .3s, transform .2s cubic-bezier(.34,1.56,.64,1)',
       animation: tab === i ? 'mgTabPop .5s cubic-bezier(.34,1.56,.64,1)' : 'none'
     }
-  }, it.icon)))));
+  }, it.icon), React.createElement("span", {
+    className: "mg-ui",
+    style: {
+      fontSize: 9,
+      fontWeight: 600,
+      letterSpacing: '.06em',
+      whiteSpace: 'nowrap',
+      color: tab === i ? '#22314a' : '#7f94ab',
+      transition: 'color .3s'
+    }
+  }, it.label[lang] || it.label.ja)))));
 }
 class _ShellErrorBoundary extends React.Component {
   constructor(props) {
