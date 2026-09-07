@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-<script>window.__MG_BUILD='20260906110250';</script>
+<script>window.__MG_BUILD='20260907105137';</script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>connec+a — 出会いが、まちを変えていく。</title>
@@ -1852,6 +1852,18 @@ const authApi = {
     return postToGAS('auth.redeemReward', {
       sessionToken,
       rewardId
+    });
+  },
+  async listPointCampaigns(sessionToken) {
+    return postToGAS('auth.listPointCampaigns', {
+      sessionToken
+    });
+  },
+  async setNotifPref(sessionToken, category, enabled) {
+    return postToGAS('auth.setNotifPref', {
+      sessionToken,
+      category,
+      enabled
     });
   },
   async getRegStatus(sessionToken, regId) {
@@ -11417,7 +11429,7 @@ function _ev_img(url, w) {
   if (m) return 'https://drive.google.com/thumbnail?id=' + m[1] + '&sz=w' + (w || 800);
   return url;
 }
-function _ev_regStatus(event, lang) {
+function _ev_regStatus(event, lang, member) {
   const st = _ev_st(lang);
   if (!event) return {
     open: false,
@@ -11441,6 +11453,18 @@ function _ev_regStatus(event, lang) {
       label: ''
     };
   } catch (e) {}
+  if (event.minRank && member && member.loaded && Array.isArray(member.rankOrder) && member.rankOrder.length) {
+    const needIdx = member.rankOrder.indexOf(event.minRank);
+    if (needIdx > 0 && member.rankIdx < needIdx) {
+      const nm = member.rankNames && member.rankNames[event.minRank] || event.minRank;
+      return {
+        open: false,
+        reason: 'rank_locked',
+        label: lang === 'en' ? nm + ' members only' : nm + '会員限定',
+        minRankName: nm
+      };
+    }
+  }
   if (event.status === '満員') return {
     open: false,
     reason: 'full',
@@ -11450,6 +11474,14 @@ function _ev_regStatus(event, lang) {
   if (event.regOpenDate) {
     const open = new Date(String(event.regOpenDate) + 'T00:00:00');
     if (!isNaN(open.getTime()) && now < open) {
+      const early = member && member.earlyHours > 0 ? new Date(open.getTime() - member.earlyHours * 3600000) : null;
+      if (early && !isNaN(early.getTime()) && now >= early) {
+        return {
+          open: true,
+          reason: 'early_access',
+          label: lang === 'en' ? 'Member early access' : '会員先行受付中'
+        };
+      }
       return {
         open: false,
         reason: 'before_open',
@@ -11945,7 +11977,27 @@ function TabEvents() {
         fontSize: 16.5,
         lineHeight: 1.3
       }
-    }, jaTitle(title)), (() => {
+    }, jaTitle(title)), ev.minRank ? React.createElement("div", {
+      className: "mg-ui",
+      style: {
+        display: 'inline-flex',
+        alignItems: 'center',
+        gap: 3,
+        marginTop: 4,
+        fontSize: 10.5,
+        fontWeight: 700,
+        letterSpacing: '.06em',
+        padding: '2px 8px',
+        borderRadius: 999,
+        background: 'rgba(212,169,78,.16)',
+        color: '#8a6d1c'
+      }
+    }, React.createElement("span", {
+      className: "msr",
+      style: {
+        fontSize: 12
+      }
+    }, "workspace_premium"), lang === 'en' ? 'Members only' : '会員限定') : null, (() => {
       const sess = ev.format === 'multi' && Array.isArray(ev.sessions) ? ev.sessions.filter(x => x && x.date).slice().sort((a, b) => String(a.date).localeCompare(String(b.date))) : [];
       if (sess.length >= 2) {
         return React.createElement("div", {
@@ -12154,6 +12206,34 @@ function SheetEventDetail({
   const [wlEntry, setWlEntry] = useState(null);
   const [wlBusy, setWlBusy] = useState(false);
   const [wlErr, setWlErr] = useState('');
+  const [myPts, setMyPts] = useState(() => {
+    try {
+      const uk = A && A.user ? A.user.id || A.user.userId || A.user.email : '';
+      return uk && typeof getSwrCached === 'function' ? getSwrCached('myPoints_' + uk) || null : null;
+    } catch (e) {
+      return null;
+    }
+  });
+  useEffect(() => {
+    if (!open || !(A && A.user)) return undefined;
+    let dead = false,
+      token = null;
+    try {
+      token = typeof authStore !== 'undefined' && authStore && authStore.getToken ? authStore.getToken() : null;
+    } catch (e) {}
+    if (!token || typeof authApi === 'undefined' || !authApi || !authApi.getMyPoints) return undefined;
+    authApi.getMyPoints(token).then(r => {
+      if (dead || !r || !r.ok) return;
+      setMyPts(r);
+      try {
+        const uk = A.user.id || A.user.userId || A.user.email;
+        if (uk && typeof setSwrCache === 'function') setSwrCache('myPoints_' + uk, r);
+      } catch (e) {}
+    }).catch(() => {});
+    return () => {
+      dead = true;
+    };
+  }, [open, A && A.user]);
   useEffect(() => {
     if (!open || !eventId) return undefined;
     let cancelled = false;
@@ -12292,7 +12372,17 @@ function SheetEventDetail({
   const blocked = !!ev && !_ev_isPreview() && (ev.status === '終了' || ev.status === 'アーカイブ' || ev.status === '非公開' || ev.status === '下書き' || ev.status === '中止' || ev.status === '延期');
   const isMulti = !!ev && ev.format === 'multi' && sessions.length > 0;
   const isMultiEvt = !!ev && ev.format === 'multi';
-  const regStatus = ev ? _ev_regStatus(ev, lang) : {
+  const _pcfg = myPts && myPts.config || {};
+  const _rankOrder = Array.isArray(_pcfg.rankOrder) ? _pcfg.rankOrder : [];
+  const _earlyPerk = myPts && myPts.rank && Array.isArray(myPts.rank.perks) ? myPts.rank.perks.filter(p => p.type === 'early_access')[0] : null;
+  const _member = {
+    rankIdx: myPts && myPts.rank ? _rankOrder.indexOf(myPts.rank.key) : -1,
+    rankOrder: _rankOrder,
+    rankNames: _pcfg.rankNames || {},
+    earlyHours: _earlyPerk ? Number(_earlyPerk.value) || 0 : 0,
+    loaded: !!(myPts && myPts.ok !== false)
+  };
+  const regStatus = ev ? _ev_regStatus(ev, lang, _member) : {
     open: false,
     reason: '',
     label: ''
@@ -18613,6 +18703,88 @@ function _my_Confirm({
     }
   }))));
 }
+const _MY_BRAND = '#6e86e0';
+const _MY_BRAND_DEEP = '#4f63c4';
+function _my_theme(cfg) {
+  const t = cfg && cfg.themeColor && String(cfg.themeColor).trim();
+  return t || _MY_BRAND;
+}
+function _my_themeInk(th) {
+  return !th || th === _MY_BRAND ? _MY_BRAND_DEEP : th;
+}
+function _my_rankInk(key, color) {
+  const K = String(key || '').toLowerCase();
+  if (K === 'gold') return '#8a6d1c';
+  if (K === 'silver') return '#5b6672';
+  if (K === 'bronze') return '#8a5a2b';
+  return color || 'var(--mg-ink3,#3d5877)';
+}
+function _my_daysLeft(ymd) {
+  if (!ymd) return null;
+  try {
+    const e = new Date(String(ymd) + 'T23:59:59');
+    const d = Math.ceil((e - new Date()) / 86400000);
+    return d >= 0 ? d : null;
+  } catch (e) {
+    return null;
+  }
+}
+function _my_perkIcon(type) {
+  return type === 'event_discount' ? 'sell' : type === 'early_access' ? 'schedule' : type === 'exclusive_events' ? 'workspace_premium' : 'redeem';
+}
+function _my_PerkRow({
+  icon,
+  label,
+  sub,
+  active,
+  accent
+}) {
+  const A = accent || _MY_BRAND_DEEP;
+  return React.createElement("div", {
+    style: {
+      display: 'flex',
+      alignItems: 'center',
+      gap: 11,
+      padding: '9px 2px',
+      opacity: active ? 1 : .72
+    }
+  }, React.createElement("span", {
+    style: {
+      width: 34,
+      height: 34,
+      flex: 'none',
+      borderRadius: 11,
+      display: 'inline-flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      background: active ? A + '1a' : 'rgba(34,49,74,.05)',
+      color: active ? A : 'var(--mg-ink5,#7f94ab)'
+    }
+  }, React.createElement("span", {
+    className: "msr",
+    style: {
+      fontSize: 19
+    }
+  }, active ? icon : 'lock')), React.createElement("div", {
+    style: {
+      flex: 1,
+      minWidth: 0
+    }
+  }, React.createElement("div", {
+    className: "mg-ui",
+    style: {
+      fontSize: 13.5,
+      fontWeight: 600,
+      color: 'var(--mg-ink,#22314a)'
+    }
+  }, label), sub ? React.createElement("div", {
+    style: {
+      fontSize: 11,
+      color: 'var(--mg-ink4,#5b7796)',
+      marginTop: 1
+    }
+  }, sub) : null));
+}
 function _my_rankVisual(key, color) {
   const K = String(key || '').toLowerCase();
   if (K === 'gold') return {
@@ -18874,7 +19046,7 @@ function _my_PointsCard({
   const rank = data && data.rank;
   const nextR = rank && rank.next;
   const lifetime = data ? Number(data.rankBasisValue != null ? data.rankBasisValue : data.lifetimeEarned) || 0 : 0;
-  const TH = data && data.config && data.config.themeColor || '#9e4478';
+  const TH = _my_theme(data && data.config);
   return React.createElement("div", {
     style: {
       padding: '0 18px 16px'
@@ -18917,7 +19089,7 @@ function _my_PointsCard({
     style: {
       fontWeight: 700,
       letterSpacing: '.08em',
-      color: rank.color || TH
+      color: _my_rankInk(rank.key, rank.color)
     }
   }, (rank.emoji ? rank.emoji + ' ' : '') + _my_rankName(rank, lang)), React.createElement("span", {
     style: {
@@ -18969,9 +19141,11 @@ function _my_RewardCard({
   theme,
   onTap
 }) {
-  const TH = theme || '#9e4478';
+  const TH = theme || _MY_BRAND;
+  const THd = _my_themeInk(TH);
   const afford = balance >= r.cost;
   const locked = r.soldOut || r.reachedLimit;
+  const shortBy = Math.max(0, r.cost - balance);
   const gift = r.type === 'coupon' ? 'local_activity' : 'redeem';
   return React.createElement("button", {
     type: "button",
@@ -18992,13 +19166,14 @@ function _my_RewardCard({
     style: {
       borderRadius: 20,
       overflow: 'hidden',
-      opacity: locked ? .62 : 1
+      opacity: locked ? .6 : 1,
+      boxShadow: afford && !locked ? '0 0 0 1px ' + TH + '33, 0 1px 2px rgba(34,49,74,.05), 0 14px 30px -8px ' + TH + '2e, inset 0 1px 0 rgba(255,255,255,.8)' : undefined
     }
   }, React.createElement("div", {
     style: {
       position: 'relative',
       aspectRatio: '1 / 1',
-      background: r.image ? 'transparent' : 'linear-gradient(150deg, rgba(192,94,151,.16), rgba(158,68,120,.10) 60%, rgba(126,93,167,.14))',
+      background: r.image ? 'transparent' : 'radial-gradient(120% 100% at 18% 12%, rgba(214,224,255,.9), rgba(214,224,255,0) 58%), radial-gradient(110% 90% at 85% 82%, rgba(255,222,238,.55), rgba(255,222,238,0) 60%), radial-gradient(100% 100% at 80% 20%, rgba(212,238,224,.5), rgba(212,238,224,0) 55%), linear-gradient(160deg,#f2f4fc,#e9eef9)',
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center'
@@ -19016,8 +19191,9 @@ function _my_RewardCard({
   }) : React.createElement("span", {
     className: "msr",
     style: {
-      fontSize: 46,
-      color: 'rgba(158,68,120,.5)'
+      fontSize: 44,
+      color: TH,
+      opacity: .5
     }
   }, gift), r.category ? React.createElement("span", {
     className: "mg-ui",
@@ -19030,17 +19206,33 @@ function _my_RewardCard({
       letterSpacing: '.08em',
       padding: '3px 8px',
       borderRadius: 999,
-      background: 'rgba(255,255,255,.86)',
-      color: 'var(--mg-ink3, #3d5877)'
+      background: 'rgba(255,255,255,.9)',
+      color: 'var(--mg-ink3, #3d5877)',
+      boxShadow: '0 2px 6px rgba(34,49,74,.12)'
     }
-  }, r.category) : null, locked ? React.createElement("span", {
+  }, r.category) : null, afford && !locked ? React.createElement("span", {
+    className: "mg-ui",
+    style: {
+      position: 'absolute',
+      top: 8,
+      right: 8,
+      fontSize: 10,
+      fontWeight: 700,
+      letterSpacing: '.06em',
+      padding: '3px 8px',
+      borderRadius: 999,
+      background: THd,
+      color: '#fff',
+      boxShadow: '0 3px 10px -2px ' + THd + 'aa'
+    }
+  }, lang === 'en' ? 'READY' : '交換可') : null, locked ? React.createElement("span", {
     style: {
       position: 'absolute',
       inset: 0,
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
-      background: 'rgba(255,255,255,.5)'
+      background: 'rgba(246,249,252,.55)'
     }
   }, React.createElement("span", {
     className: "mg-ui",
@@ -19053,7 +19245,30 @@ function _my_RewardCard({
       background: 'rgba(34,49,74,.72)',
       color: '#fff'
     }
-  }, r.soldOut ? lang === 'en' ? 'SOLD OUT' : '在庫なし' : lang === 'en' ? 'CLAIMED' : '交換済')) : null), React.createElement("div", {
+  }, r.soldOut ? lang === 'en' ? 'SOLD OUT' : '在庫なし' : lang === 'en' ? 'CLAIMED' : '交換済')) : null, r.endAt ? React.createElement("span", {
+    className: "mg-ui",
+    style: {
+      position: 'absolute',
+      bottom: 8,
+      left: 8,
+      display: 'inline-flex',
+      alignItems: 'center',
+      gap: 3,
+      fontSize: 10,
+      fontWeight: 700,
+      letterSpacing: '.04em',
+      padding: '2px 8px',
+      borderRadius: 999,
+      background: 'rgba(233,168,60,.94)',
+      color: '#4a3a08',
+      boxShadow: '0 2px 6px rgba(34,49,74,.16)'
+    }
+  }, React.createElement("span", {
+    className: "msr",
+    style: {
+      fontSize: 11
+    }
+  }, "schedule"), (lang === 'en' ? 'Until ' : '〜') + (Number(String(r.endAt).slice(5, 7)) + '/' + Number(String(r.endAt).slice(8, 10)))) : null), React.createElement("div", {
     style: {
       padding: '10px 12px 12px'
     }
@@ -19077,21 +19292,28 @@ function _my_RewardCard({
       display: 'inline-flex',
       alignItems: 'baseline',
       gap: 2,
-      fontSize: 17,
+      fontSize: 18,
       fontWeight: 600,
-      color: afford ? TH : 'var(--mg-ink4,#5b7796)'
+      color: afford ? THd : 'var(--mg-ink3,#3d5877)'
     }
   }, r.cost.toLocaleString(), React.createElement("span", {
     style: {
       fontSize: 11
     }
-  }, unit)), !locked ? React.createElement("span", {
+  }, unit)), !locked ? afford ? React.createElement("span", {
     className: "msr",
     style: {
-      fontSize: 20,
-      color: afford ? TH : 'var(--mg-ink5,#7f94ab)'
+      fontSize: 22,
+      color: THd
     }
-  }, afford ? 'add_circle' : 'lock') : null))));
+  }, "add_circle") : React.createElement("span", {
+    className: "mg-ui",
+    style: {
+      fontSize: 10.5,
+      fontWeight: 600,
+      color: 'var(--mg-ink5,#7f94ab)'
+    }
+  }, lang === 'en' ? '+' + shortBy.toLocaleString() : 'あと' + shortBy.toLocaleString() + unit) : null))));
 }
 function SheetPoints({
   open,
@@ -19101,6 +19323,7 @@ function SheetPoints({
   const lang = A && A.lang || 'ja';
   const [pts, setPts] = useState(null);
   const [shop, setShop] = useState(null);
+  const [camp, setCamp] = useState(null);
   const [view, setView] = useState('shop');
   const [cat, setCat] = useState('all');
   const [sel, setSel] = useState(null);
@@ -19118,6 +19341,9 @@ function SheetPoints({
     if (authApi.listPointRewards) authApi.listPointRewards(token).then(r => {
       if (r && r.ok) setShop(r);
     }).catch(() => {});
+    if (authApi.listPointCampaigns) authApi.listPointCampaigns(token).then(r => {
+      if (r && r.ok) setCamp(r);
+    }).catch(() => {});
   }, []);
   useEffect(() => {
     if (open) load();
@@ -19134,12 +19360,32 @@ function SheetPoints({
   }, [rewards]);
   const shown = cat === 'all' ? rewards : rewards.filter(r => r.category === cat);
   const myRed = shop && Array.isArray(shop.myRedemptions) ? shop.myRedemptions : [];
-  const TH = shop && shop.config && shop.config.themeColor || pts && pts.config && pts.config.themeColor || '#9e4478';
+  const TH = _my_theme(shop && shop.config || pts && pts.config);
+  const THd = _my_themeInk(TH);
   const shopEnabled = !(shop && shop.config && shop.config.shopEnabled === false);
   const shopIntro = shop && shop.config && shop.config.shopIntro || '';
   const programDesc = pts && pts.config && pts.config.programDesc || '';
   const perk = pts && pts.rank && pts.rank.perk || '';
   const effView = shopEnabled ? view : 'history';
+  const rank = pts && pts.rank || null;
+  const nextR = rank && rank.next || null;
+  const rankColor = rank && rank.color || TH;
+  const nextColor = nextR && nextR.color || TH;
+  const rankInk = rank ? _my_rankInk(rank.key, rankColor) : THd;
+  const nextInk = nextR ? _my_rankInk(nextR.key, nextColor) : THd;
+  const perks = rank && Array.isArray(rank.perks) ? rank.perks : [];
+  const nextUnlocks = rank && Array.isArray(rank.nextUnlocks) ? rank.nextUnlocks : [];
+  const lifetime = pts ? Number(pts.rankBasisValue != null ? pts.rankBasisValue : pts.lifetimeEarned) || 0 : 0;
+  const toNext = nextR ? Math.max(0, (Number(nextR.min) || 0) - lifetime) : 0;
+  const prog = rank ? Math.max(0.04, Math.min(1, Number(rank.progress) || 0)) : 0;
+  const days = pts ? Number(pts.totalDays) || 0 : 0;
+  const life = pts ? Number(pts.lifetimeEarned) || 0 : 0;
+  const nm = pts && pts.nextMilestone || null;
+  const nmProg = nm && nm.n ? Math.max(0.05, Math.min(1, (Number(nm.n) - Number(nm.remain)) / Number(nm.n))) : 0;
+  const affordN = rewards.filter(r => !r.soldOut && !r.reachedLimit && balance >= (Number(r.cost) || 0)).length;
+  const campaigns = camp && Array.isArray(camp.campaigns) ? camp.campaigns : [];
+  const campMult = campaigns.filter(c => c.type === 'multiplier');
+  const campChal = campaigns.filter(c => c.type === 'challenge');
   const doRedeem = r => {
     let token = null;
     try {
@@ -19189,93 +19435,501 @@ function SheetPoints({
     }
   }, React.createElement("div", {
     style: {
-      marginBottom: 12
+      marginBottom: 18
     }
   }, React.createElement(_my_MemberCard, {
     d: pts,
     lang: lang
-  })), perk ? React.createElement("div", {
+  })), rank ? React.createElement("div", {
+    style: {
+      marginBottom: 20
+    }
+  }, React.createElement(_my_Pill, null, lang === 'en' ? 'YOUR RANK' : 'ランクの道のり'), React.createElement("div", {
     className: "mg-card",
     style: {
-      borderRadius: 14,
-      padding: '10px 14px',
-      marginBottom: 12,
+      borderRadius: 22,
+      padding: '16px 18px 18px'
+    }
+  }, nextR ? React.createElement("div", {
+    style: {
+      display: 'flex',
+      alignItems: 'flex-end',
+      justifyContent: 'space-between',
+      gap: 10,
+      marginBottom: 16
+    }
+  }, React.createElement("div", {
+    style: {
+      minWidth: 0
+    }
+  }, React.createElement("div", {
+    style: {
+      display: 'inline-flex',
+      alignItems: 'center',
+      gap: 6,
+      fontSize: 12.5,
+      fontWeight: 700,
+      letterSpacing: '.04em',
+      color: rankInk
+    }
+  }, rank.emoji ? React.createElement("span", {
+    style: {
+      fontSize: 15
+    }
+  }, rank.emoji) : null, _my_rankName(rank, lang)), React.createElement("div", {
+    className: "mg-serif",
+    style: {
+      fontSize: 15,
+      lineHeight: 1.4,
+      color: 'var(--mg-ink,#22314a)',
+      marginTop: 3
+    }
+  }, lang === 'en' ? React.createElement("span", null, React.createElement("span", {
+    className: "mg-num",
+    style: {
+      fontSize: 21,
+      fontWeight: 600,
+      color: nextInk
+    }
+  }, toNext.toLocaleString()), unit + ' to ' + _my_rankName(nextR, lang)) : React.createElement("span", null, React.createElement("span", {
+    className: "mg-num",
+    style: {
+      fontSize: 21,
+      fontWeight: 600,
+      color: nextInk
+    }
+  }, toNext.toLocaleString()), unit + ' で ' + _my_rankName(nextR, lang) + 'へ')), nextUnlocks.length ? React.createElement("div", {
+    style: {
+      fontSize: 11,
+      color: THd,
+      fontWeight: 600,
+      marginTop: 4
+    }
+  }, lang === 'en' ? _my_rankName(nextR, lang) + ' unlocks ' + nextUnlocks.length + ' more perk' + (nextUnlocks.length > 1 ? 's' : '') : _my_rankName(nextR, lang) + 'で特典が' + nextUnlocks.length + 'つ増えます') : null), React.createElement("div", {
+    className: "mg-num",
+    style: {
+      fontSize: 15,
+      color: 'var(--mg-ink4,#5b7796)',
+      textAlign: 'right',
+      flex: 'none'
+    }
+  }, Math.round(prog * 100), "%")) : React.createElement("div", {
+    style: {
       display: 'flex',
       alignItems: 'center',
-      gap: 8
+      gap: 8,
+      marginBottom: 14
     }
   }, React.createElement("span", {
     className: "msr",
     style: {
-      fontSize: 18,
-      color: TH,
-      flex: 'none'
+      fontSize: 22,
+      color: rankColor
     }
-  }, "redeem"), React.createElement("div", {
+  }, "workspace_premium"), React.createElement("div", {
+    className: "mg-serif",
     style: {
-      fontSize: 12,
-      color: 'var(--mg-ink2,#2b3d57)',
-      lineHeight: 1.6
+      fontSize: 15.5
     }
-  }, pts && pts.rank && pts.rank.emoji + ' ' + _my_rankName(pts.rank, lang) || '', " \u2014 ", perk)) : null, programDesc ? React.createElement("div", {
+  }, lang === 'en' ? 'Top rank reached' : lang === 'easy' ? 'いちばん うえの ランクです' : '最高ランクに到達しています')), React.createElement("div", {
     style: {
-      fontSize: 11.5,
-      color: 'var(--mg-ink3,#3d5877)',
-      lineHeight: 1.8,
-      marginBottom: 14
+      position: 'relative',
+      margin: '0 4px',
+      height: 22
     }
-  }, programDesc) : null, React.createElement("div", {
+  }, React.createElement("div", {
     style: {
-      display: 'grid',
-      gridTemplateColumns: 'repeat(3,1fr)',
-      gap: 8,
-      marginBottom: 18
+      position: 'absolute',
+      left: 11,
+      right: 11,
+      top: '50%',
+      height: 8,
+      transform: 'translateY(-50%)',
+      borderRadius: 4,
+      background: 'rgba(34,49,74,.09)'
     }
-  }, [{
-    k: pts ? Number(pts.totalDays) || 0 : 0,
-    l: lang === 'en' ? 'Days' : lang === 'easy' ? 'さんかにっすう' : '参加日数'
-  }, {
-    k: pts ? (Number(pts.lifetimeEarned) || 0).toLocaleString() : 0,
-    l: lang === 'en' ? 'Lifetime' : lang === 'easy' ? 'これまで' : '累計獲得'
-  }, {
-    k: pts && pts.nextMilestone ? '+' + pts.nextMilestone.bonus : '—',
-    l: lang === 'en' ? 'Next bonus' : lang === 'easy' ? 'つぎの ボーナス' : '次のボーナス'
-  }].map((s, i) => React.createElement("div", {
-    key: i,
+  }), React.createElement("div", {
+    style: {
+      position: 'absolute',
+      left: 11,
+      top: '50%',
+      height: 8,
+      transform: 'translateY(-50%)',
+      width: 'calc((100% - 22px) * ' + prog + ')',
+      borderRadius: 4,
+      background: 'linear-gradient(90deg,' + rankColor + ',' + nextColor + ')',
+      boxShadow: '0 2px 8px -2px ' + nextColor + '88',
+      transition: 'width .7s cubic-bezier(.16,1,.3,1)'
+    }
+  }), React.createElement("div", {
+    style: {
+      position: 'relative',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      height: '100%'
+    }
+  }, React.createElement("div", {
+    style: {
+      width: 22,
+      height: 22,
+      borderRadius: 11,
+      background: 'linear-gradient(150deg,' + rankColor + ',' + rankColor + 'cc)',
+      border: '2px solid #fff',
+      boxShadow: '0 3px 8px -2px ' + rankColor + '99',
+      zIndex: 1
+    }
+  }), React.createElement("div", {
+    style: {
+      width: 22,
+      height: 22,
+      borderRadius: 11,
+      background: prog >= 1 ? nextColor : '#fff',
+      border: '2px solid ' + nextColor,
+      boxShadow: '0 2px 6px rgba(34,49,74,.14)',
+      zIndex: 1
+    }
+  }))), nextR ? React.createElement("div", {
+    style: {
+      display: 'flex',
+      justifyContent: 'space-between',
+      marginTop: 8,
+      fontSize: 11,
+      color: 'var(--mg-ink4,#5b7796)'
+    }
+  }, React.createElement("span", null, (rank.emoji ? rank.emoji + ' ' : '') + _my_rankName(rank, lang)), React.createElement("span", null, (nextR.emoji ? nextR.emoji + ' ' : '') + _my_rankName(nextR, lang))) : null)) : null, perks.length || nextUnlocks.length || perk ? React.createElement("div", {
+    style: {
+      marginBottom: 20
+    }
+  }, React.createElement(_my_Pill, null, lang === 'en' ? 'PERKS' : '特典'), React.createElement("div", {
     className: "mg-card",
     style: {
-      borderRadius: 16,
-      padding: '12px 8px',
+      borderRadius: 22,
+      padding: '12px 16px 4px'
+    }
+  }, perks.length ? React.createElement("div", null, React.createElement("div", {
+    className: "mg-ui",
+    style: {
+      fontSize: 11,
+      letterSpacing: '.08em',
+      color: rankInk,
+      fontWeight: 700,
+      margin: '2px 2px 0'
+    }
+  }, (rank && rank.emoji ? rank.emoji + ' ' : '') + (lang === 'en' ? 'Active perks' : 'いま使える特典')), perks.map((p, i) => React.createElement(_my_PerkRow, {
+    key: 'p' + i,
+    icon: _my_perkIcon(p.type),
+    label: p.label,
+    active: true,
+    accent: THd
+  }))) : perk ? React.createElement(_my_PerkRow, {
+    icon: "redeem",
+    label: perk,
+    active: true,
+    accent: THd
+  }) : null, nextUnlocks.length ? React.createElement("div", null, React.createElement("div", {
+    style: {
+      margin: '6px 2px',
+      borderTop: '1px solid rgba(34,49,74,.07)'
+    }
+  }), React.createElement("div", {
+    className: "mg-ui",
+    style: {
+      fontSize: 11,
+      letterSpacing: '.08em',
+      color: nextInk,
+      fontWeight: 700,
+      margin: '4px 2px 0'
+    }
+  }, (nextR && nextR.emoji ? nextR.emoji + ' ' : '') + _my_rankName(nextR, lang) + (lang === 'en' ? ' unlocks' : 'で解放')), nextUnlocks.map((u, i) => React.createElement(_my_PerkRow, {
+    key: 'u' + i,
+    icon: _my_perkIcon(u.type),
+    label: u.label,
+    active: false,
+    accent: THd
+  }))) : null)) : null, campMult.length || campChal.length ? React.createElement("div", {
+    style: {
+      marginBottom: 20
+    }
+  }, React.createElement(_my_Pill, null, lang === 'en' ? 'NOW' : 'いま'), campMult.map(c => {
+    const dl = _my_daysLeft(c.endAt);
+    return React.createElement("div", {
+      key: c.id,
+      className: "mg-cream",
+      style: {
+        padding: '12px 15px',
+        display: 'flex',
+        alignItems: 'center',
+        gap: 11,
+        marginBottom: 10
+      }
+    }, React.createElement("span", {
+      className: "msr",
+      style: {
+        fontSize: 22,
+        color: '#a9822a',
+        flex: 'none'
+      }
+    }, "bolt"), React.createElement("div", {
+      style: {
+        flex: 1,
+        minWidth: 0
+      }
+    }, React.createElement("div", {
+      className: "mg-ui",
+      style: {
+        fontSize: 13,
+        fontWeight: 700,
+        color: '#5b4a13'
+      }
+    }, c.name, " ", React.createElement("span", {
+      className: "mg-num",
+      style: {
+        fontSize: 15
+      }
+    }, "\xD7", c.multiplier)), React.createElement("div", {
+      style: {
+        fontSize: 11,
+        color: '#8a6d1c',
+        marginTop: 1
+      }
+    }, c.desc || (lang === 'en' ? 'Points multiplied' : 'ポイント倍増中'), dl != null ? lang === 'en' ? ' · ' + dl + 'd left' : '　・残り' + dl + '日' : '')));
+  }), campChal.map(c => {
+    const dl = _my_daysLeft(c.endAt);
+    const total = Math.max(1, c.targetCount || 1);
+    const cnt = Math.min(total, c.count || 0);
+    const pctW = (cnt / total * 100).toFixed(0);
+    return React.createElement("div", {
+      key: c.id,
+      className: "mg-card",
+      style: {
+        borderRadius: 22,
+        padding: '15px 16px',
+        marginBottom: 10
+      }
+    }, React.createElement("div", {
+      style: {
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        gap: 10,
+        marginBottom: 12
+      }
+    }, React.createElement("div", {
+      style: {
+        display: 'flex',
+        alignItems: 'center',
+        gap: 9,
+        minWidth: 0
+      }
+    }, React.createElement("span", {
+      className: "msr",
+      style: {
+        fontSize: 22,
+        color: c.done ? '#3c7a54' : THd,
+        flex: 'none'
+      }
+    }, c.done ? 'check_circle' : 'flag'), React.createElement("div", {
+      style: {
+        minWidth: 0
+      }
+    }, React.createElement("div", {
+      className: "mg-serif",
+      style: {
+        fontSize: 15,
+        lineHeight: 1.3
+      }
+    }, c.name), React.createElement("div", {
+      style: {
+        fontSize: 11.5,
+        color: 'var(--mg-ink4,#5b7796)',
+        marginTop: 1
+      }
+    }, c.desc ? c.desc + ' ・ ' : '', React.createElement("span", {
+      className: "mg-num",
+      style: {
+        color: THd,
+        fontWeight: 700
+      }
+    }, "+", c.bonus, unit)))), React.createElement("div", {
+      className: "mg-num",
+      style: {
+        fontSize: 12.5,
+        color: c.done ? '#3c7a54' : 'var(--mg-ink4,#5b7796)',
+        flex: 'none'
+      }
+    }, c.done ? lang === 'en' ? 'Done' : '達成' : dl != null ? lang === 'en' ? dl + 'd' : '残り' + dl + '日' : '')), React.createElement("div", {
+      style: {
+        display: 'flex',
+        alignItems: 'center',
+        gap: 10
+      }
+    }, total <= 6 ? React.createElement("div", {
+      style: {
+        display: 'flex',
+        gap: 6
+      }
+    }, Array.from({
+      length: total
+    }).map((_, i) => React.createElement("span", {
+      key: i,
+      style: {
+        width: 9,
+        height: 9,
+        borderRadius: 5,
+        background: i < cnt ? THd : 'rgba(34,49,74,.16)'
+      }
+    }))) : null, React.createElement("div", {
+      style: {
+        flex: 1,
+        height: 8,
+        borderRadius: 4,
+        background: 'rgba(34,49,74,.09)',
+        overflow: 'hidden'
+      }
+    }, React.createElement("div", {
+      style: {
+        height: '100%',
+        width: pctW + '%',
+        borderRadius: 4,
+        background: c.done ? 'linear-gradient(90deg,#5aa06f,#3c7a54)' : 'linear-gradient(90deg,' + TH + ',' + THd + ')',
+        transition: 'width .7s cubic-bezier(.16,1,.3,1)'
+      }
+    })), React.createElement("div", {
+      className: "mg-num",
+      style: {
+        fontSize: 13,
+        color: THd,
+        fontWeight: 700,
+        flex: 'none'
+      }
+    }, cnt, "/", total)));
+  })) : null, pts ? React.createElement("div", {
+    style: {
+      marginBottom: 20
+    }
+  }, React.createElement(_my_Pill, null, lang === 'en' ? 'EARN' : 'ためる'), React.createElement("div", {
+    className: "mg-card",
+    style: {
+      borderRadius: 22,
+      padding: '14px 18px',
+      display: 'flex',
+      alignItems: 'center',
+      gap: 14,
+      marginBottom: nm ? 10 : 0
+    }
+  }, React.createElement("div", {
+    style: {
+      flex: 1,
       textAlign: 'center'
     }
   }, React.createElement("div", {
     className: "mg-num",
     style: {
-      fontSize: 22,
+      fontSize: 26,
       color: 'var(--mg-ink,#22314a)'
     }
-  }, s.k), React.createElement("div", {
+  }, days), React.createElement("div", {
     style: {
       fontSize: 11,
-      letterSpacing: '.06em',
       color: 'var(--mg-ink4,#5b7796)',
-      marginTop: 2
+      marginTop: 1
     }
-  }, s.l)))), pts && pts.nextMilestone ? React.createElement("div", {
+  }, lang === 'en' ? 'Days joined' : lang === 'easy' ? 'さんかにっすう' : '参加日数')), React.createElement("div", {
+    style: {
+      width: 1,
+      height: 34,
+      background: 'rgba(34,49,74,.1)',
+      flex: 'none'
+    }
+  }), React.createElement("div", {
+    style: {
+      flex: 1,
+      textAlign: 'center'
+    }
+  }, React.createElement("div", {
+    className: "mg-num",
+    style: {
+      fontSize: 26,
+      color: 'var(--mg-ink,#22314a)'
+    }
+  }, life.toLocaleString()), React.createElement("div", {
+    style: {
+      fontSize: 11,
+      color: 'var(--mg-ink4,#5b7796)',
+      marginTop: 1
+    }
+  }, lang === 'en' ? 'Earned total' : lang === 'easy' ? 'これまで' : '累計獲得'))), nm ? React.createElement("div", {
+    className: "mg-cream",
+    style: {
+      padding: '12px 15px'
+    }
+  }, React.createElement("div", {
+    style: {
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      gap: 10,
+      marginBottom: 8
+    }
+  }, React.createElement("div", {
+    style: {
+      display: 'flex',
+      alignItems: 'center',
+      gap: 7,
+      minWidth: 0
+    }
+  }, React.createElement("span", {
+    className: "msr",
+    style: {
+      fontSize: 18,
+      color: '#a9822a',
+      flex: 'none'
+    }
+  }, "hiking"), React.createElement("div", {
+    style: {
+      fontSize: 12,
+      color: '#5b4a13',
+      lineHeight: 1.5
+    }
+  }, lang === 'en' ? 'Join ' + nm.remain + ' more day(s)' : lang === 'easy' ? 'あと ' + nm.remain + 'にちの さんかで' : 'あと' + nm.remain + '日の参加で')), React.createElement("div", {
+    className: "mg-num",
+    style: {
+      fontSize: 18,
+      fontWeight: 600,
+      color: '#8a6d1c',
+      flex: 'none'
+    }
+  }, "+", nm.bonus, unit)), React.createElement("div", {
+    style: {
+      height: 6,
+      borderRadius: 3,
+      background: 'rgba(138,109,28,.16)',
+      overflow: 'hidden'
+    }
+  }, React.createElement("div", {
+    style: {
+      height: '100%',
+      width: (nmProg * 100).toFixed(0) + '%',
+      borderRadius: 3,
+      background: 'linear-gradient(90deg,#d9b25a,#a9822a)',
+      transition: 'width .7s cubic-bezier(.16,1,.3,1)'
+    }
+  }))) : null) : null, programDesc ? React.createElement("div", {
     style: {
       fontSize: 11.5,
-      color: 'var(--mg-ink3,#3d5877)',
-      textAlign: 'center',
-      marginTop: -8,
-      marginBottom: 16
+      color: 'var(--mg-ink4,#5b7796)',
+      lineHeight: 1.8,
+      marginBottom: 18,
+      padding: '0 2px'
     }
-  }, lang === 'en' ? 'Attend ' + pts.nextMilestone.remain + ' more day(s) for +' + pts.nextMilestone.bonus + unit : lang === 'easy' ? 'あと ' + pts.nextMilestone.remain + 'にちで +' + pts.nextMilestone.bonus + unit : 'あと' + pts.nextMilestone.remain + '日の参加で +' + pts.nextMilestone.bonus + unit) : null, React.createElement("div", {
+  }, programDesc) : null, React.createElement(_my_Pill, null, lang === 'en' ? 'USE' : shopEnabled ? 'つかう' : '交換履歴'), shopEnabled ? React.createElement("div", {
     style: {
       display: 'flex',
       gap: 8,
       marginBottom: 14
     }
-  }, (shopEnabled ? [['shop', lang === 'en' ? 'Shop' : 'ショップ'], ['history', lang === 'en' ? 'History' : '交換履歴']] : [['history', lang === 'en' ? 'History' : '交換履歴']]).map(([k, lbl]) => React.createElement("button", {
+  }, [['shop', lang === 'en' ? 'Shop' : 'ショップ'], ['history', lang === 'en' ? 'History' : '交換履歴']].map(([k, lbl]) => React.createElement("button", {
     key: k,
     type: "button",
     onClick: () => setView(k),
@@ -19290,16 +19944,32 @@ function SheetPoints({
       borderRadius: 999,
       fontSize: 13,
       fontWeight: effView === k ? 700 : 500,
-      background: effView === k ? TH : 'rgba(255,255,255,.72)',
+      background: effView === k ? THd : 'rgba(255,255,255,.72)',
       color: effView === k ? '#fff' : 'var(--mg-ink2,#2b3d57)',
-      boxShadow: effView === k ? '0 6px 14px -6px ' + TH + '88' : 'inset 0 0 0 1px rgba(34,49,74,.08)'
+      boxShadow: effView === k ? '0 6px 14px -6px ' + THd + '99' : 'inset 0 0 0 1px rgba(34,49,74,.08)'
     }
-  }, lbl))), effView === 'shop' ? React.createElement("div", null, shopIntro ? React.createElement("div", {
+  }, lbl))) : null, effView === 'shop' ? React.createElement("div", null, affordN > 0 ? React.createElement("div", {
+    style: {
+      display: 'flex',
+      alignItems: 'center',
+      gap: 6,
+      fontSize: 12,
+      color: THd,
+      fontWeight: 600,
+      margin: '0 2px 12px'
+    }
+  }, React.createElement("span", {
+    className: "msr",
+    style: {
+      fontSize: 16
+    }
+  }, "redeem"), lang === 'en' ? 'You can redeem ' + affordN + ' reward' + (affordN > 1 ? 's' : '') + ' now' : lang === 'easy' ? 'いま こうかんできる: ' + affordN + 'こ' : 'いま交換できる景品 ' + affordN + '件') : null, shopIntro ? React.createElement("div", {
     style: {
       fontSize: 12,
-      color: 'var(--mg-ink2,#2b3d57)',
+      color: 'var(--mg-ink3,#3d5877)',
       lineHeight: 1.7,
-      marginBottom: 12
+      marginBottom: 12,
+      padding: '0 2px'
     }
   }, shopIntro) : null, cats.length > 0 ? React.createElement("div", {
     className: "mg-hidebar",
@@ -19325,7 +19995,7 @@ function SheetPoints({
       borderRadius: 999,
       fontSize: 12.5,
       background: cat === k ? TH + '1f' : 'rgba(255,255,255,.7)',
-      color: cat === k ? TH : 'var(--mg-ink3,#3d5877)',
+      color: cat === k ? THd : 'var(--mg-ink3,#3d5877)',
       fontWeight: cat === k ? 700 : 500,
       boxShadow: 'inset 0 0 0 1px ' + (cat === k ? TH + '55' : 'rgba(34,49,74,.08)')
     }
@@ -19366,8 +20036,9 @@ function SheetPoints({
     className: "msr",
     style: {
       fontSize: 22,
-      color: m.type === 'coupon' ? '#c05e97' : '#7e5da7',
-      flex: 'none'
+      color: TH,
+      flex: 'none',
+      opacity: .85
     }
   }, m.type === 'coupon' ? 'local_activity' : 'redeem'), React.createElement("div", {
     style: {
@@ -19441,7 +20112,7 @@ function SheetPoints({
       flex: 'none',
       borderRadius: 16,
       overflow: 'hidden',
-      background: 'linear-gradient(150deg,rgba(192,94,151,.16),rgba(126,93,167,.14))',
+      background: sel.image ? 'transparent' : 'radial-gradient(120% 100% at 18% 12%, rgba(214,224,255,.9), rgba(214,224,255,0) 58%), radial-gradient(110% 90% at 85% 82%, rgba(255,222,238,.55), rgba(255,222,238,0) 60%), linear-gradient(160deg,#f2f4fc,#e9eef9)',
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center'
@@ -19458,7 +20129,8 @@ function SheetPoints({
     className: "msr",
     style: {
       fontSize: 34,
-      color: 'rgba(158,68,120,.5)'
+      color: TH,
+      opacity: .5
     }
   }, sel.type === 'coupon' ? 'local_activity' : 'redeem')), React.createElement("div", {
     style: {
@@ -19475,7 +20147,7 @@ function SheetPoints({
     style: {
       fontSize: 18,
       fontWeight: 600,
-      color: '#9e4478',
+      color: THd,
       marginTop: 3
     }
   }, sel.cost.toLocaleString(), unit))), sel.desc ? React.createElement("div", {
@@ -19544,11 +20216,11 @@ function SheetPoints({
       height: 60,
       margin: '0 auto 14px',
       borderRadius: 30,
-      background: 'linear-gradient(150deg,#c05e97,#9e4478)',
+      background: 'linear-gradient(150deg,' + _MY_BRAND + ',' + _MY_BRAND_DEEP + ')',
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
-      boxShadow: '0 12px 26px -8px rgba(158,68,120,.6)'
+      boxShadow: '0 12px 26px -8px ' + _MY_BRAND_DEEP + '99'
     }
   }, React.createElement("span", {
     className: "msr",
@@ -19573,8 +20245,8 @@ function SheetPoints({
       marginTop: 12,
       padding: '10px 14px',
       borderRadius: 12,
-      background: 'rgba(158,68,120,.08)',
-      border: '1px dashed rgba(158,68,120,.4)'
+      background: _MY_BRAND + '14',
+      border: '1px dashed ' + _MY_BRAND + '66'
     }
   }, React.createElement("div", {
     style: {
@@ -19587,7 +20259,7 @@ function SheetPoints({
     style: {
       fontSize: 20,
       letterSpacing: '.08em',
-      color: '#9e4478'
+      color: _MY_BRAND_DEEP
     }
   }, result.res.couponCode)) : React.createElement("div", {
     style: {
@@ -19717,6 +20389,21 @@ function TabMyPage() {
         setPushState('default');
         A.toast(L(_my_T.pushFail), 'err');
       }
+    }
+  };
+  const [ptNotif, setPtNotif] = useState(() => !(user && user.notifPrefs && user.notifPrefs.points === false));
+  const handlePtNotifToggle = () => {
+    const next = !ptNotif;
+    setPtNotif(next);
+    let token = null;
+    try {
+      token = typeof authStore !== 'undefined' && authStore && authStore.getToken ? authStore.getToken() : null;
+    } catch (e) {}
+    if (token && typeof authApi !== 'undefined' && authApi && authApi.setNotifPref) {
+      authApi.setNotifPref(token, 'points', next).catch(() => {
+        setPtNotif(!next);
+        if (A) A.toast(lang === 'en' ? 'Could not update' : '変更できませんでした', 'err');
+      });
     }
   };
   const [confirmLogout, setConfirmLogout] = useState(false);
@@ -20285,7 +20972,20 @@ function TabMyPage() {
       onChange: handlePushToggle,
       ariaLabel: L(_my_T.notifRow)
     }))
-  }), (() => {
+  }), pushState === 'on' ? React.createElement(_my_Row, {
+    icon: "loyalty",
+    label: lang === 'en' ? 'Point notifications' : lang === 'easy' ? 'ポイントの おしらせ' : 'ポイント通知',
+    sub: lang === 'en' ? 'Rank up, challenges' : lang === 'easy' ? 'ランクアップ・チャレンジ' : 'ランクアップ・チャレンジ達成など',
+    right: React.createElement("div", {
+      style: {
+        flex: 'none'
+      }
+    }, React.createElement(MgSwitch, {
+      on: ptNotif,
+      onChange: handlePtNotifToggle,
+      ariaLabel: lang === 'en' ? 'Point notifications' : 'ポイント通知'
+    }))
+  }) : null, (() => {
     const standalone = window.matchMedia && window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
     if (standalone) return null;
     const [instReady, setInstReady] = [null, null];
