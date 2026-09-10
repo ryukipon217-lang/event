@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-<script>window.__MG_BUILD='20260907232728';</script>
+<script>window.__MG_BUILD='20260910152845';</script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>connec+a — 出会いが、まちを変えていく。</title>
@@ -1021,6 +1021,7 @@ const CONFIG = {
   }
 };
 const CONTACT_GAS_URL = 'https://script.google.com/macros/s/AKfycbxApwccYEPblBPtVHA4B2kw6xPrlxA07R31uHAt2iEb8pda26G83wuIK7ByEhYBAidxqQ/exec';
+const READ_API_URL = 'https://script.google.com/macros/s/AKfycbxm-_IBapGbmilVQSzPhsLhL6cMwm8_bIwxyq8Wh8j3IxXjGjBz234EwEohFe18EAY/exec';
 const I18N = {
   ja: {
     nav: {
@@ -1484,6 +1485,35 @@ async function postToGAS(action, payload, retryCount) {
     throw err;
   }
 }
+async function postFastRead(action, payload) {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 8000);
+  try {
+    const res = await fetch(READ_API_URL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'text/plain;charset=utf-8'
+      },
+      body: JSON.stringify({
+        action,
+        payload
+      }),
+      signal: controller.signal,
+      redirect: 'follow'
+    });
+    clearTimeout(timeoutId);
+    if (res.ok) {
+      const json = await res.json();
+      if (json && json.ok) return json.data;
+      if (json && json.error === 'ログインが必要です') throw new Error(json.error);
+    }
+  } catch (err) {
+    clearTimeout(timeoutId);
+    if (err && err.message === 'ログインが必要です') throw err;
+    console.warn('[postFastRead] read-api失敗→本体へフォールバック:', action, err && err.message);
+  }
+  return postToGAS(action, payload);
+}
 function logAction(type, targetId, meta) {
   try {
     var token = typeof authStore !== 'undefined' && authStore && authStore.getToken ? authStore.getToken() : null;
@@ -1839,12 +1869,12 @@ const authApi = {
     });
   },
   async getMyPoints(sessionToken) {
-    return postToGAS('auth.getMyPoints', {
+    return postFastRead('auth.getMyPoints', {
       sessionToken
     });
   },
   async listPointRewards(sessionToken) {
-    return postToGAS('auth.listPointRewards', {
+    return postFastRead('auth.listPointRewards', {
       sessionToken
     });
   },
