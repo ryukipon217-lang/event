@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-<script>window.__MG_BUILD='20260911132416';</script>
+<script>window.__MG_BUILD='20260911140327';</script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>connec+a — 出会いが、まちを変えていく。</title>
@@ -25869,74 +25869,86 @@ function _info_TownWeather({
     style: {
       display: 'flex',
       alignItems: 'center',
-      gap: 6,
-      padding: '16px 16px 18px',
-      borderRadius: 20,
-      background: 'linear-gradient(150deg, rgba(190,214,244,.5), rgba(244,224,235,.42))'
+      gap: 12,
+      padding: '18px 16px 20px',
+      borderRadius: 22,
+      background: 'linear-gradient(150deg, rgba(174,204,242,.62), rgba(244,220,233,.5))'
     }
   }, React.createElement("span", {
     "aria-hidden": "true",
     style: {
-      width: 96,
-      height: 96,
+      width: 104,
+      height: 104,
       flex: 'none',
+      borderRadius: '50%',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      background: 'radial-gradient(circle at 38% 32%, rgba(255,255,255,.98), rgba(255,255,255,.72))',
+      boxShadow: 'inset 0 1px 0 rgba(255,255,255,.95), inset 0 0 0 1px rgba(255,255,255,.6), 0 10px 22px -6px rgba(34,49,74,.22)'
+    }
+  }, React.createElement("span", {
+    style: {
+      width: 80,
+      height: 80,
       display: 'inline-block'
     },
     dangerouslySetInnerHTML: {
       __html: svgFor(t0.code)
     }
-  }), React.createElement("div", {
+  })), React.createElement("div", {
     style: {
       flex: 1,
       minWidth: 0
     }
   }, React.createElement("div", {
     style: {
-      fontSize: 14,
+      fontSize: 15,
       color: 'var(--mg-ink3, #3d5877)',
-      fontWeight: 600
+      fontWeight: 700
     }
   }, H('今日', 'きょう', 'Today'), m0 ? ' · ' + (m0[lang] || m0.ja) : ''), React.createElement("div", {
     className: "mg-num",
     style: {
-      fontSize: 54,
+      fontSize: 58,
       lineHeight: 1,
       color: 'var(--mg-ink, #22314a)',
-      marginTop: 3,
+      marginTop: 4,
       letterSpacing: '-.02em'
     }
   }, t0.tmax, React.createElement("span", {
     style: {
-      fontSize: 28
+      fontSize: 30
     }
   }, "\xB0")), React.createElement("div", {
     style: {
       display: 'flex',
       alignItems: 'center',
       gap: 14,
-      marginTop: 6
+      marginTop: 7
     }
   }, React.createElement("span", {
     className: "mg-num",
     style: {
-      fontSize: 14.5,
+      fontSize: 15,
       color: 'var(--mg-ink4, #5b7796)'
     }
   }, H('最低', 'さいてい', 'Low'), " ", t0.tmin, "\xB0"), t0.pop != null ? React.createElement("span", {
     className: "mg-num",
     style: {
-      fontSize: 14.5,
-      color: '#4a7bd0',
+      fontSize: 15,
+      color: '#3f72c9',
       display: 'inline-flex',
       alignItems: 'center',
-      gap: 3
+      gap: 3,
+      fontWeight: 700
     }
   }, React.createElement(Icon, {
     name: "water_drop",
     size: 16,
     fill: true,
     style: {
-      color: '#4a7bd0'
+      color: '#3f72c9'
     }
   }), t0.pop, "%") : null))), React.createElement("div", {
     style: {
@@ -25979,8 +25991,8 @@ function _info_TownWeather({
         width: 30,
         flex: 'none',
         textAlign: 'right',
-        fontSize: 13,
-        color: 'var(--mg-ink5, #8ba0b6)'
+        fontSize: 13.5,
+        color: 'var(--mg-ink4, #5b7796)'
       }
     }, d.tmin, "\xB0"), React.createElement("span", {
       style: {
@@ -26898,8 +26910,8 @@ function _town_TrainLive({
         background: 'none',
         border: 'none',
         cursor: 'pointer',
-        padding: '8px 4px',
-        margin: '-8px 0',
+        padding: '11px 7px',
+        margin: '-11px -3px',
         flex: 'none'
       }
     }, React.createElement(_TiStar, {
@@ -27294,9 +27306,9 @@ function _town_TrainLive({
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
-      width: 30,
-      height: 30,
-      borderRadius: 10,
+      width: 38,
+      height: 38,
+      borderRadius: 12,
       background: 'rgba(255,255,255,.65)',
       border: '1px solid rgba(34,49,74,.08)',
       cursor: refreshing ? 'default' : 'pointer',
@@ -27408,9 +27420,9 @@ function _town_TrainLive({
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
-      width: 30,
-      height: 30,
-      borderRadius: 10,
+      width: 38,
+      height: 38,
+      borderRadius: 12,
       background: showSearch ? 'rgba(34,49,74,.07)' : 'rgba(110,134,224,.13)',
       border: 'none',
       cursor: 'pointer'
@@ -27798,23 +27810,16 @@ function PageTown() {
   const transitArea = _u.prefecture || _cityFull;
   const isKanto = _TOWN_KANTO.indexOf(_u.prefecture) >= 0;
   const transitLinks = [{
-    ic: 'train',
-    label: {
-      ja: '鉄道の運行情報',
-      easy: 'でんしゃ の うんこう じょうほう',
-      en: 'Train status'
-    },
-    url: _town_trainUrl(_u.prefecture, _cityFull),
-    tint: {
-      bg: 'rgba(74,123,208,.14)',
-      fg: '#3f7fd0'
-    }
-  }, {
     ic: 'directions_car',
     label: {
       ja: '道路の交通情報',
       easy: 'どうろ の こうつう じょうほう',
       en: 'Road traffic'
+    },
+    desc: {
+      ja: '渋滞・通行止めを地図で確認',
+      easy: 'どうろ の こみぐあい',
+      en: 'Live congestion & closures'
     },
     url: _q(transitArea + ' 道路 交通情報'),
     tint: {
@@ -27829,6 +27834,11 @@ function PageTown() {
       easy: 'やくしょ の まどぐち',
       en: 'City / ward office'
     },
+    desc: {
+      ja: '住民票・各種手続き・相談窓口',
+      easy: 'じゅうみんひょう など の てつづき',
+      en: 'Certificates, procedures & help desks'
+    },
     url: _cRec && _cRec[4] ? _cRec[4] : _q(_cityFull + ' 公式サイト'),
     tint: {
       bg: 'rgba(110,134,224,.15)',
@@ -27840,6 +27850,11 @@ function PageTown() {
       ja: 'ゴミの出し方・分別',
       easy: 'ゴミ の だしかた',
       en: 'Garbage & recycling'
+    },
+    desc: {
+      ja: '分別ルール・収集日(多言語対応)',
+      easy: 'ぶんべつ と しゅうしゅうび',
+      en: 'Sorting rules & collection days'
     },
     url: _q(_cityFull + ' ゴミ 分別 ' + (lang === 'en' ? 'multilingual' : '外国語')),
     tint: {
@@ -27853,6 +27868,11 @@ function PageTown() {
       easy: 'せいかつ ガイド',
       en: 'Life guide'
     },
+    desc: {
+      ja: '医療・年金・子育てなどの案内',
+      easy: 'せいかつ の こまりごと',
+      en: 'Health, pension & childcare info'
+    },
     url: _q(_cityFull + ' 外国人 生活ガイド'),
     tint: {
       bg: 'rgba(230,140,175,.17)',
@@ -27865,82 +27885,139 @@ function PageTown() {
       easy: 'イベント・おまつり',
       en: 'Events & festivals'
     },
+    desc: {
+      ja: 'まちの催し・季節の行事',
+      easy: 'まち の イベント',
+      en: 'Local events & seasonal festivals'
+    },
     url: _q(_cityFull + ' イベント 祭り'),
     tint: {
       bg: 'rgba(224,160,60,.16)',
       fg: '#c07a1e'
     }
   }];
-  const Tile = (t, i, labelOverride) => React.createElement("a", {
-    key: i,
-    href: t.url,
-    target: "_blank",
-    rel: "noopener noreferrer",
-    className: "mg-tap",
+  const SectionHead = ({
+    ic,
+    tint,
+    title,
+    desc
+  }) => React.createElement("div", {
     style: {
-      position: 'relative',
       display: 'flex',
-      flexDirection: 'column',
-      gap: 10,
-      padding: '15px 14px 14px',
-      borderRadius: 18,
-      background: 'linear-gradient(160deg, rgba(255,255,255,.95), rgba(255,255,255,.76))',
-      border: '1px solid rgba(255,255,255,.9)',
-      boxShadow: '0 12px 24px rgba(34,49,74,.10)',
-      textDecoration: 'none',
-      color: 'var(--mg-ink, #22314a)'
+      alignItems: 'center',
+      gap: 13,
+      margin: '0 2px 13px'
     }
   }, React.createElement("span", {
     style: {
-      width: 40,
-      height: 40,
-      borderRadius: 13,
+      width: 46,
+      height: 46,
+      borderRadius: 15,
       flex: 'none',
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
-      background: t.tint.bg
+      background: tint.bg,
+      boxShadow: 'inset 0 1px 0 rgba(255,255,255,.7), 0 6px 14px -4px ' + tint.bg
+    }
+  }, React.createElement(Icon, {
+    name: ic,
+    size: 25,
+    style: {
+      color: tint.fg
+    }
+  })), React.createElement("div", {
+    style: {
+      flex: 1,
+      minWidth: 0
+    }
+  }, React.createElement("div", {
+    className: "mg-serif",
+    style: {
+      fontSize: 21,
+      lineHeight: 1.2,
+      color: 'var(--mg-ink, #22314a)',
+      letterSpacing: '.01em'
+    }
+  }, T(title)), React.createElement("div", {
+    style: {
+      fontSize: 12.5,
+      color: 'var(--mg-ink4, #5b7796)',
+      marginTop: 2,
+      lineHeight: 1.4
+    }
+  }, T(desc))));
+  const ServiceCard = (t, i) => React.createElement("a", {
+    key: i,
+    href: t.url,
+    target: "_blank",
+    rel: "noopener noreferrer",
+    className: "mg-card mg-tap",
+    style: {
+      display: 'flex',
+      alignItems: 'center',
+      gap: 14,
+      padding: '15px 15px',
+      borderRadius: 20,
+      textDecoration: 'none',
+      color: 'var(--mg-ink, #22314a)',
+      marginBottom: 10
+    }
+  }, React.createElement("span", {
+    style: {
+      width: 50,
+      height: 50,
+      borderRadius: 16,
+      flex: 'none',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      background: t.tint.bg,
+      boxShadow: 'inset 0 1px 0 rgba(255,255,255,.7)'
     }
   }, React.createElement(Icon, {
     name: t.ic,
-    size: 22,
+    size: 26,
     style: {
       color: t.tint.fg
     }
-  })), React.createElement("span", {
+  })), React.createElement("div", {
     style: {
-      fontSize: 13,
-      lineHeight: 1.4,
-      fontWeight: 500,
-      letterSpacing: '.01em'
-    }
-  }, labelOverride || T(t.label)), React.createElement(Icon, {
-    name: "north_east",
-    size: 13,
-    style: {
-      position: 'absolute',
-      top: 14,
-      right: 14,
-      color: 'var(--mg-ink5, #8ba0b6)',
-      opacity: 0.7
-    }
-  }));
-  const TileGrid = (labelObj, items) => React.createElement("div", {
-    style: {
-      marginBottom: 14
+      flex: 1,
+      minWidth: 0
     }
   }, React.createElement("div", {
-    className: "mg-label-accent",
     style: {
-      margin: '0 2px 9px'
+      fontSize: 15.5,
+      fontWeight: 700,
+      letterSpacing: '.01em',
+      lineHeight: 1.3
     }
-  }, T(labelObj)), React.createElement("div", {
+  }, T(t.label)), t.desc ? React.createElement("div", {
     style: {
-      display: 'grid',
-      gridTemplateColumns: '1fr 1fr',
-      gap: 10
+      fontSize: 12.5,
+      color: 'var(--mg-ink4, #5b7796)',
+      marginTop: 3,
+      lineHeight: 1.45
     }
-  }, items.map((t, i) => Tile(t, i))));
+  }, T(t.desc)) : null), React.createElement("span", {
+    style: {
+      width: 30,
+      height: 30,
+      borderRadius: 10,
+      flex: 'none',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      background: 'rgba(34,49,74,.05)'
+    }
+  }, React.createElement(Icon, {
+    name: "north_east",
+    size: 16,
+    style: {
+      color: 'var(--mg-ink4, #5b7796)'
+    }
+  })));
   return React.createElement("div", {
     className: "mg-ui",
     style: {
@@ -27953,7 +28030,7 @@ function PageTown() {
     "aria-hidden": "true"
   }), React.createElement("div", {
     style: {
-      padding: '0 22px 14px'
+      padding: '0 22px 16px'
     }
   }, React.createElement("div", {
     className: "mg-h-tab mg-onphoto"
@@ -27963,24 +28040,25 @@ function PageTown() {
     en: 'Your town'
   })), _u.city ? React.createElement("div", {
     style: {
-      marginTop: 9
+      marginTop: 10
     }
   }, React.createElement("span", {
     style: {
       display: 'inline-flex',
       alignItems: 'center',
-      gap: 5,
-      padding: '7px 14px',
-      borderRadius: 16,
-      background: 'rgba(255,255,255,.9)',
+      gap: 6,
+      padding: '9px 16px',
+      borderRadius: 18,
+      background: 'rgba(255,255,255,.92)',
       border: '1px solid rgba(255,255,255,.9)',
-      boxShadow: '0 8px 18px rgba(34,49,74,.16)',
-      fontSize: 12.5,
+      boxShadow: '0 10px 22px -6px rgba(34,49,74,.2), inset 0 1px 0 rgba(255,255,255,.9)',
+      fontSize: 13.5,
+      fontWeight: 600,
       color: 'var(--mg-ink2, #33456a)'
     }
   }, React.createElement(Icon, {
     name: "location_on",
-    size: 15,
+    size: 17,
     style: {
       color: 'var(--mg-accent, #6e86e0)'
     }
@@ -27990,31 +28068,38 @@ function PageTown() {
     }
   }, React.createElement("div", {
     style: {
-      marginBottom: 14
+      marginBottom: 20
     }
-  }, React.createElement("div", {
-    className: "mg-label-accent",
-    style: {
-      margin: '0 2px 7px'
+  }, React.createElement(SectionHead, {
+    ic: "wb_sunny",
+    tint: {
+      bg: 'rgba(240,180,60,.16)',
+      fg: '#d99514'
+    },
+    title: {
+      ja: '天気・週間予報',
+      easy: 'てんき・しゅうかん よほう',
+      en: 'Weather & 7-day'
+    },
+    desc: {
+      ja: '今日の空と、これから一週間',
+      easy: 'きょう と これから の てんき',
+      en: "Today's sky and the week ahead"
     }
-  }, T({
-    ja: '天気・週間予報',
-    easy: 'てんき・しゅうかん よほう',
-    en: 'Weather & 7-day'
-  })), React.createElement("div", {
-    className: "mg-card",
+  }), React.createElement("div", {
+    className: "mg-glass",
     style: {
-      borderRadius: 20,
-      padding: 12
+      borderRadius: 24,
+      padding: 13
     }
   }, _cRec ? React.createElement(_info_TownWeather, {
     rec: _cRec,
     lang: lang
   }) : React.createElement("div", {
     style: {
-      fontSize: 12,
-      color: 'var(--mg-ink5, #8ba0b6)',
-      padding: '8px 4px'
+      fontSize: 13,
+      color: 'var(--mg-ink4, #5b7796)',
+      padding: '10px 4px'
     }
   }, T({
     ja: '天気を取得中…',
@@ -28022,39 +28107,57 @@ function PageTown() {
     en: 'Loading weather…'
   })))), React.createElement("div", {
     style: {
+      marginBottom: 20
+    }
+  }, React.createElement(SectionHead, {
+    ic: "cottage",
+    tint: {
+      bg: 'rgba(110,134,224,.15)',
+      fg: '#5a6dd0'
+    },
+    title: {
+      ja: 'くらしの窓口',
+      easy: 'くらし の まどぐち',
+      en: 'Living & services'
+    },
+    desc: {
+      ja: '手続き・ゴミ・生活ガイドへの入口',
+      easy: 'まち の せいかつ じょうほう',
+      en: 'Procedures, garbage & life guides'
+    }
+  }), townLinks.map((t, i) => ServiceCard(t, i))), React.createElement("div", {
+    style: {
       marginBottom: 14
     }
-  }, React.createElement("div", {
-    className: "mg-label-accent",
-    style: {
-      margin: '0 2px 9px'
+  }, React.createElement(SectionHead, {
+    ic: "directions_transit",
+    tint: {
+      bg: 'rgba(74,123,208,.15)',
+      fg: '#3f7fd0'
+    },
+    title: {
+      ja: '交通・運行情報',
+      easy: 'こうつう・うんこう じょうほう',
+      en: 'Transit & traffic'
+    },
+    desc: isKanto ? {
+      ja: '鉄道のリアルタイム運行と道路情報',
+      easy: 'でんしゃ と どうろ の じょうほう',
+      en: 'Live train status & road traffic'
+    } : {
+      ja: 'まわりの道路・交通の情報',
+      easy: 'どうろ の じょうほう',
+      en: 'Local road & traffic info'
     }
-  }, T({
-    ja: '交通・運行情報',
-    easy: 'こうつう・うんこう じょうほう',
-    en: 'Transit & traffic'
-  })), isKanto ? React.createElement(_town_TrainLive, {
+  }), isKanto ? React.createElement(_town_TrainLive, {
     lang: lang,
     cityRec: _cRec
-  }) : null, React.createElement("div", {
+  }) : null, transitLinks.map((t, i) => ServiceCard(t, i))), React.createElement("div", {
     style: {
-      display: 'grid',
-      gridTemplateColumns: '1fr 1fr',
-      gap: 10
-    }
-  }, transitLinks.map((t, i) => Tile(t, i, i === 0 && isKanto ? T({
-    ja: '運行情報を詳しく',
-    easy: 'うんこう じょうほう(くわしく)',
-    en: 'Train details'
-  }) : null)))), TileGrid({
-    ja: 'くらしの窓口',
-    easy: 'くらし の まどぐち',
-    en: 'Living & services'
-  }, townLinks), React.createElement("div", {
-    style: {
-      fontSize: 10.5,
+      fontSize: 11,
       color: 'var(--mg-ink5, #8ba0b6)',
-      margin: '2px 2px 0'
+      margin: '2px 2px 0',
+      lineHeight: 1.5
     }
   }, T({
     ja: '天気=Open-Meteo / リンクは外部サイト・検索へ移動します',
