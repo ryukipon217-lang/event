@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-<script>window.__MG_BUILD='20260911041409';</script>
+<script>window.__MG_BUILD='20260911041701';</script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>connec+a — 出会いが、まちを変えていく。</title>
@@ -25882,6 +25882,7 @@ function _town_TrainLive({
   const [data, setData] = React.useState(null);
   const [done, setDone] = React.useState(false);
   const [showNotices, setShowNotices] = React.useState(typeof window !== 'undefined' && !!window.__mgTiNoticesOpen);
+  const [showAllLines, setShowAllLines] = React.useState(false);
   React.useEffect(() => {
     let dead = false;
     (async () => {
@@ -25978,7 +25979,7 @@ function _town_TrainLive({
       color: 'var(--mg-ink5, #8ba0b6)',
       flex: 'none'
     }
-  })), abnormal.slice(0, 8).map((ln, i) => {
+  })), (showAllLines ? abnormal : abnormal.slice(0, 8)).map((ln, i) => {
     const st = _TI_ST[ln.status] || _TI_ST.unknown;
     const dJa = ln.detail && ln.detail.ja || '';
     const dEn = ln.detail && ln.detail.en || '';
@@ -26046,16 +26047,36 @@ function _town_TrainLive({
         color: st.fg
       }
     }, T(st.t))), detailNode);
-  }), abnormal.length > 8 ? React.createElement("div", {
+  }), abnormal.length > 8 ? React.createElement("button", {
+    type: "button",
+    className: "mg-tap",
+    onClick: () => setShowAllLines(!showAllLines),
     style: {
-      fontSize: 11,
-      color: 'var(--mg-ink5, #8ba0b6)',
-      padding: '6px 15px 3px'
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      gap: 5,
+      width: '100%',
+      padding: '11px 15px',
+      background: 'none',
+      border: 'none',
+      borderTop: '1px solid rgba(34,49,74,.06)',
+      cursor: 'pointer',
+      fontSize: 12,
+      fontWeight: 600,
+      color: 'var(--mg-accent, #6e86e0)'
     }
-  }, T({
-    ja: 'ほか ' + (abnormal.length - 8) + ' 路線',
-    easy: 'ほか ' + (abnormal.length - 8) + ' ろせん',
-    en: '+' + (abnormal.length - 8) + ' more lines'
+  }, showAllLines ? T({
+    ja: '閉じる',
+    easy: 'とじる',
+    en: 'Show less'
+  }) : T({
+    ja: 'ほか ' + (abnormal.length - 8) + ' 路線を表示',
+    easy: 'ほか ' + (abnormal.length - 8) + ' ろせん を みる',
+    en: 'Show ' + (abnormal.length - 8) + ' more lines'
+  }), React.createElement(Icon, {
+    name: showAllLines ? 'expand_less' : 'expand_more',
+    size: 14
   })) : null, notices.length ? React.createElement("div", {
     style: {
       borderTop: '1px solid rgba(34,49,74,.06)'
