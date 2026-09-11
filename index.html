@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-<script>window.__MG_BUILD='20260911143233';</script>
+<script>window.__MG_BUILD='20260911153153';</script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>connec+a — 出会いが、まちを変えていく。</title>
@@ -1004,6 +1004,18 @@ select.mg-field,
 
 /* 運行情報: 手動更新ボタンの回転 */
 @keyframes mg-ti-spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+
+/* 天気アイコン(自前・CSSアニメ=iOS Safari含め確実に動く。雫/雪はHTML要素+keyframes) */
+@keyframes mg-wx-fall { 0%{ transform:translateY(-3px); opacity:0 } 20%{ opacity:1 } 80%{ opacity:1 } 100%{ transform:translateY(11px); opacity:0 } }
+@keyframes mg-wx-spin { to { transform:rotate(360deg) } }
+@keyframes mg-wx-drift { 0%,100%{ transform:translateX(-1.5px) } 50%{ transform:translateX(1.5px) } }
+@keyframes mg-wx-flash { 0%,42%,58%,100%{ opacity:1 } 46%,54%{ opacity:.15 } }
+.mg-wx{ position:relative; display:inline-block; flex:none; line-height:0 }
+/* 天気は代表の明示要望で常時アニメ=reduce-motionの全体凍結(*{animation-duration:.01ms!important})を天気だけ上書き(!important+クラス特異性で勝つ) */
+.mg-wx-drop{ position:absolute; width:2px; border-radius:2px; background:#4a86d8; animation:mg-wx-fall .95s linear infinite !important }
+.mg-wx-flake{ position:absolute; border-radius:50%; background:#9cc3ea; animation:mg-wx-fall 1.7s ease-in infinite !important }
+.mg-wx-spin{ transform-box:fill-box; transform-origin:center; animation:mg-wx-spin 9s linear infinite !important }
+.mg-wx-bolt{ animation:mg-wx-flash 2.4s ease-in-out infinite !important }
 
 </style>
 </head>
@@ -8676,8 +8688,8 @@ function _home_WeatherChip({
       display: 'inline-block',
       filter: 'drop-shadow(0 1px 3px rgba(20,40,70,.12))'
     }
-  }, React.createElement(_WxSvg, {
-    html: svg,
+  }, React.createElement(_WxIcon, {
+    kind: wm ? wm.mi : "cloud",
     size: 42
   })) : React.createElement(Icon, {
     name: "partly_cloudy_day",
@@ -8755,8 +8767,8 @@ function _home_WeatherChip({
         flex: 'none',
         display: 'inline-flex'
       }
-    }, React.createElement(_WxSvg, {
-      html: svg,
+    }, React.createElement(_WxIcon, {
+      kind: wm ? wm.mi : "cloud",
       size: 26
     })) : React.createElement(Icon, {
       name: "partly_cloudy_day",
@@ -8791,9 +8803,9 @@ function _home_WeatherChip({
       display: 'inline-flex',
       margin: '-8px -6px'
     }
-  }, React.createElement(_WxSvg, {
-    html: svg,
-    size: 76
+  }, React.createElement(_WxIcon, {
+    kind: wm ? wm.mi : "cloud",
+    size: 72
   })), React.createElement("div", {
     style: {
       minWidth: 0
@@ -8884,8 +8896,8 @@ function _home_WeatherChip({
         fontSize: 14,
         color: 'var(--mg-ink3, #3d5877)'
       }
-    }, parseInt(String(h.hm).slice(0, 2), 10)), React.createElement(_WxSvg, {
-      html: hs,
+    }, parseInt(String(h.hm).slice(0, 2), 10)), React.createElement(_WxIcon, {
+      kind: hm ? hm.mi : "cloud",
       size: 42
     }), React.createElement("span", {
       className: "mg-num",
@@ -10541,9 +10553,9 @@ function _ev_WxCard({
         display: 'inline-flex',
         filter: 'drop-shadow(0 2px 4px rgba(20,40,70,.10))'
       }
-    }, React.createElement(_WxSvg, {
-      html: _ev_WX_SVG[wmDay.mi] || '',
-      size: 58
+    }, React.createElement(_WxIcon, {
+      kind: wmDay ? wmDay.mi : "cloud",
+      size: 56
     })), React.createElement("div", {
       style: {
         minWidth: 0
@@ -10648,9 +10660,9 @@ function _ev_WxCard({
       display: 'inline-flex',
       filter: 'drop-shadow(0 3px 7px rgba(20,40,70,.14))'
     }
-  }, React.createElement(_WxSvg, {
-    html: _ev_WX_SVG[cm.mi] || '',
-    size: 104
+  }, React.createElement(_WxIcon, {
+    kind: cm ? cm.mi : "cloud",
+    size: 96
   })), React.createElement("div", {
     style: {
       minWidth: 0
@@ -10759,8 +10771,8 @@ function _ev_WxCard({
         opacity: on ? 1 : 0.72,
         transition: 'opacity .3s'
       }
-    }, React.createElement(_WxSvg, {
-      html: _ev_WX_SVG[hm2.mi] || '',
+    }, React.createElement(_WxIcon, {
+      kind: hm2 ? hm2.mi : "cloud",
       size: 42
     })), React.createElement("span", {
       className: "mg-num",
@@ -25802,22 +25814,127 @@ const _INFO_DOW = {
   ja: ['日', '月', '火', '水', '木', '金', '土'],
   en: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
 };
-function _WxSvg({
-  html,
-  size
+function _WxIcon({
+  kind,
+  size = 40
 }) {
-  if (!html) return null;
-  var src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(html);
-  return React.createElement("img", {
-    src: src,
-    width: size,
-    height: size,
-    alt: "",
-    "aria-hidden": "true",
+  const S = size,
+    k = kind || 'cloud';
+  const hasSun = k === 'clear' || k === 'pcloud' || k === 'shower' || k === 'snowsh';
+  const smallSun = k !== 'clear';
+  const hasCloud = k !== 'clear';
+  const rain = k === 'rain' || k === 'drizzle' || k === 'shower' ? k === 'drizzle' ? 2 : 3 : 0;
+  const snow = k === 'snow' || k === 'snowsh' ? k === 'snowsh' ? 2 : 3 : 0;
+  const fog = k === 'fog';
+  const thunder = k === 'thunder';
+  const cdx = smallSun ? 6 : 0,
+    cdy = hasSun && smallSun ? 6 : 0;
+  const cloudFill = thunder ? '#aab6cc' : '#dbe4f2',
+    cloudTop = thunder ? '#c4cfe0' : '#eff4fb',
+    cloudLine = thunder ? '#9aa7bf' : '#c4d2e8';
+  const sunCx = hasCloud ? 23 : 32,
+    sunCy = hasCloud ? 22 : 32,
+    sunR = k === 'clear' ? 13 : 8.5;
+  const dropXs = rain === 2 ? [26, 40] : [21, 33, 45];
+  const snowXs = snow === 2 ? [28, 44] : [22, 34, 46];
+  return React.createElement("span", {
+    className: "mg-wx",
     style: {
-      display: 'inline-block'
+      width: S,
+      height: S
+    },
+    "aria-hidden": "true"
+  }, React.createElement("svg", {
+    width: S,
+    height: S,
+    viewBox: "0 0 64 64",
+    style: {
+      display: 'block',
+      position: 'absolute',
+      inset: 0
     }
-  });
+  }, hasSun ? React.createElement("g", null, React.createElement("g", {
+    className: "mg-wx-spin"
+  }, [0, 45, 90, 135, 180, 225, 270, 315].map(a => {
+    const t = a * Math.PI / 180,
+      i = sunR + 3,
+      o = sunR + 6.5;
+    return React.createElement("line", {
+      key: a,
+      x1: sunCx + Math.cos(t) * i,
+      y1: sunCy + Math.sin(t) * i,
+      x2: sunCx + Math.cos(t) * o,
+      y2: sunCy + Math.sin(t) * o,
+      stroke: "#f7b53a",
+      strokeWidth: k === 'clear' ? 3 : 2.4,
+      strokeLinecap: "round"
+    });
+  })), React.createElement("circle", {
+    cx: sunCx,
+    cy: sunCy,
+    r: sunR,
+    fill: "#f6a821"
+  }), React.createElement("circle", {
+    cx: sunCx - sunR * 0.28,
+    cy: sunCy - sunR * 0.28,
+    r: sunR * 0.5,
+    fill: "#ffca4d",
+    opacity: "0.9"
+  })) : null, hasCloud ? React.createElement("g", {
+    transform: 'translate(' + cdx + ' ' + cdy + ')'
+  }, React.createElement("path", {
+    d: "M45 42 H20 A11 11 0 0 1 18.5 20.2 A15.5 15.5 0 0 1 47.6 24 A9.6 9.6 0 0 1 45 42 Z",
+    fill: cloudFill,
+    stroke: cloudLine,
+    strokeWidth: "1.3"
+  }), React.createElement("path", {
+    d: "M22 24.5 A13 13 0 0 1 44 27",
+    fill: "none",
+    stroke: cloudTop,
+    strokeWidth: "3.4",
+    strokeLinecap: "round",
+    opacity: "0.85"
+  })) : null, fog ? React.createElement("g", {
+    stroke: "#b6c6de",
+    strokeWidth: "3.2",
+    strokeLinecap: "round"
+  }, React.createElement("line", {
+    x1: "16",
+    y1: "49",
+    x2: "48",
+    y2: "49"
+  }), React.createElement("line", {
+    x1: "21",
+    y1: "56",
+    x2: "43",
+    y2: "56"
+  })) : null, thunder ? React.createElement("path", {
+    className: "mg-wx-bolt",
+    d: "M34 40 L25 52 L31 52 L28 60 L41 46 L34 46 L38 40 Z",
+    fill: "#f5b220",
+    stroke: "#e0991a",
+    strokeWidth: "0.6",
+    strokeLinejoin: "round"
+  }) : null), rain ? dropXs.map((x, i) => React.createElement("span", {
+    key: i,
+    className: "mg-wx-drop",
+    style: {
+      left: x / 64 * S + 'px',
+      top: 44 / 64 * S + 'px',
+      height: 7 / 64 * S + 'px',
+      animationDelay: i * 0.28 + 's'
+    }
+  })) : null, snow ? snowXs.map((x, i) => React.createElement("span", {
+    key: i,
+    className: "mg-wx-flake",
+    style: {
+      left: x / 64 * S - 1 + 'px',
+      top: 46 / 64 * S + 'px',
+      width: 4 / 64 * S + 'px',
+      height: 4 / 64 * S + 'px',
+      animationDelay: i * 0.5 + 's'
+    }
+  })) : null);
 }
 function _info_TownWeather({
   rec,
@@ -25889,9 +26006,9 @@ function _info_TownWeather({
       background: 'radial-gradient(circle at 38% 32%, rgba(226,236,250,.95), rgba(210,224,244,.72))',
       boxShadow: 'inset 0 1px 0 rgba(255,255,255,.95), inset 0 0 0 1px rgba(255,255,255,.6), 0 10px 22px -6px rgba(34,49,74,.22)'
     }
-  }, React.createElement(_WxSvg, {
-    html: svgFor(t0.code),
-    size: 84
+  }, React.createElement(_WxIcon, {
+    kind: m0 ? m0.mi : "cloud",
+    size: 80
   })), React.createElement("div", {
     style: {
       flex: 1,
@@ -25979,8 +26096,8 @@ function _info_TownWeather({
         alignItems: 'center',
         justifyContent: 'center'
       }
-    }, React.createElement(_WxSvg, {
-      html: svgFor(d.code),
+    }, React.createElement(_WxIcon, {
+      kind: (wmo(d.code) || {}).mi,
       size: 30
     })), React.createElement("span", {
       className: "mg-num",
