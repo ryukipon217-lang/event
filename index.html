@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-<script>window.__MG_BUILD='20260911140327';</script>
+<script>window.__MG_BUILD='20260911141310';</script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>connec+a — 出会いが、まちを変えていく。</title>
@@ -10417,14 +10417,23 @@ const _ev_WMO = code => {
     easy: 'はれ',
     en: 'Clear'
   };
-  if (c <= 2) return {
+  if (c === 1) return {
+    ic: 'clear_day',
+    mi: 'clear',
+    tint: '#e0912f',
+    bg: 'rgba(233,163,59,.13)',
+    ja: '晴れ',
+    easy: 'はれ',
+    en: 'Sunny'
+  };
+  if (c === 2) return {
     ic: 'partly_cloudy_day',
     mi: 'pcloud',
     tint: '#d9942f',
     bg: 'rgba(233,163,59,.12)',
-    ja: '晴れ',
-    easy: 'はれ',
-    en: 'Sunny'
+    ja: '晴れ時々くもり',
+    easy: 'はれ ときどき くもり',
+    en: 'Partly cloudy'
   };
   if (c === 3) return {
     ic: 'cloud',
@@ -25817,6 +25826,172 @@ const _INFO_DOW = {
   ja: ['日', '月', '火', '水', '木', '金', '土'],
   en: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
 };
+function _WxGlyph({
+  kind,
+  size = 40
+}) {
+  const SUN = '#f6a821',
+    RAY = '#f7b53a',
+    CLOUD = '#cdd8ea',
+    CLOUD_T = '#eef3fb',
+    CLOUD_S = '#b6c6de',
+    DROP = '#4a86d8',
+    SNOW = '#8fb8e0',
+    BOLT = '#f5b220';
+  const Cloud = ({
+    cx,
+    cy,
+    s = 1,
+    fill = CLOUD,
+    top = CLOUD_T
+  }) => React.createElement("g", {
+    transform: 'translate(' + cx + ' ' + cy + ') scale(' + s + ')'
+  }, React.createElement("ellipse", {
+    cx: "0",
+    cy: "6",
+    rx: "20",
+    ry: "12",
+    fill: fill
+  }), React.createElement("circle", {
+    cx: "-9",
+    cy: "2",
+    r: "9",
+    fill: fill
+  }), React.createElement("circle", {
+    cx: "8",
+    cy: "0",
+    r: "11",
+    fill: fill
+  }), React.createElement("circle", {
+    cx: "-1",
+    cy: "-6",
+    r: "10",
+    fill: top
+  }));
+  const Sun = ({
+    cx,
+    cy,
+    r = 11,
+    rays = true
+  }) => React.createElement("g", null, rays ? [0, 45, 90, 135, 180, 225, 270, 315].map(a => {
+    const t = a * Math.PI / 180,
+      i = r + 3.5,
+      o = r + 8;
+    return React.createElement("line", {
+      key: a,
+      x1: cx + Math.cos(t) * i,
+      y1: cy + Math.sin(t) * i,
+      x2: cx + Math.cos(t) * o,
+      y2: cy + Math.sin(t) * o,
+      stroke: RAY,
+      strokeWidth: "3.2",
+      strokeLinecap: "round"
+    });
+  }) : null, React.createElement("circle", {
+    cx: cx,
+    cy: cy,
+    r: r,
+    fill: SUN
+  }));
+  const drop = (x, y) => React.createElement("path", {
+    key: 'd' + x + y,
+    d: 'M' + x + ' ' + y + ' q4 5 0 9 q-4 -4 0 -9 Z',
+    fill: DROP
+  });
+  const flake = (x, y) => React.createElement("circle", {
+    key: 'f' + x + y,
+    cx: x,
+    cy: y,
+    r: "2.6",
+    fill: SNOW
+  });
+  return React.createElement("svg", {
+    width: size,
+    height: size,
+    viewBox: "0 0 64 64",
+    "aria-hidden": "true",
+    style: {
+      display: 'block',
+      overflow: 'visible'
+    }
+  }, kind === 'clear' ? React.createElement(Sun, {
+    cx: 32,
+    cy: 32,
+    r: 14
+  }) : null, kind === 'pcloud' ? React.createElement("g", null, React.createElement(Sun, {
+    cx: 24,
+    cy: 22,
+    r: 9
+  }), React.createElement(Cloud, {
+    cx: 36,
+    cy: 38,
+    s: 0.92
+  })) : null, kind === 'cloud' ? React.createElement(Cloud, {
+    cx: 32,
+    cy: 30,
+    s: 1.12,
+    fill: CLOUD,
+    top: "#dbe6f4"
+  }) : null, kind === 'fog' ? React.createElement("g", null, React.createElement(Cloud, {
+    cx: 32,
+    cy: 24,
+    s: 1.0
+  }), React.createElement("g", {
+    stroke: CLOUD_S,
+    strokeWidth: "3.4",
+    strokeLinecap: "round"
+  }, React.createElement("line", {
+    x1: "16",
+    y1: "46",
+    x2: "48",
+    y2: "46"
+  }), React.createElement("line", {
+    x1: "20",
+    y1: "54",
+    x2: "44",
+    y2: "54"
+  }))) : null, kind === 'drizzle' ? React.createElement("g", null, React.createElement(Cloud, {
+    cx: 32,
+    cy: 24,
+    s: 1.0
+  }), [drop(24, 42), drop(38, 42)]) : null, kind === 'rain' ? React.createElement("g", null, React.createElement(Cloud, {
+    cx: 32,
+    cy: 22,
+    s: 1.0
+  }), [drop(20, 42), drop(32, 44), drop(44, 42)]) : null, kind === 'snow' ? React.createElement("g", null, React.createElement(Cloud, {
+    cx: 32,
+    cy: 22,
+    s: 1.0
+  }), [flake(20, 46), flake(32, 50), flake(44, 46)]) : null, kind === 'shower' ? React.createElement("g", null, React.createElement(Sun, {
+    cx: 22,
+    cy: 20,
+    r: 8
+  }), React.createElement(Cloud, {
+    cx: 36,
+    cy: 30,
+    s: 0.95
+  }), [drop(28, 48), drop(42, 48)]) : null, kind === 'snowsh' ? React.createElement("g", null, React.createElement(Sun, {
+    cx: 22,
+    cy: 20,
+    r: 8
+  }), React.createElement(Cloud, {
+    cx: 36,
+    cy: 30,
+    s: 0.95
+  }), [flake(30, 50), flake(44, 50)]) : null, kind === 'thunder' ? React.createElement("g", null, React.createElement(Cloud, {
+    cx: 32,
+    cy: 22,
+    s: 1.05,
+    fill: "#aeb9cf",
+    top: "#cdd8ea"
+  }), React.createElement("path", {
+    d: "M34 38 L24 52 L31 52 L28 62 L42 46 L34 46 L38 38 Z",
+    fill: BOLT,
+    stroke: "#e0991a",
+    strokeWidth: "0.8",
+    strokeLinejoin: "round"
+  })) : null);
+}
 function _info_TownWeather({
   rec,
   lang
@@ -25852,9 +26027,9 @@ function _info_TownWeather({
     return arr[d.getDay()];
   };
   const wmo = code => typeof _ev_WMO === 'function' ? _ev_WMO(code) : null;
-  const svgFor = code => {
+  const kindOf = code => {
     const m = wmo(code);
-    return m && typeof _ev_WX_SVG !== 'undefined' ? _ev_WX_SVG[m.mi] || '' : '';
+    return m ? m.mi : 'cloud';
   };
   const t0 = days[0],
     m0 = wmo(t0.code);
@@ -25887,15 +26062,9 @@ function _info_TownWeather({
       background: 'radial-gradient(circle at 38% 32%, rgba(255,255,255,.98), rgba(255,255,255,.72))',
       boxShadow: 'inset 0 1px 0 rgba(255,255,255,.95), inset 0 0 0 1px rgba(255,255,255,.6), 0 10px 22px -6px rgba(34,49,74,.22)'
     }
-  }, React.createElement("span", {
-    style: {
-      width: 80,
-      height: 80,
-      display: 'inline-block'
-    },
-    dangerouslySetInnerHTML: {
-      __html: svgFor(t0.code)
-    }
+  }, React.createElement(_WxGlyph, {
+    kind: kindOf(t0.code),
+    size: 70
   })), React.createElement("div", {
     style: {
       flex: 1,
@@ -25975,17 +26144,18 @@ function _info_TownWeather({
         color: i === 0 ? 'var(--mg-accent, #6e86e0)' : 'var(--mg-ink2, #33456a)'
       }
     }, i === 0 ? H('今日', 'きょう', 'Now') : dow(d.date)), React.createElement("span", {
-      "aria-hidden": "true",
       style: {
-        width: 30,
-        height: 30,
+        width: 32,
+        height: 32,
         flex: 'none',
-        display: 'inline-block'
-      },
-      dangerouslySetInnerHTML: {
-        __html: svgFor(d.code)
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center'
       }
-    }), React.createElement("span", {
+    }, React.createElement(_WxGlyph, {
+      kind: kindOf(d.code),
+      size: 26
+    })), React.createElement("span", {
       className: "mg-num",
       style: {
         width: 30,
