@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-<script>window.__MG_BUILD='20260911130403';</script>
+<script>window.__MG_BUILD='20260911130756';</script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>connec+a — 出会いが、まちを変えていく。</title>
@@ -4309,7 +4309,19 @@ const TI_BADGE_FILES = {
   "tokyu.sg": "tokyu_sg.svg",
   "tokyu.sh": "tokyu_sh.svg",
   "tokyu.tm": "tokyu_tm.svg",
-  "tokyu.ty": "tokyu_ty.svg"
+  "tokyu.ty": "tokyu_ty.svg",
+  "odpt.Toei.Arakawa": "odpt_Toei_Arakawa.svg",
+  "odpt.TamaMonorail.TamaMonorail": "odpt_TamaMonorail_TamaMonorail.svg",
+  "odakyu.odawara": "odakyu_odawara.svg",
+  "odakyu.enoshima": "odakyu_enoshima.svg",
+  "odakyu.tama": "odakyu_tama.svg",
+  "seibu.ikebukuro": "seibu_ikebukuro.svg",
+  "seibu.chichibu": "seibu_chichibu.svg",
+  "seibu.yurakucho": "seibu_yurakucho.svg",
+  "seibu.toshima": "seibu_toshima.svg",
+  "seibu.sayama": "seibu_sayama.svg",
+  "seibu.shinjuku": "seibu_shinjuku.svg",
+  "seibu.haijima": "seibu_haijima.svg"
 };
 const TI_OP_LOGO_FILES = {
   "JR東日本": "jreast.svg",
@@ -4325,7 +4337,8 @@ const TI_OP_LOGO_FILES = {
   "京王": "keio.svg",
   "京急": "keikyu.svg",
   "相鉄": "sotetsu.svg",
-  "京成": "keisei.svg"
+  "京成": "keisei.svg",
+  "りんかい線": "twr.svg"
 };
 const MG_LEGAL_UPDATED = '2026-09-11';
 const MG_TERMS_JA = `利用規約
@@ -27650,7 +27663,17 @@ function _town_TrainLive({
     ja: '出典: 各鉄道会社の公式運行情報・ODPT ・「遅延」の基準は会社ごとに異なります(JR=30分以上・都営地下鉄=15分以上 など)',
     easy: 'でんしゃ の かいしゃ の こうしき じょうほう です ・「おくれ」の きめかた は かいしゃ で ちがいます',
     en: 'Source: official operator feeds & ODPT · “Delayed” thresholds vary by operator (JR: 30+ min, Toei subway: 15+ min)'
-  })));
+  }), ' ・ ', React.createElement("a", {
+    href: "#/terms",
+    style: {
+      color: 'var(--mg-accent, #6e86e0)',
+      textDecoration: 'none'
+    }
+  }, T({
+    ja: '権利表記',
+    easy: 'けんり の ひょうき',
+    en: 'Credits'
+  }))));
 }
 function PageTown() {
   const A = useMg() || {};
@@ -34023,7 +34046,47 @@ function ScreenPolicy({
     style: {
       fontSize: 12
     }
-  }, lang === 'en' ? 'Please contact us for inquiries.' : 'ご不明な点はお問い合わせください。')), React.createElement("div", {
+  }, lang === 'en' ? 'Please contact us for inquiries.' : 'ご不明な点はお問い合わせください。')), !isPrivacy ? React.createElement("div", {
+    className: "mg-card mg-ui",
+    style: {
+      borderRadius: 20,
+      padding: '16px 18px',
+      marginTop: 14,
+      fontSize: 11.5,
+      lineHeight: 1.8,
+      color: 'var(--mg-ink3, #3d5877)'
+    }
+  }, React.createElement("div", {
+    style: {
+      fontWeight: 700,
+      fontSize: 12.5,
+      color: 'var(--mg-ink2, #2b3d57)',
+      marginBottom: 6
+    }
+  }, lang === 'en' ? 'Material credits' : '素材クレジット'), React.createElement("div", {
+    style: {
+      marginBottom: 6
+    }
+  }, lang === 'en' ? 'Railway line symbols and operator logos are from Wikimedia Commons (Public domain or CC BY-SA). All names, symbols and logos belong to the respective railway companies.' : '鉄道の路線記号・事業者ロゴは Wikimedia Commons の素材(パブリックドメインまたは CC BY-SA)を使用しています。名称・記号・ロゴは各鉄道会社に帰属します。'), React.createElement("div", {
+    style: {
+      fontSize: 11,
+      color: 'var(--mg-ink4, #5b7796)'
+    }
+  }, "CC BY-SA: Tokyo Sakura Tram symbol (\u6771\u4EAC\u90FD\u4EA4\u901A\u5C40) \u30FB Tama Monorail Line symbol (Tokyo Tama Intercity Monorail Co., Ltd.) \u30FB Odakyu Odawara Line symbol (Hide1228) \u30FB Seibu SI/SS Line symbols (Hide1228 / Syohei Arai) \u30FB \u6771\u4EAC\u81E8\u6D77\u9AD8\u901F\u9244\u9053\u30ED\u30B4 (Jkwchui / Jon C)", ' — ', React.createElement("a", {
+    href: "https://creativecommons.org/licenses/by-sa/4.0/",
+    target: "_blank",
+    rel: "noopener noreferrer",
+    style: {
+      color: 'var(--mg-accent, #6e86e0)'
+    }
+  }, "CC BY-SA 4.0"), ' / ', React.createElement("a", {
+    href: "https://creativecommons.org/licenses/by-sa/3.0/",
+    target: "_blank",
+    rel: "noopener noreferrer",
+    style: {
+      color: 'var(--mg-accent, #6e86e0)'
+    }
+  }, "3.0"))) : null, React.createElement("div", {
     style: {
       marginTop: 26,
       paddingTop: 18,

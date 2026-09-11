@@ -413,5 +413,103 @@
     "file": "tokyu_ty.svg",
     "license": "Public domain",
     "source": "https://commons.wikimedia.org/wiki/File:Tokyu_TY_line_symbol.svg"
+  },
+  "odpt.Toei.Arakawa": {
+    "file": "odpt_Toei_Arakawa.svg",
+    "source": "https://commons.wikimedia.org/wiki/File:Tokyo_Sakura_Tram_symbol.svg",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+    "artist": "東京都交通局",
+    "attribution": true
+  },
+  "odpt.TamaMonorail.TamaMonorail": {
+    "file": "odpt_TamaMonorail_TamaMonorail.svg",
+    "source": "https://commons.wikimedia.org/wiki/File:Tama_Monorail_Line_symbol.svg",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+    "artist": "Tokyo Tama Intercity Monorail Co., Ltd.",
+    "attribution": true
+  },
+  "op:多摩モノレール": {
+    "file": "op_tamamonorail.svg",
+    "source": "https://commons.wikimedia.org/wiki/File:Tama_Monorail_Line_symbol.svg",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+    "artist": "Tokyo Tama Intercity Monorail Co., Ltd.",
+    "attribution": true
+  },
+  "odakyu.odawara": {
+    "file": "odakyu_odawara.svg",
+    "source": "https://commons.wikimedia.org/wiki/File:Odakyu_odawara.svg",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+    "artist": "Hide1228",
+    "attribution": true
+  },
+  "odakyu.enoshima": {
+    "file": "odakyu_enoshima.svg",
+    "license": "Public domain",
+    "source": "https://commons.wikimedia.org/wiki/File:Odakyu_enoshima.svg"
+  },
+  "odakyu.tama": {
+    "file": "odakyu_tama.svg",
+    "license": "Public domain",
+    "source": "https://commons.wikimedia.org/wiki/File:Odakyu_tama.svg"
+  },
+  "seibu.ikebukuro": {
+    "file": "seibu_ikebukuro.svg",
+    "source": "https://commons.wikimedia.org/wiki/File:SeibuIkebukuro.svg",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+    "artist": "Hide1228 / Syohei Arai",
+    "attribution": true
+  },
+  "seibu.chichibu": {
+    "file": "seibu_chichibu.svg",
+    "source": "https://commons.wikimedia.org/wiki/File:SeibuIkebukuro.svg",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+    "artist": "Hide1228 / Syohei Arai",
+    "attribution": true
+  },
+  "seibu.yurakucho": {
+    "file": "seibu_yurakucho.svg",
+    "source": "https://commons.wikimedia.org/wiki/File:SeibuIkebukuro.svg",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+    "artist": "Hide1228 / Syohei Arai",
+    "attribution": true
+  },
+  "seibu.toshima": {
+    "file": "seibu_toshima.svg",
+    "source": "https://commons.wikimedia.org/wiki/File:SeibuIkebukuro.svg",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+    "artist": "Hide1228 / Syohei Arai",
+    "attribution": true
+  },
+  "seibu.sayama": {
+    "file": "seibu_sayama.svg",
+    "source": "https://commons.wikimedia.org/wiki/File:SeibuIkebukuro.svg",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+    "artist": "Hide1228 / Syohei Arai",
+    "attribution": true
+  },
+  "seibu.shinjuku": {
+    "file": "seibu_shinjuku.svg",
+    "source": "https://commons.wikimedia.org/wiki/File:SeibuShinjuku.svg",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+    "artist": "Hide1228 / Syohei Arai",
+    "attribution": true
+  },
+  "seibu.haijima": {
+    "file": "seibu_haijima.svg",
+    "source": "https://commons.wikimedia.org/wiki/File:SeibuShinjuku.svg",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+    "artist": "Hide1228 / Syohei Arai",
+    "attribution": true
   }
 }

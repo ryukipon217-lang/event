@@ -82,5 +82,14 @@
     "source": "https://commons.wikimedia.org/wiki/File:Keisei_Logo.svg",
     "license": "Public domain",
     "note": "京成電鉄「K'SEI」青ロゴタイプ。白地前提。横長。元寸法300x105。"
+  },
+  "りんかい線": {
+    "file": "twr.svg",
+    "source": "https://commons.wikimedia.org/wiki/File:%E6%9D%B1%E4%BA%AC%E8%87%A8%E6%B5%B7%E9%AB%98%E9%80%9F%E9%89%84%E9%81%93%E3%83%AD%E3%82%B4%E3%83%9E%E3%83%BC%E3%82%AF.svg",
+    "license": "CC BY-SA 3.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0",
+    "artist": "Jkwchui (original) / Jon C (vector)",
+    "attribution": true,
+    "note": "東京臨海高速鉄道(りんかい線)ロゴマーク。横長。元寸法300x125。"
   }
 }
