@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-<script>window.__MG_BUILD='20260911142459';</script>
+<script>window.__MG_BUILD='20260911143233';</script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>connec+a — 出会いが、まちを変えていく。</title>
@@ -25806,26 +25806,16 @@ function _WxSvg({
   html,
   size
 }) {
-  const ref = React.useRef(null);
-  React.useEffect(() => {
-    const svg = ref.current && ref.current.querySelector('svg');
-    if (!svg) return;
-    try {
-      svg.pauseAnimations();
-      svg.setCurrentTime(0);
-      svg.unpauseAnimations();
-    } catch (e) {}
-  }, [html]);
-  return React.createElement("span", {
-    ref: ref,
+  if (!html) return null;
+  var src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(html);
+  return React.createElement("img", {
+    src: src,
+    width: size,
+    height: size,
+    alt: "",
     "aria-hidden": "true",
     style: {
-      width: size,
-      height: size,
       display: 'inline-block'
-    },
-    dangerouslySetInnerHTML: {
-      __html: html
     }
   });
 }
