@@ -1,0 +1,86 @@
+{
+  "JR東日本": {
+    "file": "jreast.svg",
+    "source": "https://commons.wikimedia.org/wiki/File:JR_logo_(east).svg",
+    "license": "Public domain",
+    "note": "JRマーク(東日本・緑単色)。横長。元寸法512x278。"
+  },
+  "東京メトロ": {
+    "file": "tokyometro.svg",
+    "source": "https://commons.wikimedia.org/wiki/File:Tokyo_Metro_logo_(full).svg",
+    "license": "Public domain",
+    "note": "水色角丸のハートM+紺角丸「東京メトロ」の2パネル構成(色地に白抜き=白地/暗地どちらでも可)。横長。元寸法300x148。"
+  },
+  "都営": {
+    "file": "toei.svg",
+    "source": "https://commons.wikimedia.org/wiki/File:Toei_Transportation_combined_logo.svg",
+    "license": "Public domain",
+    "note": "緑の銀杏マーク+「都営交通 TOEI TRANSPORTATION」英和併記。文字は濃灰=白地前提。横長。元寸法140x35。"
+  },
+  "横浜市営": {
+    "file": "yokohama.svg",
+    "source": "https://commons.wikimedia.org/wiki/File:Yokohama_Municipal_Subway_Logo.svg",
+    "license": "Public domain",
+    "note": "横浜市営地下鉄ロゴマーク(青の円形マークのみ・文字なし・ほぼ正方形)。元寸法100x100。"
+  },
+  "多摩モノレール": {
+    "file": "tamamonorail.svg",
+    "source": "https://commons.wikimedia.org/wiki/File:Tama_monorail.svg",
+    "license": "Public domain",
+    "note": "多摩モノレールのロゴ(キャッチコピー付き・多色)。白地前提。横長。元寸法512x107。"
+  },
+  "つくばエクスプレス": {
+    "file": "tx.svg",
+    "source": "https://commons.wikimedia.org/wiki/File:Tsukuba_Express_logo.svg",
+    "license": "Public domain",
+    "note": "TXマーク+TSUKUBA EXPRESSワードマーク。横長。元寸法308x46。viewBox欠落のためwidth/heightから機械補記済み(図柄不変更)。"
+  },
+  "東急": {
+    "file": "tokyu.svg",
+    "source": "https://commons.wikimedia.org/wiki/File:Tokyu_Corporation_Logo.svg",
+    "license": "Public domain",
+    "note": "赤丸マーク+「東急」コーポレートロゴ。白地前提。横長。元寸法150x56。"
+  },
+  "小田急": {
+    "file": "odakyu.svg",
+    "source": "https://commons.wikimedia.org/wiki/File:Odakyu_electric_railway_company_logos.svg",
+    "license": "Public domain",
+    "note": "小田急電鉄ロゴ(マーク+青odakyuロゴタイプ)。白地前提。横長。元寸法1000x257。"
+  },
+  "東武": {
+    "file": "tobu.svg",
+    "source": "https://commons.wikimedia.org/wiki/File:Tobu_Logo_full.svg",
+    "license": "Public domain",
+    "note": "左=東武鉄道社章(黒の車輪紋)+右=現行TOBUロゴタイプの2要素構成。単体TOBUワードマークのPD版はCommonsに無し(File:Tobu group logo.svgは「TOBU Group」表記=グループロゴのため不採用)。横長。元寸法243x90。viewBox機械補記済み。"
+  },
+  "西武": {
+    "file": "seibu.svg",
+    "source": "https://commons.wikimedia.org/wiki/File:SeibuRailway_logo.svg",
+    "license": "Public domain",
+    "note": "Sマーク+「西武鉄道」ワードマーク型(レオマーク不使用)。白地前提。横長。元寸法170x44。viewBox機械補記済み。"
+  },
+  "京王": {
+    "file": "keio.svg",
+    "source": "https://commons.wikimedia.org/wiki/File:KeioRailway_logo.svg",
+    "license": "Public domain",
+    "note": "赤KEIOワードマーク。白地前提。横長。元寸法300x77。"
+  },
+  "京急": {
+    "file": "keikyu.svg",
+    "source": "https://commons.wikimedia.org/wiki/File:Keikyu_logo.svg",
+    "license": "Public domain",
+    "note": "青KEIKYUワードマーク+京急電鉄(上下2段)。白地前提。やや横長(約2:1)。元寸法1183x555。"
+  },
+  "相鉄": {
+    "file": "sotetsu.svg",
+    "source": "https://commons.wikimedia.org/wiki/File:SOTETSU_logo_horizontal.svg",
+    "license": "Public domain",
+    "note": "相鉄マーク+SOTETSU横組みロゴ。白地前提。横長。元寸法1503x338。"
+  },
+  "京成": {
+    "file": "keisei.svg",
+    "source": "https://commons.wikimedia.org/wiki/File:Keisei_Logo.svg",
+    "license": "Public domain",
+    "note": "京成電鉄「K'SEI」青ロゴタイプ。白地前提。横長。元寸法300x105。"
+  }
+}
