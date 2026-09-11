@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-<script>window.__MG_BUILD='20260911041701';</script>
+<script>window.__MG_BUILD='20260911052447';</script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>connec+a — 出会いが、まちを変えていく。</title>
@@ -25869,6 +25869,35 @@ const _TI_RANK2 = {
   normal: 0,
   unknown: 0
 };
+const _TI_OP_MIN = {
+  'JR東日本': 30,
+  '東武': 30,
+  '東急': 15,
+  '西武': 15,
+  '京王': 15,
+  '京成': 15,
+  '東京メトロ': 15,
+  '都営': 15,
+  '京急': 10,
+  '相鉄': 10
+};
+const _TI_OP_EN = {
+  'JR東日本': 'JR East',
+  '東京メトロ': 'Tokyo Metro',
+  '都営': 'Toei',
+  '横浜市営': 'Yokohama Municipal',
+  '多摩モノレール': 'Tama Monorail',
+  'りんかい線': 'Rinkai Line',
+  'つくばエクスプレス': 'Tsukuba Express',
+  '東急': 'Tokyu',
+  '小田急': 'Odakyu',
+  '東武': 'Tobu',
+  '西武': 'Seibu',
+  '京王': 'Keio',
+  '京急': 'Keikyu',
+  '相鉄': 'Sotetsu',
+  '京成': 'Keisei'
+};
 function _ti_hhmm(iso) {
   if (!iso) return '';
   const d = new Date(iso);
@@ -25979,75 +26008,123 @@ function _town_TrainLive({
       color: 'var(--mg-ink5, #8ba0b6)',
       flex: 'none'
     }
-  })), (showAllLines ? abnormal : abnormal.slice(0, 8)).map((ln, i) => {
-    const st = _TI_ST[ln.status] || _TI_ST.unknown;
-    const dJa = ln.detail && ln.detail.ja || '';
-    const dEn = ln.detail && ln.detail.en || '';
-    let detailNode = null;
-    if (lang === 'en') {
-      detailNode = dEn ? React.createElement("div", {
+  })), (() => {
+    const shownSet = new Set((showAllLines ? abnormal : abnormal.slice(0, 8)).map(l => l.id));
+    const groups = [],
+      byOp = {};
+    abnormal.forEach(l => {
+      if (!shownSet.has(l.id)) return;
+      let g = byOp[l.operator];
+      if (!g) {
+        g = byOp[l.operator] = {
+          op: l.operator,
+          lines: []
+        };
+        groups.push(g);
+      }
+      g.lines.push(l);
+    });
+    return groups.map((g, gi) => {
+      const min = _TI_OP_MIN[g.op];
+      const showMin = min && g.lines.some(l => l.status === 'delay');
+      return React.createElement("div", {
+        key: g.op + gi,
         style: {
-          fontSize: 11.5,
-          color: 'var(--mg-ink3, #3d5877)',
-          lineHeight: 1.5,
-          marginTop: 3
+          borderTop: '1px solid rgba(34,49,74,.06)'
         }
-      }, dEn, React.createElement("span", {
+      }, React.createElement("div", {
         style: {
+          display: 'flex',
+          alignItems: 'baseline',
+          gap: 7,
+          padding: '9px 15px 0'
+        }
+      }, React.createElement("span", {
+        style: {
+          fontSize: 10.5,
+          fontWeight: 700,
+          letterSpacing: '.06em',
+          color: 'var(--mg-ink4, #5b7796)'
+        }
+      }, lang === 'en' ? _TI_OP_EN[g.op] || g.op : g.op), showMin ? React.createElement("span", {
+        style: {
+          fontSize: 9.5,
           color: 'var(--mg-ink5, #8ba0b6)'
         }
-      }, " (auto-translated)")) : dJa ? React.createElement("div", {
-        style: {
-          fontSize: 11.5,
-          color: 'var(--mg-ink3, #3d5877)',
-          lineHeight: 1.5,
-          marginTop: 3
+      }, T({
+        ja: '遅延=' + min + '分以上',
+        easy: 'おくれ=' + min + 'ぷん から',
+        en: 'delays: ' + min + '+ min'
+      })) : null), g.lines.map((ln, i) => {
+        const st = _TI_ST[ln.status] || _TI_ST.unknown;
+        const dJa = ln.detail && ln.detail.ja || '';
+        const dEn = ln.detail && ln.detail.en || '';
+        let detailNode = null;
+        if (lang === 'en') {
+          detailNode = dEn ? React.createElement("div", {
+            style: {
+              fontSize: 11.5,
+              color: 'var(--mg-ink3, #3d5877)',
+              lineHeight: 1.5,
+              marginTop: 3
+            }
+          }, dEn, React.createElement("span", {
+            style: {
+              color: 'var(--mg-ink5, #8ba0b6)'
+            }
+          }, " (auto-translated)")) : dJa ? React.createElement("div", {
+            style: {
+              fontSize: 11.5,
+              color: 'var(--mg-ink3, #3d5877)',
+              lineHeight: 1.5,
+              marginTop: 3
+            }
+          }, dJa, React.createElement("span", {
+            style: {
+              color: 'var(--mg-ink5, #8ba0b6)'
+            }
+          }, " (Japanese)")) : null;
+        } else if (dJa) {
+          detailNode = React.createElement("div", {
+            style: {
+              fontSize: lang === 'easy' ? 11 : 11.5,
+              color: 'var(--mg-ink3, #3d5877)',
+              lineHeight: 1.5,
+              marginTop: 3
+            }
+          }, dJa);
         }
-      }, dJa, React.createElement("span", {
-        style: {
-          color: 'var(--mg-ink5, #8ba0b6)'
-        }
-      }, " (Japanese)")) : null;
-    } else if (dJa) {
-      detailNode = React.createElement("div", {
-        style: {
-          fontSize: lang === 'easy' ? 11 : 11.5,
-          color: 'var(--mg-ink3, #3d5877)',
-          lineHeight: 1.5,
-          marginTop: 3
-        }
-      }, dJa);
-    }
-    return React.createElement("div", {
-      key: ln.id || i,
-      style: {
-        padding: '11px 15px',
-        borderTop: '1px solid rgba(34,49,74,.06)'
-      }
-    }, React.createElement("div", {
-      style: {
-        display: 'flex',
-        alignItems: 'center',
-        gap: 8,
-        flexWrap: 'wrap'
-      }
-    }, React.createElement("span", {
-      style: {
-        fontSize: 12.5,
-        fontWeight: 700,
-        color: 'var(--mg-ink, #22314a)'
-      }
-    }, lineName(ln)), React.createElement("span", {
-      style: {
-        fontSize: 10.5,
-        fontWeight: 700,
-        padding: '3px 9px',
-        borderRadius: 999,
-        background: st.bg,
-        color: st.fg
-      }
-    }, T(st.t))), detailNode);
-  }), abnormal.length > 8 ? React.createElement("button", {
+        return React.createElement("div", {
+          key: ln.id || i,
+          style: {
+            padding: '7px 15px 10px'
+          }
+        }, React.createElement("div", {
+          style: {
+            display: 'flex',
+            alignItems: 'center',
+            gap: 8,
+            flexWrap: 'wrap'
+          }
+        }, React.createElement("span", {
+          style: {
+            fontSize: 12.5,
+            fontWeight: 700,
+            color: 'var(--mg-ink, #22314a)'
+          }
+        }, lineName(ln)), React.createElement("span", {
+          style: {
+            fontSize: 10.5,
+            fontWeight: 700,
+            padding: '3px 9px',
+            borderRadius: 999,
+            background: st.bg,
+            color: st.fg
+          }
+        }, T(st.t))), detailNode);
+      }));
+    });
+  })(), abnormal.length > 8 ? React.createElement("button", {
     type: "button",
     className: "mg-tap",
     onClick: () => setShowAllLines(!showAllLines),
