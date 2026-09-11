@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-<script>window.__MG_BUILD='20260911141909';</script>
+<script>window.__MG_BUILD='20260911142459';</script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>connec+a — 出会いが、まちを変えていく。</title>
@@ -8673,15 +8673,13 @@ function _home_WeatherChip({
   }, svg ? React.createElement("span", {
     "aria-hidden": "true",
     style: {
-      width: 42,
-      height: 42,
       display: 'inline-block',
       filter: 'drop-shadow(0 1px 3px rgba(20,40,70,.12))'
-    },
-    dangerouslySetInnerHTML: {
-      __html: svg
     }
-  }) : React.createElement(Icon, {
+  }, React.createElement(_WxSvg, {
+    html: svg,
+    size: 42
+  })) : React.createElement(Icon, {
     name: "partly_cloudy_day",
     size: 24,
     style: {
@@ -8753,17 +8751,14 @@ function _home_WeatherChip({
         minWidth: 0
       }
     }, svg ? React.createElement("span", {
-      "aria-hidden": "true",
       style: {
-        width: 26,
-        height: 26,
         flex: 'none',
-        display: 'inline-block'
-      },
-      dangerouslySetInnerHTML: {
-        __html: svg
+        display: 'inline-flex'
       }
-    }) : React.createElement(Icon, {
+    }, React.createElement(_WxSvg, {
+      html: svg,
+      size: 26
+    })) : React.createElement(Icon, {
       name: "partly_cloudy_day",
       size: 18,
       style: {
@@ -8791,18 +8786,15 @@ function _home_WeatherChip({
       gap: 14
     }
   }, React.createElement("span", {
-    "aria-hidden": "true",
     style: {
-      width: 76,
-      height: 76,
       flex: 'none',
-      display: 'inline-block',
+      display: 'inline-flex',
       margin: '-8px -6px'
-    },
-    dangerouslySetInnerHTML: {
-      __html: svg
     }
-  }), React.createElement("div", {
+  }, React.createElement(_WxSvg, {
+    html: svg,
+    size: 76
+  })), React.createElement("div", {
     style: {
       minWidth: 0
     }
@@ -8892,16 +8884,9 @@ function _home_WeatherChip({
         fontSize: 14,
         color: 'var(--mg-ink3, #3d5877)'
       }
-    }, parseInt(String(h.hm).slice(0, 2), 10)), React.createElement("span", {
-      "aria-hidden": "true",
-      style: {
-        width: 42,
-        height: 42,
-        display: 'inline-block'
-      },
-      dangerouslySetInnerHTML: {
-        __html: hs
-      }
+    }, parseInt(String(h.hm).slice(0, 2), 10)), React.createElement(_WxSvg, {
+      html: hs,
+      size: 42
     }), React.createElement("span", {
       className: "mg-num",
       style: {
@@ -10550,19 +10535,16 @@ function _ev_WxCard({
         gap: 12
       }
     }, React.createElement("span", {
-      "aria-hidden": "true",
       style: {
-        width: 58,
-        height: 58,
         flex: 'none',
         margin: '-6px -4px -6px -8px',
-        display: 'inline-block',
+        display: 'inline-flex',
         filter: 'drop-shadow(0 2px 4px rgba(20,40,70,.10))'
-      },
-      dangerouslySetInnerHTML: {
-        __html: _ev_WX_SVG[wmDay.mi] || ''
       }
-    }), React.createElement("div", {
+    }, React.createElement(_WxSvg, {
+      html: _ev_WX_SVG[wmDay.mi] || '',
+      size: 58
+    })), React.createElement("div", {
       style: {
         minWidth: 0
       }
@@ -10660,19 +10642,16 @@ function _ev_WxCard({
       animation: 'mgWxSlide .55s cubic-bezier(.2,.7,.2,1)'
     }
   }, React.createElement("span", {
-    "aria-hidden": "true",
     style: {
-      width: 104,
-      height: 104,
       flex: 'none',
       margin: '-10px -6px -10px -12px',
-      display: 'inline-block',
+      display: 'inline-flex',
       filter: 'drop-shadow(0 3px 7px rgba(20,40,70,.14))'
-    },
-    dangerouslySetInnerHTML: {
-      __html: _ev_WX_SVG[cm.mi] || ''
     }
-  }), React.createElement("div", {
+  }, React.createElement(_WxSvg, {
+    html: _ev_WX_SVG[cm.mi] || '',
+    size: 104
+  })), React.createElement("div", {
     style: {
       minWidth: 0
     }
@@ -10775,18 +10754,15 @@ function _ev_WxCard({
         color: on ? 'var(--mg-ink, #22314a)' : 'var(--mg-ink3, #3d5877)'
       }
     }, parseInt(String(h.hm).slice(0, 2), 10)), React.createElement("span", {
-      "aria-hidden": "true",
       style: {
-        width: 42,
-        height: 42,
-        display: 'inline-block',
+        display: 'inline-flex',
         opacity: on ? 1 : 0.72,
         transition: 'opacity .3s'
-      },
-      dangerouslySetInnerHTML: {
-        __html: _ev_WX_SVG[hm2.mi] || ''
       }
-    }), React.createElement("span", {
+    }, React.createElement(_WxSvg, {
+      html: _ev_WX_SVG[hm2.mi] || '',
+      size: 42
+    })), React.createElement("span", {
       className: "mg-num",
       style: {
         fontSize: 17,
@@ -25826,6 +25802,33 @@ const _INFO_DOW = {
   ja: ['日', '月', '火', '水', '木', '金', '土'],
   en: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
 };
+function _WxSvg({
+  html,
+  size
+}) {
+  const ref = React.useRef(null);
+  React.useEffect(() => {
+    const svg = ref.current && ref.current.querySelector('svg');
+    if (!svg) return;
+    try {
+      svg.pauseAnimations();
+      svg.setCurrentTime(0);
+      svg.unpauseAnimations();
+    } catch (e) {}
+  }, [html]);
+  return React.createElement("span", {
+    ref: ref,
+    "aria-hidden": "true",
+    style: {
+      width: size,
+      height: size,
+      display: 'inline-block'
+    },
+    dangerouslySetInnerHTML: {
+      __html: html
+    }
+  });
+}
 function _info_TownWeather({
   rec,
   lang
@@ -25896,15 +25899,9 @@ function _info_TownWeather({
       background: 'radial-gradient(circle at 38% 32%, rgba(226,236,250,.95), rgba(210,224,244,.72))',
       boxShadow: 'inset 0 1px 0 rgba(255,255,255,.95), inset 0 0 0 1px rgba(255,255,255,.6), 0 10px 22px -6px rgba(34,49,74,.22)'
     }
-  }, React.createElement("span", {
-    style: {
-      width: 84,
-      height: 84,
-      display: 'inline-block'
-    },
-    dangerouslySetInnerHTML: {
-      __html: svgFor(t0.code)
-    }
+  }, React.createElement(_WxSvg, {
+    html: svgFor(t0.code),
+    size: 84
   })), React.createElement("div", {
     style: {
       flex: 1,
@@ -25984,17 +25981,18 @@ function _info_TownWeather({
         color: i === 0 ? 'var(--mg-accent, #6e86e0)' : 'var(--mg-ink2, #33456a)'
       }
     }, i === 0 ? H('今日', 'きょう', 'Now') : dow(d.date)), React.createElement("span", {
-      "aria-hidden": "true",
       style: {
         width: 32,
         height: 32,
         flex: 'none',
-        display: 'inline-block'
-      },
-      dangerouslySetInnerHTML: {
-        __html: svgFor(d.code)
+        display: 'inline-flex',
+        alignItems: 'center',
+        justifyContent: 'center'
       }
-    }), React.createElement("span", {
+    }, React.createElement(_WxSvg, {
+      html: svgFor(d.code),
+      size: 30
+    })), React.createElement("span", {
       className: "mg-num",
       style: {
         width: 30,
