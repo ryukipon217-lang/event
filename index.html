@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-<script>window.__MG_BUILD='20260911052447';</script>
+<script>window.__MG_BUILD='20260911084716';</script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>connec+a — 出会いが、まちを変えていく。</title>
@@ -25819,7 +25819,9 @@ const _TI_ST = {
     },
     fg: '#16723f',
     bg: 'rgba(63,174,122,.15)',
-    dot: '#3fae7a'
+    wash: 'rgba(63,174,122,.06)',
+    dot: '#3fae7a',
+    ic: 'check_circle'
   },
   delay: {
     t: {
@@ -25829,7 +25831,9 @@ const _TI_ST = {
     },
     fg: '#a3670f',
     bg: 'rgba(224,145,47,.16)',
-    dot: '#e0912f'
+    wash: 'rgba(224,145,47,.07)',
+    dot: '#e0912f',
+    ic: 'warning'
   },
   suspend: {
     t: {
@@ -25839,7 +25843,9 @@ const _TI_ST = {
     },
     fg: '#b03030',
     bg: 'rgba(214,69,69,.13)',
-    dot: '#d64545'
+    wash: 'rgba(214,69,69,.06)',
+    dot: '#d64545',
+    ic: 'block'
   },
   info: {
     t: {
@@ -25849,7 +25855,9 @@ const _TI_ST = {
     },
     fg: '#a3670f',
     bg: 'rgba(224,145,47,.16)',
-    dot: '#e0912f'
+    wash: 'rgba(224,145,47,.07)',
+    dot: '#e0912f',
+    ic: 'info'
   },
   unknown: {
     t: {
@@ -25859,7 +25867,9 @@ const _TI_ST = {
     },
     fg: '#5b7796',
     bg: 'rgba(139,160,182,.15)',
-    dot: '#8ba0b6'
+    wash: 'rgba(139,160,182,.07)',
+    dot: '#8ba0b6',
+    ic: 'help'
   }
 };
 const _TI_RANK2 = {
@@ -25869,6 +25879,74 @@ const _TI_RANK2 = {
   normal: 0,
   unknown: 0
 };
+function _TiMark({
+  kind,
+  size = 18,
+  color = '#3fae7a',
+  sw = 2.6
+}) {
+  const P = {
+    fill: 'none',
+    stroke: color,
+    strokeWidth: sw,
+    strokeLinecap: 'round',
+    strokeLinejoin: 'round'
+  };
+  return React.createElement("svg", {
+    width: size,
+    height: size,
+    viewBox: "0 0 24 24",
+    "aria-hidden": "true",
+    style: {
+      display: 'block'
+    }
+  }, kind === 'normal' ? React.createElement("circle", _extends({
+    cx: "12",
+    cy: "12",
+    r: "8.2"
+  }, P)) : null, kind === 'delay' ? React.createElement("path", _extends({
+    d: "M12 4.6 L20.4 19.2 L3.6 19.2 Z"
+  }, P)) : null, kind === 'suspend' ? React.createElement("g", null, React.createElement("path", _extends({
+    d: "M5.8 5.8 L18.2 18.2"
+  }, P)), React.createElement("path", _extends({
+    d: "M18.2 5.8 L5.8 18.2"
+  }, P))) : null, kind === 'info' ? React.createElement("g", null, React.createElement("path", _extends({
+    d: "M12 5 L12 13.8"
+  }, P)), React.createElement("circle", {
+    cx: "12",
+    cy: "18.4",
+    r: "1.8",
+    fill: color,
+    stroke: "none"
+  })) : null, kind === 'unknown' ? React.createElement("text", {
+    x: "12",
+    y: "17",
+    textAnchor: "middle",
+    fontSize: "14.5",
+    fontWeight: "700",
+    fill: color
+  }, "?") : null);
+}
+function _TiStar({
+  on,
+  size = 18
+}) {
+  return React.createElement("svg", {
+    width: size,
+    height: size,
+    viewBox: "0 0 24 24",
+    "aria-hidden": "true",
+    style: {
+      display: 'block'
+    }
+  }, React.createElement("path", {
+    d: "M12 3.6l2.6 5.3 5.8.8-4.2 4.1 1 5.8-5.2-2.7-5.2 2.7 1-5.8L3.6 9.7l5.8-.8z",
+    fill: on ? '#e0a83d' : 'none',
+    stroke: on ? '#e0a83d' : '#8ba0b6',
+    strokeWidth: "1.6",
+    strokeLinejoin: "round"
+  }));
+}
 const _TI_OP_MIN = {
   'JR東日本': 30,
   '東武': 30,
@@ -25912,6 +25990,22 @@ function _town_TrainLive({
   const [done, setDone] = React.useState(false);
   const [showNotices, setShowNotices] = React.useState(typeof window !== 'undefined' && !!window.__mgTiNoticesOpen);
   const [showAllLines, setShowAllLines] = React.useState(false);
+  const [showCatalog, setShowCatalog] = React.useState(typeof window !== 'undefined' && !!window.__mgTiAllOpen);
+  const [myIds, setMyIds] = React.useState(() => {
+    try {
+      const v = JSON.parse(localStorage.getItem('mg_ti_mylines') || '[]');
+      return Array.isArray(v) ? v.slice(0, 30) : [];
+    } catch (e) {
+      return [];
+    }
+  });
+  const toggleMy = id => setMyIds(prev => {
+    const next = prev.includes(id) ? prev.filter(x => x !== id) : prev.concat([id]);
+    try {
+      localStorage.setItem('mg_ti_mylines', JSON.stringify(next));
+    } catch (e) {}
+    return next;
+  });
   React.useEffect(() => {
     let dead = false;
     (async () => {
@@ -25951,20 +26045,166 @@ function _town_TrainLive({
   const src = data && data.sources && data.sources.jreast_page;
   const lines = data && Array.isArray(data.lines) ? data.lines : [];
   if (!src || !lines.length || lines.every(l => l.status === 'unknown')) return null;
-  const abnormal = lines.filter(l => l.status !== 'normal' && l.status !== 'unknown').sort((a, b) => (_TI_RANK2[b.status] || 0) - (_TI_RANK2[a.status] || 0));
-  const worst = abnormal.length ? abnormal[0].status : 'normal';
+  const lineName = l => lang === 'en' ? l.nameEn || l.name : l.name;
+  const opName = op => lang === 'en' ? _TI_OP_EN[op] || op : op;
+  const myLines = myIds.map(id => lines.find(l => l.id === id)).filter(Boolean);
+  const allAbnormal = lines.filter(l => l.status !== 'normal' && l.status !== 'unknown');
+  const abnormal = allAbnormal.filter(l => !myIds.includes(l.id)).sort((a, b) => (_TI_RANK2[b.status] || 0) - (_TI_RANK2[a.status] || 0));
+  const worst = allAbnormal.length ? allAbnormal.slice().sort((a, b) => (_TI_RANK2[b.status] || 0) - (_TI_RANK2[a.status] || 0))[0].status : 'normal';
   const upd = _ti_hhmm(src.fetchedAt);
   const notices = data && Array.isArray(data.notices) ? data.notices : [];
-  const lineName = l => lang === 'en' ? l.nameEn || l.name : l.name;
-  const summary = abnormal.length ? T({
-    ja: abnormal.length + '路線で乱れがあります',
-    easy: abnormal.length + 'つ の せん で トラブル が あります',
-    en: 'Disruptions on ' + abnormal.length + (abnormal.length === 1 ? ' line' : ' lines')
+  const summary = allAbnormal.length ? T({
+    ja: allAbnormal.length + '路線で乱れがあります',
+    easy: allAbnormal.length + 'つ の せん で トラブル が あります',
+    en: 'Disruptions on ' + allAbnormal.length + (allAbnormal.length === 1 ? ' line' : ' lines')
   }) : T({
     ja: '各線は平常運転です',
     easy: 'でんしゃ は いつもどおり です',
     en: 'All lines: normal service'
   });
+  const secLabel = txt => React.createElement("div", {
+    style: {
+      padding: '10px 15px 2px',
+      fontSize: 10.5,
+      fontWeight: 700,
+      letterSpacing: '.08em',
+      color: 'var(--mg-ink4, #5b7796)'
+    }
+  }, txt);
+  const LineRow = (ln, opts) => {
+    const st = _TI_ST[ln.status] || _TI_ST.unknown;
+    const starred = myIds.includes(ln.id);
+    const dJa = ln.detail && ln.detail.ja || '';
+    const dEn = ln.detail && ln.detail.en || '';
+    let detailNode = null;
+    if (!opts.compact) {
+      if (lang === 'en') {
+        detailNode = dEn ? React.createElement("div", {
+          style: {
+            fontSize: 11.5,
+            color: 'var(--mg-ink3, #3d5877)',
+            lineHeight: 1.5,
+            marginTop: 3
+          }
+        }, dEn, React.createElement("span", {
+          style: {
+            color: 'var(--mg-ink5, #8ba0b6)'
+          }
+        }, " (auto-translated)")) : dJa ? React.createElement("div", {
+          style: {
+            fontSize: 11.5,
+            color: 'var(--mg-ink3, #3d5877)',
+            lineHeight: 1.5,
+            marginTop: 3
+          }
+        }, dJa, React.createElement("span", {
+          style: {
+            color: 'var(--mg-ink5, #8ba0b6)'
+          }
+        }, " (Japanese)")) : null;
+      } else if (dJa) {
+        detailNode = React.createElement("div", {
+          style: {
+            fontSize: lang === 'easy' ? 11 : 11.5,
+            color: 'var(--mg-ink3, #3d5877)',
+            lineHeight: 1.5,
+            marginTop: 3
+          }
+        }, dJa);
+      }
+    }
+    return React.createElement("div", {
+      key: ln.id,
+      style: {
+        display: 'flex',
+        gap: 10,
+        alignItems: opts.compact ? 'center' : 'flex-start',
+        padding: opts.compact ? '5px 15px' : '7px 15px 10px'
+      }
+    }, React.createElement("span", {
+      style: {
+        width: opts.compact ? 22 : 28,
+        height: opts.compact ? 22 : 28,
+        borderRadius: opts.compact ? 7 : 9,
+        flex: 'none',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        background: st.bg,
+        marginTop: opts.compact ? 0 : 1
+      }
+    }, React.createElement(_TiMark, {
+      kind: ln.status,
+      size: opts.compact ? 13 : 17,
+      color: st.dot
+    })), React.createElement("div", {
+      style: {
+        flex: 1,
+        minWidth: 0
+      }
+    }, React.createElement("div", {
+      style: {
+        display: 'flex',
+        alignItems: 'center',
+        gap: 8,
+        flexWrap: 'wrap'
+      }
+    }, React.createElement("span", {
+      style: {
+        fontSize: 12.5,
+        fontWeight: opts.compact ? 500 : 700,
+        color: 'var(--mg-ink, #22314a)'
+      }
+    }, lineName(ln)), !opts.compact || ln.status !== 'normal' ? React.createElement("span", {
+      style: {
+        fontSize: 10.5,
+        fontWeight: 700,
+        padding: '3px 9px',
+        borderRadius: 999,
+        background: st.bg,
+        color: st.fg
+      }
+    }, T(st.t)) : null), detailNode), opts.star ? React.createElement("button", {
+      type: "button",
+      className: "mg-tap",
+      onClick: () => toggleMy(ln.id),
+      "aria-label": starred ? T({
+        ja: 'マイ路線から外す',
+        easy: 'マイろせん から はずす',
+        en: 'Remove from My lines'
+      }) : T({
+        ja: 'マイ路線に登録',
+        easy: 'マイろせん に とうろく',
+        en: 'Add to My lines'
+      }),
+      style: {
+        background: 'none',
+        border: 'none',
+        cursor: 'pointer',
+        padding: '6px 4px',
+        margin: '-6px 0',
+        flex: 'none'
+      }
+    }, React.createElement(_TiStar, {
+      on: starred,
+      size: 18
+    })) : null);
+  };
+  const catalogGroups = [];
+  {
+    const byOp = {};
+    lines.forEach(l => {
+      let g = byOp[l.operator];
+      if (!g) {
+        g = byOp[l.operator] = {
+          op: l.operator,
+          lines: []
+        };
+        catalogGroups.push(g);
+      }
+      g.lines.push(l);
+    });
+  }
   return React.createElement("div", {
     className: "mg-card",
     style: {
@@ -25977,38 +26217,73 @@ function _town_TrainLive({
       display: 'flex',
       alignItems: 'center',
       gap: 10,
-      padding: '14px 15px'
+      padding: '12px 15px',
+      background: _TI_ST[worst].wash
     }
   }, React.createElement("span", {
     style: {
-      width: 9,
-      height: 9,
-      borderRadius: 5,
-      background: _TI_ST[worst].dot,
+      width: 27,
+      height: 27,
+      borderRadius: 9,
       flex: 'none',
-      boxShadow: '0 0 0 4px ' + _TI_ST[worst].bg
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      background: _TI_ST[worst].bg
     }
-  }), React.createElement("span", {
+  }, React.createElement(_TiMark, {
+    kind: worst,
+    size: 17,
+    color: _TI_ST[worst].dot
+  })), React.createElement("span", {
     style: {
       flex: 1,
       fontSize: 13,
       color: 'var(--mg-ink2, #33456a)',
-      fontWeight: 600
+      fontWeight: 700
     }
   }, summary), upd ? React.createElement("span", {
     style: {
       fontSize: 10.5,
-      color: 'var(--mg-ink5, #8ba0b6)',
+      color: 'var(--mg-ink4, #5b7796)',
       flex: 'none'
     }
-  }, upd) : null, React.createElement(Icon, {
-    name: "train",
-    size: 16,
+  }, upd) : null), myLines.length ? React.createElement("div", {
     style: {
-      color: 'var(--mg-ink5, #8ba0b6)',
-      flex: 'none'
+      borderTop: '1px solid rgba(34,49,74,.06)'
     }
-  })), (() => {
+  }, React.createElement("div", {
+    style: {
+      display: 'flex',
+      alignItems: 'center',
+      gap: 5,
+      padding: '10px 15px 2px'
+    }
+  }, React.createElement(_TiStar, {
+    on: true,
+    size: 13
+  }), React.createElement("span", {
+    style: {
+      fontSize: 10.5,
+      fontWeight: 700,
+      letterSpacing: '.08em',
+      color: 'var(--mg-ink4, #5b7796)'
+    }
+  }, T({
+    ja: 'マイ路線',
+    easy: 'マイろせん',
+    en: 'My lines'
+  }))), myLines.map(ln => LineRow(ln, {
+    star: true
+  }))) : null, abnormal.length ? React.createElement("div", {
+    style: {
+      borderTop: '1px solid rgba(34,49,74,.06)'
+    }
+  }, myLines.length ? secLabel(T({
+    ja: '乱れのある路線',
+    easy: 'トラブル が ある ろせん',
+    en: 'Lines with disruptions'
+  })) : null, (() => {
     const shownSet = new Set((showAllLines ? abnormal : abnormal.slice(0, 8)).map(l => l.id));
     const groups = [],
       byOp = {};
@@ -26028,16 +26303,13 @@ function _town_TrainLive({
       const min = _TI_OP_MIN[g.op];
       const showMin = min && g.lines.some(l => l.status === 'delay');
       return React.createElement("div", {
-        key: g.op + gi,
-        style: {
-          borderTop: '1px solid rgba(34,49,74,.06)'
-        }
+        key: g.op + gi
       }, React.createElement("div", {
         style: {
           display: 'flex',
           alignItems: 'baseline',
           gap: 7,
-          padding: '9px 15px 0'
+          padding: '8px 15px 0'
         }
       }, React.createElement("span", {
         style: {
@@ -26046,7 +26318,7 @@ function _town_TrainLive({
           letterSpacing: '.06em',
           color: 'var(--mg-ink4, #5b7796)'
         }
-      }, lang === 'en' ? _TI_OP_EN[g.op] || g.op : g.op), showMin ? React.createElement("span", {
+      }, opName(g.op)), showMin ? React.createElement("span", {
         style: {
           fontSize: 9.5,
           color: 'var(--mg-ink5, #8ba0b6)'
@@ -26055,74 +26327,9 @@ function _town_TrainLive({
         ja: '遅延=' + min + '分以上',
         easy: 'おくれ=' + min + 'ぷん から',
         en: 'delays: ' + min + '+ min'
-      })) : null), g.lines.map((ln, i) => {
-        const st = _TI_ST[ln.status] || _TI_ST.unknown;
-        const dJa = ln.detail && ln.detail.ja || '';
-        const dEn = ln.detail && ln.detail.en || '';
-        let detailNode = null;
-        if (lang === 'en') {
-          detailNode = dEn ? React.createElement("div", {
-            style: {
-              fontSize: 11.5,
-              color: 'var(--mg-ink3, #3d5877)',
-              lineHeight: 1.5,
-              marginTop: 3
-            }
-          }, dEn, React.createElement("span", {
-            style: {
-              color: 'var(--mg-ink5, #8ba0b6)'
-            }
-          }, " (auto-translated)")) : dJa ? React.createElement("div", {
-            style: {
-              fontSize: 11.5,
-              color: 'var(--mg-ink3, #3d5877)',
-              lineHeight: 1.5,
-              marginTop: 3
-            }
-          }, dJa, React.createElement("span", {
-            style: {
-              color: 'var(--mg-ink5, #8ba0b6)'
-            }
-          }, " (Japanese)")) : null;
-        } else if (dJa) {
-          detailNode = React.createElement("div", {
-            style: {
-              fontSize: lang === 'easy' ? 11 : 11.5,
-              color: 'var(--mg-ink3, #3d5877)',
-              lineHeight: 1.5,
-              marginTop: 3
-            }
-          }, dJa);
-        }
-        return React.createElement("div", {
-          key: ln.id || i,
-          style: {
-            padding: '7px 15px 10px'
-          }
-        }, React.createElement("div", {
-          style: {
-            display: 'flex',
-            alignItems: 'center',
-            gap: 8,
-            flexWrap: 'wrap'
-          }
-        }, React.createElement("span", {
-          style: {
-            fontSize: 12.5,
-            fontWeight: 700,
-            color: 'var(--mg-ink, #22314a)'
-          }
-        }, lineName(ln)), React.createElement("span", {
-          style: {
-            fontSize: 10.5,
-            fontWeight: 700,
-            padding: '3px 9px',
-            borderRadius: 999,
-            background: st.bg,
-            color: st.fg
-          }
-        }, T(st.t))), detailNode);
-      }));
+      })) : null), g.lines.map(ln => LineRow(ln, {
+        star: true
+      })));
     });
   })(), abnormal.length > 8 ? React.createElement("button", {
     type: "button",
@@ -26154,7 +26361,79 @@ function _town_TrainLive({
   }), React.createElement(Icon, {
     name: showAllLines ? 'expand_less' : 'expand_more',
     size: 14
-  })) : null, notices.length ? React.createElement("div", {
+  })) : null) : null, React.createElement("div", {
+    style: {
+      borderTop: '1px solid rgba(34,49,74,.06)'
+    }
+  }, React.createElement("button", {
+    type: "button",
+    className: "mg-tap",
+    onClick: () => setShowCatalog(!showCatalog),
+    style: {
+      display: 'flex',
+      alignItems: 'center',
+      gap: 8,
+      width: '100%',
+      padding: '11px 15px',
+      background: 'none',
+      border: 'none',
+      cursor: 'pointer',
+      textAlign: 'left'
+    }
+  }, React.createElement(Icon, {
+    name: "format_list_bulleted",
+    size: 15,
+    style: {
+      color: 'var(--mg-ink4, #5b7796)',
+      flex: 'none'
+    }
+  }), React.createElement("span", {
+    style: {
+      flex: 1,
+      fontSize: 12,
+      color: 'var(--mg-ink3, #3d5877)',
+      fontWeight: 600
+    }
+  }, T({
+    ja: 'すべての路線を見る',
+    easy: 'ぜんぶ の ろせん を みる',
+    en: 'All lines'
+  }), " (", lines.length, ")"), React.createElement(Icon, {
+    name: showCatalog ? 'expand_less' : 'expand_more',
+    size: 16,
+    style: {
+      color: 'var(--mg-ink5, #8ba0b6)',
+      flex: 'none'
+    }
+  })), showCatalog ? React.createElement("div", {
+    style: {
+      paddingBottom: 6
+    }
+  }, React.createElement("div", {
+    style: {
+      padding: '0 15px 6px',
+      fontSize: 10.5,
+      color: 'var(--mg-ink5, #8ba0b6)',
+      lineHeight: 1.5
+    }
+  }, T({
+    ja: '☆をタップすると「マイ路線」に登録され、平常時もいちばん上に表示されます',
+    easy: '☆ を おすと 「マイろせん」に とうろく。いつも うえ に でます',
+    en: 'Tap ☆ to pin lines to “My lines” — shown on top even when normal'
+  })), catalogGroups.map(g => React.createElement("div", {
+    key: g.op
+  }, React.createElement("div", {
+    style: {
+      padding: '7px 15px 2px',
+      fontSize: 10.5,
+      fontWeight: 700,
+      letterSpacing: '.06em',
+      color: 'var(--mg-ink4, #5b7796)'
+    }
+  }, opName(g.op)), g.lines.map(ln => LineRow(ln, {
+    compact: true,
+    star: true
+  }))))) : null), notices.length ? React.createElement("div", {
     style: {
       borderTop: '1px solid rgba(34,49,74,.06)'
     }
