@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-<script>window.__MG_BUILD='20260911131305';</script>
+<script>window.__MG_BUILD='20260911131532';</script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>connec+a — 出会いが、まちを変えていく。</title>
@@ -26789,6 +26789,7 @@ function _town_TrainLive({
   const [openDetails, setOpenDetails] = React.useState({});
   const [detailDefault] = React.useState(() => typeof window !== 'undefined' && !!window.__mgTiDetailsOpen);
   const detailOpen = id => openDetails[id] !== undefined ? !!openDetails[id] : detailDefault;
+  const [openOps, setOpenOps] = React.useState({});
   const toggleDetail = id => setOpenDetails(prev => ({
     ...prev,
     [id]: !detailOpen(id)
@@ -27560,6 +27561,7 @@ function _town_TrainLive({
     en: 'Tap ☆ to pin lines to “My lines” — shown on top even when normal'
   })), catalogGroups.map(g => {
     const nAb = g.lines.filter(l => l.status !== 'normal' && l.status !== 'unknown').length;
+    const opOpen = openOps[g.op] !== undefined ? !!openOps[g.op] : nAb > 0;
     return React.createElement("div", {
       key: g.op,
       style: {
@@ -27568,12 +27570,24 @@ function _town_TrainLive({
         background: 'rgba(34,49,74,.035)',
         overflow: 'hidden'
       }
-    }, React.createElement("div", {
+    }, React.createElement("button", {
+      type: "button",
+      className: "mg-tap",
+      onClick: () => setOpenOps(prev => ({
+        ...prev,
+        [g.op]: !opOpen
+      })),
+      "aria-expanded": opOpen,
       style: {
         display: 'flex',
         alignItems: 'center',
         gap: 8,
-        padding: '10px 13px 8px'
+        width: '100%',
+        padding: '11px 13px',
+        background: 'none',
+        border: 'none',
+        cursor: 'pointer',
+        textAlign: 'left'
       }
     }, typeof TI_OP_LOGO_FILES !== 'undefined' && TI_OP_LOGO_FILES[g.op] ? React.createElement(_TiOpLogo, {
       op: g.op,
@@ -27640,7 +27654,16 @@ function _town_TrainLive({
       ja: 'すべて平常',
       easy: 'ぜんぶ ふつう',
       en: 'All normal'
-    }))), g.lines.map(CatalogRow));
+    })), React.createElement(Icon, {
+      name: "expand_more",
+      size: 16,
+      style: {
+        color: 'var(--mg-ink5, #8ba0b6)',
+        flex: 'none',
+        transform: opOpen ? 'rotate(180deg)' : 'none',
+        transition: 'transform .18s'
+      }
+    })), opOpen ? g.lines.map(CatalogRow) : null);
   })) : null), notices.length ? React.createElement("div", {
     style: {
       borderTop: '1px solid rgba(34,49,74,.06)'
