@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-<script>window.__MG_BUILD='20260911153153';</script>
+<script>window.__MG_BUILD='20260912062559';</script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>connec+a — 出会いが、まちを変えていく。</title>
@@ -1016,6 +1016,117 @@ select.mg-field,
 .mg-wx-flake{ position:absolute; border-radius:50%; background:#9cc3ea; animation:mg-wx-fall 1.7s ease-in infinite !important }
 .mg-wx-spin{ transform-box:fill-box; transform-origin:center; animation:mg-wx-spin 9s linear infinite !important }
 .mg-wx-bolt{ animation:mg-wx-flash 2.4s ease-in-out infinite !important }
+/* 天気: ガラスの雫/雪片 */
+.mg-wx-drop-glass{ background:linear-gradient(180deg, rgba(191,224,255,.95), rgba(74,134,216,.85)) !important; border-radius:60% 60% 62% 62% / 46% 46% 78% 78%; box-shadow:inset 0 1px .5px rgba(255,255,255,.9), 0 1px 2px rgba(40,80,140,.3); }
+.mg-wx-flake-glass{ background:radial-gradient(circle at 35% 30%, #ffffff, #a9cdf0 70%) !important; box-shadow:inset 0 1px .5px rgba(255,255,255,.9), 0 1px 2px rgba(80,120,170,.25); }
+
+
+/* ============================================================
+   クリアガラス(統合スキル / 2026-09-12 再設計)
+   出典を蒸留: Kyant0 AndroidLiquidGlass(光学の正典)/ css.glass / LiquidLens。
+   4原則: ①内側は素通し(彩度いじらない)②縁だけ極細0.5pxの方向性の光
+   (白のみ=無色・左上だけ)③下に淡い内影で厚みだけ(浮遊drop無し)
+   ④色収差/跳ね/彩度盛り/多層は入れない(癖封じ)。詳細=_spec/reports/_liquid-glass-skill.md
+   ============================================================ */
+/* クリアガラス・チップ */
+.mg-liquid{
+  position:relative; isolation:isolate;
+  background:rgba(255,255,255,.10);
+  border-radius:999px;
+  -webkit-backdrop-filter:blur(8px); backdrop-filter:blur(8px);
+  border:1px solid rgba(255,255,255,.16);
+  box-shadow:inset 0 -4px 9px -6px rgba(0,0,0,.13);
+  transition:transform .18s ease-out;
+}
+/* 方向性の縁リム(Kyant Default: 白.5 / 45° / falloff1)。0.5pxの光を左上だけ。無色。 */
+.mg-liquid::before{
+  content:''; position:absolute; inset:0; border-radius:inherit; pointer-events:none; z-index:2; padding:.5px;
+  background:linear-gradient(135deg, rgba(255,255,255,.5), rgba(255,255,255,0) 45%);
+  -webkit-mask:linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite:xor; mask-composite:exclude;
+}
+.mg-liquid > *{ position:relative; z-index:3; }
+.mg-liquid:active{ transform:scale(.95); }
+.mg-liquid.mg-liquid-rr{ border-radius:16px; }
+.mg-liquid-reduce{ transform:scale(var(--mgrd,1)); transform-origin:left center; transition:transform .18s ease-out; }
+.mg-liquid:focus-visible{ outline:none; box-shadow:0 0 0 3px rgba(110,134,224,.55); }
+@media (prefers-reduced-transparency: reduce){
+  .mg-liquid{ -webkit-backdrop-filter:none; backdrop-filter:none; background:linear-gradient(180deg, rgba(255,255,255,.98), rgba(246,249,255,.98)); box-shadow:none; }
+  .mg-liquid::before{ display:none; }
+}
+@media (prefers-reduced-motion: reduce){ .mg-liquid:active{ transform:none; } }
+
+/* クリアガラスのレンズ円(天気アイコン封入=ガラス玉) */
+.mg-lens{
+  position:relative; isolation:isolate; border-radius:50%;
+  background:radial-gradient(130% 120% at 30% 22%, rgba(255,255,255,.3), rgba(255,255,255,.05) 48%, rgba(255,255,255,.02) 100%);
+  -webkit-backdrop-filter:blur(7px); backdrop-filter:blur(7px);
+  border:1px solid rgba(255,255,255,.42); border-top-color:rgba(255,255,255,.95);
+  box-shadow:
+    inset 0 2.5px 1.5px rgba(255,255,255,.95),
+    inset 0 0 10px rgba(255,255,255,.16),
+    inset 0 9px 12px -9px rgba(255,255,255,.9),
+    inset 0 -11px 16px -11px rgba(104,102,104,.34);
+  display:flex; align-items:center; justify-content:center;
+}
+.mg-lens-blur{ -webkit-backdrop-filter:blur(13px) saturate(120%) brightness(1.05); backdrop-filter:blur(13px) saturate(120%) brightness(1.05); }
+/* ガラス球の上部の鋭いハイライト弧 */
+.mg-lens::after{
+  content:''; position:absolute; left:15%; right:20%; top:7%; height:34%; border-radius:50%;
+  background:linear-gradient(180deg, rgba(255,255,255,.85), rgba(255,255,255,0) 82%);
+  pointer-events:none; z-index:1; filter:blur(1.5px);
+}
+.mg-lens > *{ position:relative; z-index:0; }
+@media (prefers-reduced-transparency: reduce){
+  .mg-lens{ -webkit-backdrop-filter:none; backdrop-filter:none; background:radial-gradient(120% 120% at 32% 26%, #ffffff, #eef3fb 70%); }
+}
+
+/* クリアガラス・カード(まち画面の面。チップと同じ4原則。本文可読のため地を僅かに厚く) */
+.mg-aqua{
+  position:relative; isolation:isolate;
+  background:rgba(255,255,255,.12);
+  border-radius:22px;
+  -webkit-backdrop-filter:blur(12px); backdrop-filter:blur(12px);
+  border:1px solid rgba(255,255,255,.16);
+  box-shadow:inset 0 -6px 13px -8px rgba(0,0,0,.13);
+}
+.mg-aqua::before{
+  content:''; position:absolute; inset:0; border-radius:inherit; pointer-events:none; z-index:2; padding:.5px;
+  background:linear-gradient(135deg, rgba(255,255,255,.46), rgba(255,255,255,0) 44%);
+  -webkit-mask:linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite:xor; mask-composite:exclude;
+}
+@media (prefers-reduced-transparency: reduce){
+  .mg-aqua{ -webkit-backdrop-filter:none; backdrop-filter:none; background:linear-gradient(180deg, rgba(255,255,255,.97), rgba(246,249,255,.97)); box-shadow:none; }
+  .mg-aqua::before{ display:none; }
+}
+
+/* ============================================================
+   まち画面のテーマ(視認性=文字色を共通CSSで一元管理)
+   透明ガラスは後ろの天気背景を透かすので、文字色は背景の明暗で切替える。
+   昼(明るい天気背景): 濃インク。透明ガラス上で薄れる副次(ink4/5)は少し濃いめでAA確保。
+   夜(.mg-town-night=紺背景): インク階調と意味色(運行/降水)を明色へ一括反転。
+   JS側は class を付け替えるだけ・色は全てここ。個別インライン色は var(--mg-*) 参照。
+   ============================================================ */
+.mg-town{
+  color:var(--mg-ink);
+  --mg-ink:#22314a; --mg-ink2:#2b3d57; --mg-ink3:#3d5877; --mg-ink4:#425975; --mg-ink5:#566d88;
+  --mg-st-ok:#16723f; --mg-st-warn:#a3670f; --mg-st-bad:#b03030; --mg-st-none:#5b7796; --mg-rain:#3f72c9;
+}
+.mg-town.mg-town-night{
+  color:#eef3fc;
+  --mg-ink:#eef3fc; --mg-ink2:#e0e8f7; --mg-ink3:#cdd9ef; --mg-ink4:#b7c5df; --mg-ink5:#9dadc9;
+  --mg-st-ok:#63d29c; --mg-st-warn:#f2b866; --mg-st-bad:#ff8f8f; --mg-st-none:#aabbd6; --mg-rain:#8fb4ef;
+}
+
+/* 天気背景の降雨アニメ(白い雫が落ち続ける。雨・霧雨・にわか雨・雷雨で表示) */
+@keyframes mg-rainfall { 0%{ transform:translateY(-12vh) } 100%{ transform:translateY(112vh) } }
+.mg-rainbg{ position:fixed; inset:0; z-index:-1; pointer-events:none; overflow:hidden; }
+.mg-rainbg span{ position:absolute; top:-12vh; width:2px; height:14vh; border-radius:2px;
+  background:linear-gradient(180deg, rgba(255,255,255,0), rgba(255,255,255,.72) 55%, rgba(255,255,255,.92));
+  /* 淡い水色背景でも白い雫が見えるよう、青灰の淡いふちを付けて分離(夜の紺の上では淡い光暈) */
+  box-shadow:0 0 1.4px rgba(70,95,140,.4);
+  animation:mg-rainfall linear infinite !important; }
 
 </style>
 </head>
@@ -25820,6 +25931,7 @@ function _WxIcon({
 }) {
   const S = size,
     k = kind || 'cloud';
+  const uid = React.useId().replace(/[:]/g, '');
   const hasSun = k === 'clear' || k === 'pcloud' || k === 'shower' || k === 'snowsh';
   const smallSun = k !== 'clear';
   const hasCloud = k !== 'clear';
@@ -25829,14 +25941,14 @@ function _WxIcon({
   const thunder = k === 'thunder';
   const cdx = smallSun ? 6 : 0,
     cdy = hasSun && smallSun ? 6 : 0;
-  const cloudFill = thunder ? '#aab6cc' : '#dbe4f2',
-    cloudTop = thunder ? '#c4cfe0' : '#eff4fb',
-    cloudLine = thunder ? '#9aa7bf' : '#c4d2e8';
   const sunCx = hasCloud ? 23 : 32,
     sunCy = hasCloud ? 22 : 32,
     sunR = k === 'clear' ? 13 : 8.5;
   const dropXs = rain === 2 ? [26, 40] : [21, 33, 45];
   const snowXs = snow === 2 ? [28, 44] : [22, 34, 46];
+  const AMBER = '#f5a623',
+    CLOUD = thunder ? '#8f9ab2' : '#ffffff',
+    CLOUD_EDGE = thunder ? 'none' : 'rgba(150,166,192,.4)';
   return React.createElement("span", {
     className: "mg-wx",
     style: {
@@ -25851,7 +25963,8 @@ function _WxIcon({
     style: {
       display: 'block',
       position: 'absolute',
-      inset: 0
+      inset: 0,
+      overflow: 'visible'
     }
   }, hasSun ? React.createElement("g", null, React.createElement("g", {
     className: "mg-wx-spin"
@@ -25865,38 +25978,24 @@ function _WxIcon({
       y1: sunCy + Math.sin(t) * i,
       x2: sunCx + Math.cos(t) * o,
       y2: sunCy + Math.sin(t) * o,
-      stroke: "#f7b53a",
-      strokeWidth: k === 'clear' ? 3 : 2.4,
+      stroke: AMBER,
+      strokeWidth: k === 'clear' ? 2.4 : 1.9,
       strokeLinecap: "round"
     });
   })), React.createElement("circle", {
     cx: sunCx,
     cy: sunCy,
     r: sunR,
-    fill: "#f6a821"
-  }), React.createElement("circle", {
-    cx: sunCx - sunR * 0.28,
-    cy: sunCy - sunR * 0.28,
-    r: sunR * 0.5,
-    fill: "#ffca4d",
-    opacity: "0.9"
-  })) : null, hasCloud ? React.createElement("g", {
-    transform: 'translate(' + cdx + ' ' + cdy + ')'
-  }, React.createElement("path", {
+    fill: AMBER
+  })) : null, hasCloud ? React.createElement("path", {
+    transform: 'translate(' + cdx + ' ' + cdy + ')',
     d: "M45 42 H20 A11 11 0 0 1 18.5 20.2 A15.5 15.5 0 0 1 47.6 24 A9.6 9.6 0 0 1 45 42 Z",
-    fill: cloudFill,
-    stroke: cloudLine,
-    strokeWidth: "1.3"
-  }), React.createElement("path", {
-    d: "M22 24.5 A13 13 0 0 1 44 27",
-    fill: "none",
-    stroke: cloudTop,
-    strokeWidth: "3.4",
-    strokeLinecap: "round",
-    opacity: "0.85"
-  })) : null, fog ? React.createElement("g", {
-    stroke: "#b6c6de",
-    strokeWidth: "3.2",
+    fill: CLOUD,
+    stroke: CLOUD_EDGE,
+    strokeWidth: CLOUD_EDGE === 'none' ? 0 : 1
+  }) : null, fog ? React.createElement("g", {
+    stroke: CLOUD,
+    strokeWidth: "3.6",
     strokeLinecap: "round"
   }, React.createElement("line", {
     x1: "16",
@@ -25911,17 +26010,18 @@ function _WxIcon({
   })) : null, thunder ? React.createElement("path", {
     className: "mg-wx-bolt",
     d: "M34 40 L25 52 L31 52 L28 60 L41 46 L34 46 L38 40 Z",
-    fill: "#f5b220",
-    stroke: "#e0991a",
-    strokeWidth: "0.6",
+    fill: AMBER,
     strokeLinejoin: "round"
   }) : null), rain ? dropXs.map((x, i) => React.createElement("span", {
     key: i,
     className: "mg-wx-drop",
     style: {
-      left: x / 64 * S + 'px',
-      top: 44 / 64 * S + 'px',
-      height: 7 / 64 * S + 'px',
+      left: x / 64 * S - 0.5 + 'px',
+      top: 43 / 64 * S + 'px',
+      width: 2.4 / 64 * S + 'px',
+      height: 8 / 64 * S + 'px',
+      borderRadius: 2 / 64 * S + 'px',
+      background: '#4a86d8',
       animationDelay: i * 0.28 + 's'
     }
   })) : null, snow ? snowXs.map((x, i) => React.createElement("span", {
@@ -25932,6 +26032,7 @@ function _WxIcon({
       top: 46 / 64 * S + 'px',
       width: 4 / 64 * S + 'px',
       height: 4 / 64 * S + 'px',
+      background: '#9cc3ea',
       animationDelay: i * 0.5 + 's'
     }
   })) : null);
@@ -25941,6 +26042,7 @@ function _info_TownWeather({
   lang
 }) {
   const H = (ja, easy, en) => lang === 'easy' ? easy : lang === 'en' ? en : ja;
+  const _popC = 'var(--mg-rain, #3f72c9)';
   const lat = rec ? rec[2] : null,
     lng = rec ? rec[3] : null;
   const [wk, setWk] = React.useState(() => {
@@ -25991,24 +26093,21 @@ function _info_TownWeather({
       gap: 12,
       padding: '18px 16px 20px',
       borderRadius: 22,
-      background: 'linear-gradient(150deg, rgba(174,204,242,.62), rgba(244,220,233,.5))'
+      background: 'linear-gradient(150deg, rgba(255,255,255,.16), rgba(255,255,255,.05))'
     }
   }, React.createElement("span", {
     "aria-hidden": "true",
     style: {
-      width: 104,
-      height: 104,
+      width: 92,
+      height: 92,
       flex: 'none',
-      borderRadius: '50%',
       display: 'flex',
       alignItems: 'center',
-      justifyContent: 'center',
-      background: 'radial-gradient(circle at 38% 32%, rgba(226,236,250,.95), rgba(210,224,244,.72))',
-      boxShadow: 'inset 0 1px 0 rgba(255,255,255,.95), inset 0 0 0 1px rgba(255,255,255,.6), 0 10px 22px -6px rgba(34,49,74,.22)'
+      justifyContent: 'center'
     }
   }, React.createElement(_WxIcon, {
     kind: m0 ? m0.mi : "cloud",
-    size: 80
+    size: 82
   })), React.createElement("div", {
     style: {
       flex: 1,
@@ -26050,7 +26149,7 @@ function _info_TownWeather({
     className: "mg-num",
     style: {
       fontSize: 15,
-      color: '#3f72c9',
+      color: _popC,
       display: 'inline-flex',
       alignItems: 'center',
       gap: 3,
@@ -26061,7 +26160,7 @@ function _info_TownWeather({
     size: 16,
     fill: true,
     style: {
-      color: '#3f72c9'
+      color: _popC
     }
   }), t0.pop, "%") : null))), React.createElement("div", {
     style: {
@@ -26111,11 +26210,13 @@ function _info_TownWeather({
     }, d.tmin, "\xB0"), React.createElement("span", {
       style: {
         flex: 1,
-        height: 6,
-        borderRadius: 3,
-        background: 'rgba(34,49,74,.08)',
+        height: 8,
+        borderRadius: 4,
+        background: 'rgba(255,255,255,.16)',
+        boxShadow: 'inset 0 1px 2px rgba(40,55,85,.16), inset 0 -1px 0 rgba(255,255,255,.35)',
         position: 'relative',
-        minWidth: 40
+        minWidth: 40,
+        overflow: 'hidden'
       }
     }, React.createElement("span", {
       style: {
@@ -26123,9 +26224,10 @@ function _info_TownWeather({
         left: loPct + '%',
         right: hiPct + '%',
         top: 0,
-        height: 6,
-        borderRadius: 3,
-        background: 'linear-gradient(90deg, #86b3ea, #cbb0e0 55%, #efb2c8)'
+        height: 8,
+        borderRadius: 4,
+        background: 'linear-gradient(90deg, #93baf0, #6e86e0)',
+        boxShadow: 'inset 0 1.5px 1px rgba(255,255,255,.5), inset 0 -2px 3px rgba(60,80,140,.2)'
       }
     })), React.createElement("span", {
       className: "mg-num",
@@ -26205,7 +26307,7 @@ const _TI_ST = {
       easy: 'ふつう',
       en: 'Normal'
     },
-    fg: '#16723f',
+    fg: 'var(--mg-st-ok, #16723f)',
     bg: 'rgba(63,174,122,.15)',
     wash: 'rgba(63,174,122,.06)',
     dot: '#3fae7a',
@@ -26222,7 +26324,7 @@ const _TI_ST = {
       easy: 'おくれ',
       en: 'Delay'
     },
-    fg: '#a3670f',
+    fg: 'var(--mg-st-warn, #a3670f)',
     bg: 'rgba(224,145,47,.16)',
     wash: 'rgba(224,145,47,.07)',
     dot: '#e0912f',
@@ -26239,7 +26341,7 @@ const _TI_ST = {
       easy: 'ストップ',
       en: 'Stopped'
     },
-    fg: '#b03030',
+    fg: 'var(--mg-st-bad, #b03030)',
     bg: 'rgba(214,69,69,.13)',
     wash: 'rgba(214,69,69,.06)',
     dot: '#d64545',
@@ -26256,7 +26358,7 @@ const _TI_ST = {
       easy: 'おしらせ',
       en: 'Notice'
     },
-    fg: '#a3670f',
+    fg: 'var(--mg-st-warn, #a3670f)',
     bg: 'rgba(224,145,47,.16)',
     wash: 'rgba(224,145,47,.07)',
     dot: '#e0912f',
@@ -26273,7 +26375,7 @@ const _TI_ST = {
       easy: '—',
       en: '—'
     },
-    fg: '#5b7796',
+    fg: 'var(--mg-st-none, #5b7796)',
     bg: 'rgba(139,160,182,.15)',
     wash: 'rgba(139,160,182,.07)',
     dot: '#8ba0b6',
@@ -27076,11 +27178,10 @@ function _town_TrainLive({
     }
     return React.createElement("div", {
       key: ln.id,
+      className: "mg-aqua",
       style: {
         margin: '0 12px 9px',
         borderRadius: 14,
-        background: 'rgba(255,255,255,.72)',
-        border: '1px solid rgba(34,49,74,.07)',
         overflow: 'hidden'
       }
     }, React.createElement("div", {
@@ -27358,7 +27459,7 @@ function _town_TrainLive({
     })) : null);
   })();
   return React.createElement("div", {
-    className: "mg-card",
+    className: "mg-aqua",
     style: {
       borderRadius: 18,
       overflow: 'hidden',
@@ -27408,7 +27509,7 @@ function _town_TrainLive({
     en: 'Updating…'
   }) : upd), React.createElement("button", {
     type: "button",
-    className: "mg-tap",
+    className: "mg-tap mg-liquid mg-liquid-rr",
     onClick: doRefresh,
     disabled: refreshing,
     "aria-label": T({
@@ -27422,9 +27523,6 @@ function _town_TrainLive({
       justifyContent: 'center',
       width: 38,
       height: 38,
-      borderRadius: 12,
-      background: 'rgba(255,255,255,.65)',
-      border: '1px solid rgba(34,49,74,.08)',
       cursor: refreshing ? 'default' : 'pointer',
       flex: 'none',
       padding: 0
@@ -27462,16 +27560,13 @@ function _town_TrainLive({
     return React.createElement("button", {
       key: op,
       type: "button",
-      className: "mg-tap",
+      className: "mg-tap mg-liquid",
       onClick: () => setShowCatalog(true),
       style: {
         display: 'inline-flex',
         alignItems: 'center',
         gap: 6,
-        padding: '6px 11px',
-        borderRadius: 999,
-        background: 'rgba(255,255,255,.8)',
-        border: '1px solid rgba(34,49,74,.09)',
+        padding: '7px 13px',
         cursor: 'pointer'
       }
     }, React.createElement(_TiMark, {
@@ -27482,7 +27577,7 @@ function _town_TrainLive({
       solid: true
     }), React.createElement("span", {
       style: {
-        fontSize: 11.5,
+        fontSize: 12,
         fontWeight: 700,
         color: 'var(--mg-ink2, #33456a)'
       }
@@ -27519,7 +27614,7 @@ function _town_TrainLive({
     }
   }), React.createElement("button", {
     type: "button",
-    className: "mg-tap",
+    className: "mg-tap mg-liquid mg-liquid-rr",
     onClick: () => setShowSearch(!showSearch),
     "aria-label": showSearch ? T({
       ja: '検索を閉じる',
@@ -27536,9 +27631,6 @@ function _town_TrainLive({
       justifyContent: 'center',
       width: 38,
       height: 38,
-      borderRadius: 12,
-      background: showSearch ? 'rgba(34,49,74,.07)' : 'rgba(110,134,224,.13)',
-      border: 'none',
       cursor: 'pointer'
     }
   }, React.createElement(Icon, {
@@ -27550,7 +27642,7 @@ function _town_TrainLive({
     }
   }))), searchRows, myLines.length ? myLines.map(LineCard) : !showSearch ? React.createElement("button", {
     type: "button",
-    className: "mg-tap",
+    className: "mg-tap mg-liquid",
     onClick: () => setShowSearch(true),
     style: {
       display: 'flex',
@@ -27559,16 +27651,13 @@ function _town_TrainLive({
       gap: 8,
       width: 'calc(100% - 24px)',
       margin: '2px 12px 12px',
-      padding: '14px 16px',
-      borderRadius: 999,
-      background: 'rgba(110,134,224,.10)',
-      border: '1.5px dashed rgba(110,134,224,.5)',
+      padding: '15px 16px',
       cursor: 'pointer',
       boxSizing: 'border-box'
     }
   }, React.createElement(Icon, {
     name: "add_circle",
-    size: 19,
+    size: 20,
     weight: 400,
     style: {
       color: 'var(--mg-accent, #6e86e0)'
@@ -27911,12 +28000,69 @@ function _town_TrainLive({
     en: 'Credits'
   }))));
 }
+function _town_wxBg(kind, night) {
+  const k = kind || 'clear';
+  if (night) {
+    if (k === 'clear' || k === 'pcloud') return 'radial-gradient(120% 84% at 50% -6%, #2f3d72 0%, #232c5a 46%, #171d40 100%)';
+    if (k === 'rain' || k === 'drizzle' || k === 'shower' || k === 'thunder') return 'radial-gradient(120% 84% at 50% -6%, #283257 0%, #1e2547 50%, #151a35 100%)';
+    return 'radial-gradient(120% 84% at 50% -6%, #2c3563 0%, #212850 50%, #161c3c 100%)';
+  }
+  switch (k) {
+    case 'clear':
+      return 'radial-gradient(58% 40% at 80% 4%, rgba(255,248,223,.85), rgba(255,248,223,0) 60%), radial-gradient(120% 92% at 50% -10%, #eef6fe 0%, #d5e8fa 48%, #bedaf3 100%)';
+    case 'pcloud':
+      return 'radial-gradient(50% 34% at 78% 6%, rgba(255,249,228,.7), rgba(255,249,228,0) 62%), radial-gradient(34% 19% at 26% 22%, rgba(255,255,255,.6), transparent 72%), radial-gradient(120% 92% at 50% -10%, #eef4fc 0%, #d8e6f6 48%, #c4d7ee 100%)';
+    case 'cloud':
+      return 'radial-gradient(40% 21% at 24% 20%, rgba(255,255,255,.62), transparent 72%), radial-gradient(38% 20% at 72% 27%, rgba(255,255,255,.52), transparent 72%), radial-gradient(120% 92% at 50% -10%, #eff2f7 0%, #dde3ec 48%, #cbd3e0 100%)';
+    case 'fog':
+      return 'linear-gradient(180deg, #f2f4f7 0%, #e4e8ee 55%, #d6dbe3 100%)';
+    case 'drizzle':
+    case 'rain':
+    case 'shower':
+      return 'radial-gradient(120% 92% at 50% -10%, #e0e8f1 0%, #c3d0e0 48%, #a7b8ce 100%)';
+    case 'snow':
+      return 'radial-gradient(120% 92% at 50% -10%, #f5f9fd 0%, #e4eef7 48%, #d3e0ef 100%)';
+    case 'thunder':
+      return 'radial-gradient(120% 92% at 50% -10%, #e6e8f1 0%, #cdd2e0 48%, #b4bacf 100%)';
+    default:
+      return 'radial-gradient(120% 92% at 50% -10%, #eff3f8 0%, #dde4ee 48%, #cad3e0 100%)';
+  }
+}
 function PageTown() {
   const A = useMg() || {};
   const lang = A.lang || 'ja';
   const T = o => _info_text(lang, o);
   const _u = A.user || {};
+  const [wxKind, setWxKind] = React.useState(typeof window !== 'undefined' && window.__mgTownWxKind || null);
+  const _wxNight = (() => {
+    try {
+      const h = new Date().getHours();
+      return typeof window !== 'undefined' && window.__mgTownNight != null ? !!window.__mgTownNight : h >= 18 || h < 5;
+    } catch (e) {
+      return false;
+    }
+  })();
   const _cRec = typeof mgCityRec === 'function' && _u.prefecture && _u.city ? mgCityRec(_u.prefecture, _u.city) : null;
+  React.useEffect(() => {
+    if (typeof window !== 'undefined' && window.__mgTownWxKind) return undefined;
+    const lat = _cRec ? _cRec[2] : null,
+      lng = _cRec ? _cRec[3] : null;
+    if (lat == null || typeof _ev_weeklyFor !== 'function') return undefined;
+    let dead = false;
+    (async () => {
+      try {
+        const w = await _ev_weeklyFor(lat, lng);
+        const code = w && Array.isArray(w.days) && w.days[0] ? w.days[0].code : null;
+        const m = code != null && typeof _ev_WMO === 'function' ? _ev_WMO(code) : null;
+        if (!dead && m) setWxKind(m.mi);
+      } catch (e) {}
+    })();
+    return () => {
+      dead = true;
+    };
+  }, [_cRec ? _cRec[2] : null, _cRec ? _cRec[3] : null]);
+  const _wxBg = _town_wxBg(wxKind, _wxNight);
+  const _night = !!_u.city && _wxNight;
   const _cityFull = _u.city ? _u.prefecture && _u.prefecture !== _u.city ? _u.prefecture + _u.city : _u.city : '';
   const _q = s => 'https://www.google.com/search?q=' + encodeURIComponent(s);
   const cityDisp = typeof mgCityLabel === 'function' && _u.city ? mgCityLabel(_u.prefecture, _u.city, lang) : _u.city;
@@ -28066,7 +28212,7 @@ function PageTown() {
     href: t.url,
     target: "_blank",
     rel: "noopener noreferrer",
-    className: "mg-card mg-tap",
+    className: "mg-aqua mg-tap",
     style: {
       display: 'flex',
       alignItems: 'center',
@@ -28133,11 +28279,40 @@ function PageTown() {
     }
   })));
   return React.createElement("div", {
-    className: "mg-ui",
+    className: 'mg-ui mg-town' + (_night ? ' mg-town-night' : ''),
     style: {
-      color: 'var(--mg-ink, #22314a)'
+      position: 'relative'
     }
-  }, React.createElement("div", {
+  }, _u.city ? React.createElement("div", {
+    "aria-hidden": "true",
+    style: {
+      position: 'fixed',
+      inset: 0,
+      zIndex: -1,
+      background: _wxBg,
+      transition: 'background 1.2s ease'
+    }
+  }) : null, _u.city && ['rain', 'drizzle', 'shower', 'thunder'].indexOf(wxKind) >= 0 ? React.createElement("div", {
+    className: "mg-rainbg",
+    "aria-hidden": "true"
+  }, Array.from({
+    length: 42
+  }, (_, i) => {
+    const left = (i * 31 + i % 4 * 7) % 100;
+    const dur = 0.62 + i % 5 * 0.11;
+    const delay = -(i * 0.17 % 1.3).toFixed(2);
+    const op = 0.52 + i % 3 * 0.16;
+    return React.createElement("span", {
+      key: i,
+      style: {
+        left: left + '%',
+        height: 10 + i % 4 * 3 + 'vh',
+        animationDuration: dur + 's',
+        animationDelay: delay + 's',
+        opacity: op
+      }
+    });
+  })) : null, React.createElement("div", {
     style: {
       height: 112
     },
@@ -28147,7 +28322,10 @@ function PageTown() {
       padding: '0 22px 16px'
     }
   }, React.createElement("div", {
-    className: "mg-h-tab mg-onphoto"
+    className: 'mg-h-tab' + (_night ? ' mg-onphoto' : ''),
+    style: _night ? undefined : {
+      color: 'var(--mg-ink, #22314a)'
+    }
   }, T({
     ja: 'あなたのまち',
     easy: 'あなた の まち',
@@ -28157,17 +28335,14 @@ function PageTown() {
       marginTop: 10
     }
   }, React.createElement("span", {
+    className: "mg-liquid",
     style: {
       display: 'inline-flex',
       alignItems: 'center',
       gap: 6,
       padding: '9px 16px',
-      borderRadius: 18,
-      background: 'rgba(255,255,255,.92)',
-      border: '1px solid rgba(255,255,255,.9)',
-      boxShadow: '0 10px 22px -6px rgba(34,49,74,.2), inset 0 1px 0 rgba(255,255,255,.9)',
       fontSize: 13.5,
-      fontWeight: 600,
+      fontWeight: 700,
       color: 'var(--mg-ink2, #33456a)'
     }
   }, React.createElement(Icon, {
@@ -28201,7 +28376,7 @@ function PageTown() {
       en: "Today's sky and the week ahead"
     }
   }), React.createElement("div", {
-    className: "mg-glass",
+    className: "mg-aqua",
     style: {
       borderRadius: 24,
       padding: 13
@@ -28376,7 +28551,7 @@ function PageTown() {
     style: {
       fontSize: 12.5,
       fontWeight: 600,
-      color: '#16723f'
+      color: 'var(--mg-st-ok, #16723f)'
     }
   }, T({
     ja: '平常運転',
