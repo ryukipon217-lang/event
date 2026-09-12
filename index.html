@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-<script>window.__MG_BUILD='20260912120751';</script>
+<script>window.__MG_BUILD='20260912123045';</script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>connec+a — 出会いが、まちを変えていく。</title>
@@ -546,10 +546,12 @@ html{ background:#e9edfc; }
    ============================================================ */
 .mg-glass-card{
   position:relative; isolation:isolate;
-  background:rgba(255,255,255,.22) !important;
+  background:rgba(18,28,50,.30) !important;   /* 写真の上で白文字が読める暗ガラス(代表要望: イベントカードの文字=白) */
   -webkit-backdrop-filter:blur(16px); backdrop-filter:blur(16px);
   border:1px solid transparent !important;
-  box-shadow:0 16px 40px -18px rgba(20,40,80,.42), inset 0 2px 1px rgba(255,255,255,.9), inset 0 -12px 22px -14px rgba(20,40,80,.20) !important;
+  box-shadow:0 16px 40px -18px rgba(10,20,45,.5), inset 0 1px 0 rgba(255,255,255,.5), inset 0 -12px 22px -14px rgba(0,0,0,.22) !important;
+  color:#fff;
+  --mg-ink:#f5f8fd; --mg-ink2:#e7eef9; --mg-ink3:#d7e1f1; --mg-ink4:#c2d0e6; --mg-ink5:#aabbd6; --mg-accent:#aab9f2;
 }
 .mg-glass-card::before{
   content:''; position:absolute; inset:0; border-radius:inherit; pointer-events:none; z-index:2; padding:1.3px;
@@ -558,7 +560,7 @@ html{ background:#e9edfc; }
   -webkit-mask-composite:xor; mask-composite:exclude;
 }
 @media (prefers-reduced-transparency: reduce){
-  .mg-glass-card{ -webkit-backdrop-filter:none; backdrop-filter:none; background:rgba(255,255,255,.96) !important; box-shadow:0 10px 26px -12px rgba(34,49,74,.3) !important; }
+  .mg-glass-card{ -webkit-backdrop-filter:none; backdrop-filter:none; background:rgba(22,32,54,.94) !important; box-shadow:0 10px 26px -12px rgba(10,20,45,.4) !important; }
   .mg-glass-card::before{ display:none; }
 }
 /* 申し込む等のガラスCTA(periwinkleティント+背後ぼかし+縁の光。色で押せる感は維持) */
