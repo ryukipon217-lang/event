@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-<script>window.__MG_BUILD='20260912063633';</script>
+<script>window.__MG_BUILD='20260912094949';</script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>connec+a — 出会いが、まちを変えていく。</title>
@@ -502,6 +502,41 @@ html{ background:#e9edfc; }
 }
 .mg-tabbar-item[data-on]:not([data-on="0"]):not([data-on="false"]),
 .mg-tabbar-item.is-on{ color:var(--mg-ink); }
+
+/* ============================================================
+   タブバー リキッドガラス化(2026-09-12 再設計 / liquid-glass skill)
+   レール無しのクリアガラス。選択=素通しのレンズが指を追って滑り膨らむ(Kyant0 LiquidBottomTabs 準拠)。
+   屈折はChromiumのみJSで後付け(iOS Safari等は下のぼかし+縁のまま=安全)。
+   ============================================================ */
+.mg-tabbar-glass{
+  background:rgba(255,255,255,.34);   /* 白背景でも存在感が出る濃度(代表確認: 薄.20/中.34/濃.48 → 中採用) */
+  -webkit-backdrop-filter:blur(14px); backdrop-filter:blur(14px);
+  border:1px solid rgba(255,255,255,.30);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.5), inset 0 -6px 14px -10px rgba(20,40,80,.14), 0 8px 24px -10px rgba(34,49,74,.20);
+}
+.mg-tabbar-glass::before{
+  content:''; position:absolute; inset:0; border-radius:inherit; pointer-events:none; z-index:1; padding:1px;
+  background:linear-gradient(150deg, rgba(255,255,255,.62), rgba(255,255,255,0) 42%, rgba(255,255,255,.34));
+  -webkit-mask:linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite:xor; mask-composite:exclude;
+}
+/* 走る選択カプセル=素通しレンズ(白塗り無し・縁の光と内側ハイライトで浮かせる) */
+.mg-tabpill-lens{
+  width:54px; height:48px; border-radius:24px;
+  background:rgba(255,255,255,.06);
+  border:1px solid rgba(255,255,255,.62);
+  box-shadow:inset 0 1.5px 1px rgba(255,255,255,.85), inset 0 -3px 5px rgba(70,105,170,.12), 0 3px 10px rgba(40,70,130,.14);
+  -webkit-backdrop-filter:blur(5px); backdrop-filter:blur(5px);
+  transition:transform .2s ease;
+}
+/* タブ切替時のふくらみ(大きめ=代表要望2026-09-12)。ドラッグ中はJSで直接scale */
+@keyframes mgPillBulge{ 0%{ transform:scale(1) } 42%{ transform:scale(1.28) } 100%{ transform:scale(1) } }
+@media (prefers-reduced-transparency: reduce){
+  .mg-tabbar-glass{ -webkit-backdrop-filter:none; backdrop-filter:none; background:rgba(255,255,255,.97); }
+  .mg-tabbar-glass::before{ display:none; }
+  .mg-tabpill-lens{ -webkit-backdrop-filter:none; backdrop-filter:none; background:rgba(110,134,224,.16); }
+}
+@media (prefers-reduced-motion: reduce){ .mg-tabpill-lens{ animation:none !important; } }
 
 /* チケットクイックピル(fixed left20 bottom96 h44。ブラー無しカード面) */
 .mg-ticket-pill{
@@ -35153,6 +35188,126 @@ function MgToast({
     }
   }, err ? 'error' : 'check_circle'), React.createElement("span", null, t.msg)));
 }
+var _MG_LG_PROFILE = function () {
+  var f = function (u) {
+    u = Math.min(1, Math.max(0, u));
+    return Math.pow(1 - Math.pow(1 - u, 4), 1 / 4);
+  };
+  var eps = 0.001,
+    n = 1 / 1.5,
+    arr = [],
+    max = 0,
+    S = 128;
+  for (var i = 0; i <= S; i++) {
+    var t = i / S,
+      slope = (f(t + eps) - f(t - eps)) / (2 * eps);
+    var th1 = Math.atan(slope),
+      th2 = Math.asin(Math.min(1, n * Math.sin(th1))),
+      d = Math.tan(th1 - th2);
+    arr.push(d);
+    if (d > max) max = d;
+  }
+  return arr.map(function (v) {
+    return max > 0 ? v / max : 0;
+  });
+}();
+function _mgLgProfile(t) {
+  var x = Math.min(1, Math.max(0, t)) * (_MG_LG_PROFILE.length - 1),
+    i = Math.floor(x),
+    fr = x - i;
+  return _MG_LG_PROFILE[i] * (1 - fr) + _MG_LG_PROFILE[Math.min(i + 1, _MG_LG_PROFILE.length - 1)] * fr;
+}
+function _mgSdRR(x, y, w, h, r) {
+  var qx = Math.abs(x - w / 2) - (w / 2 - r),
+    qy = Math.abs(y - h / 2) - (h / 2 - r);
+  return Math.hypot(Math.max(qx, 0), Math.max(qy, 0)) + Math.min(Math.max(qx, qy), 0) - r;
+}
+function _mgDispMap(w, h, radius, bezel) {
+  var q = Math.min(1, 300 / Math.max(w, h));
+  var W = Math.max(8, Math.round(w * q)),
+    H = Math.max(8, Math.round(h * q));
+  var R = Math.max(1, radius * q),
+    B = Math.max(2, bezel * q);
+  var c = document.createElement('canvas');
+  c.width = W;
+  c.height = H;
+  var ctx = c.getContext('2d'),
+    img = ctx.createImageData(W, H),
+    d = img.data;
+  for (var y = 0; y < H; y++) for (var x = 0; x < W; x++) {
+    var i = (y * W + x) * 4,
+      dist = _mgSdRR(x + 0.5, y + 0.5, W, H, R),
+      depth = -dist,
+      rx = 0,
+      ry = 0;
+    if (dist < 0 && depth < B) {
+      var mag = _mgLgProfile(depth / B);
+      var gx = _mgSdRR(x + 1.5, y + 0.5, W, H, R) - _mgSdRR(x - 0.5, y + 0.5, W, H, R);
+      var gy = _mgSdRR(x + 0.5, y + 1.5, W, H, R) - _mgSdRR(x + 0.5, y - 0.5, W, H, R);
+      var gl = Math.hypot(gx, gy) || 1;
+      rx = gx / gl * mag;
+      ry = gy / gl * mag;
+    }
+    d[i] = 128 + rx * 127;
+    d[i + 1] = 128 + ry * 127;
+    d[i + 2] = 128;
+    d[i + 3] = 255;
+  }
+  ctx.putImageData(img, 0, 0);
+  return c.toDataURL();
+}
+var _mgLgN = 0;
+function _mgGlassRefract(el, opts) {
+  opts = opts || {};
+  var rect = el.getBoundingClientRect(),
+    w = Math.round(rect.width),
+    h = Math.round(rect.height);
+  if (w < 4 || h < 4) return;
+  var cs = getComputedStyle(el);
+  var radius = Math.min(parseFloat(cs.borderTopLeftRadius) || 24, Math.min(w, h) / 2);
+  var bezel = Math.min(opts.bezel != null ? opts.bezel : 16, Math.min(w, h) / 2 - 1);
+  var blur = opts.blur != null ? opts.blur : 8,
+    scale = opts.refraction != null ? opts.refraction : 16;
+  var NS = 'http://www.w3.org/2000/svg';
+  var root = document.getElementById('mg-lg-root');
+  if (!root) {
+    root = document.createElementNS(NS, 'svg');
+    root.setAttribute('id', 'mg-lg-root');
+    root.setAttribute('aria-hidden', 'true');
+    root.style.cssText = 'position:absolute;width:0;height:0;overflow:hidden;pointer-events:none';
+    document.body.appendChild(root);
+  }
+  var id = el.getAttribute('data-mg-lg');
+  if (!id) {
+    id = 'mglg' + _mgLgN++;
+    el.setAttribute('data-mg-lg', id);
+  }
+  var map = _mgDispMap(w, h, radius, Math.max(2, bezel));
+  var old = document.getElementById(id);
+  if (old) old.remove();
+  var f = document.createElementNS(NS, 'filter');
+  f.setAttribute('id', id);
+  f.setAttribute('color-interpolation-filters', 'sRGB');
+  f.setAttribute('x', '0');
+  f.setAttribute('y', '0');
+  f.setAttribute('width', '100%');
+  f.setAttribute('height', '100%');
+  f.innerHTML = '<feImage href="' + map + '" x="0" y="0" width="' + w + '" height="' + h + '" preserveAspectRatio="none" result="m"/>' + '<feDisplacementMap in="SourceGraphic" in2="m" scale="' + scale + '" xChannelSelector="R" yChannelSelector="G"/>';
+  root.appendChild(f);
+  var fx = 'blur(' + blur + 'px) saturate(1.05) url(#' + id + ')';
+  el.style.webkitBackdropFilter = fx;
+  el.style.backdropFilter = fx;
+}
+function _mgIsChromium() {
+  try {
+    var b = navigator.userAgentData && navigator.userAgentData.brands;
+    return !!(b && b.some(function (x) {
+      return /Chromium|Google Chrome/.test(x.brand);
+    }));
+  } catch (e) {
+    return false;
+  }
+}
 function MgTabBar({
   tab,
   lang,
@@ -35179,8 +35334,7 @@ function MgTabBar({
       ja: 'まち',
       easy: 'まち',
       en: 'Town'
-    },
-    center: true
+    }
   }, {
     icon: 'menu_book',
     label: {
@@ -35211,6 +35365,38 @@ function MgTabBar({
     hover: -1,
     blockClickUntil: 0
   });
+  React.useEffect(() => {
+    const el = navRef.current;
+    if (!el || !_mgIsChromium()) return;
+    if (window.matchMedia && window.matchMedia('(prefers-reduced-transparency: reduce)').matches) return;
+    let raf = 0;
+    const apply = () => {
+      try {
+        _mgGlassRefract(el, {
+          refraction: 16,
+          bezel: 14,
+          blur: 12
+        });
+      } catch (e) {}
+    };
+    const t = setTimeout(apply, 60);
+    const onR = () => {
+      cancelAnimationFrame(raf);
+      raf = requestAnimationFrame(apply);
+    };
+    window.addEventListener('resize', onR);
+    let ro = null;
+    if ('ResizeObserver' in window) {
+      ro = new ResizeObserver(onR);
+      ro.observe(el);
+    }
+    return () => {
+      clearTimeout(t);
+      cancelAnimationFrame(raf);
+      window.removeEventListener('resize', onR);
+      if (ro) ro.disconnect();
+    };
+  }, []);
   const onDown = React.useCallback(e => {
     if (e.isPrimary === false) return;
     const d = _d.current;
@@ -35242,7 +35428,7 @@ function MgTabBar({
         pillRef.current.style.transition = 'transform .12s ease-out, opacity .2s ease';
         pillRef.current.style.opacity = '1';
       }
-      if (bubbleRef.current) bubbleRef.current.style.transform = 'scaleX(1.14) scaleY(.92)';
+      if (bubbleRef.current) bubbleRef.current.style.transform = 'scale(1.28)';
     }
     d.px = Math.max(0, Math.min(4 * d.cw, e.clientX - d.navLeft - 6 - d.cw / 2));
     if (pillRef.current) pillRef.current.style.transform = 'translateX(' + d.px.toFixed(1) + 'px)';
@@ -35272,7 +35458,7 @@ function MgTabBar({
       el.style.transition = 'transform .42s cubic-bezier(.22,1.4,.36,1), opacity .3s ease';
       void el.offsetWidth;
       el.style.transform = 'translateX(' + nearest * 100 + '%)';
-      el.style.opacity = nearest === 2 ? '0' : '1';
+      el.style.opacity = '1';
     }
     if (bubbleRef.current) bubbleRef.current.style.transform = '';
     d.blockClickUntil = Date.now() + 350;
@@ -35286,7 +35472,7 @@ function MgTabBar({
   }, []);
   return React.createElement("nav", {
     ref: navRef,
-    className: "mg-tabbar-flt",
+    className: "mg-tabbar-flt mg-tabbar-glass",
     onPointerDown: onDown,
     onPointerMove: onMove,
     onPointerUp: onUp,
@@ -35301,10 +35487,8 @@ function MgTabBar({
       height: 64,
       borderRadius: 32,
       zIndex: 40,
-      background: 'rgba(255,255,255,.97)',
-      border: '1px solid rgba(34,49,74,.07)',
-      boxShadow: '0 1px 2px rgba(34,49,74,.05), 0 10px 26px -6px rgba(34,49,74,.14), 0 26px 54px -20px rgba(34,49,74,.22), inset 0 1px 0 #fff',
-      transform: hidden ? 'translate(-50%, 220%)' : 'translate(-50%, 0)',
+      isolation: 'isolate',
+      transform: hidden ? 'translate(-50%, 160%)' : 'translate(-50%, 0)',
       transition: 'transform .46s ' + _shell_EASE,
       touchAction: 'none',
       userSelect: 'none',
@@ -35325,19 +35509,15 @@ function MgTabBar({
       justifyContent: 'center',
       transform: 'translateX(' + tab * 100 + '%)',
       transition: 'transform .46s ' + _shell_EASE + ', opacity .3s ease',
-      opacity: tab === 2 ? 0 : 1,
+      opacity: 1,
       pointerEvents: 'none'
     }
   }, React.createElement("div", {
+    key: tab,
     ref: bubbleRef,
+    className: "mg-tabpill-lens",
     style: {
-      width: 52,
-      height: 52,
-      borderRadius: 26,
-      background: 'rgba(110,134,224,.10)',
-      border: '1px solid rgba(110,134,224,.22)',
-      boxShadow: 'inset 0 1px 0 rgba(255,255,255,.7), 0 2px 8px rgba(110,134,224,.16)',
-      transition: 'transform .18s ease'
+      animation: 'mgPillBulge .5s ease'
     }
   })), React.createElement("div", {
     style: {
@@ -35347,60 +35527,7 @@ function MgTabBar({
       height: '100%',
       padding: '0 6px'
     }
-  }, items.map((it, i) => it.center ? React.createElement("button", {
-    key: it.icon,
-    type: "button",
-    className: "mg-tap",
-    onClick: () => onTab(i),
-    "aria-label": it.label[lang] || it.label.ja,
-    "aria-current": tab === i ? 'page' : undefined,
-    style: {
-      background: 'none',
-      border: 0,
-      padding: 0,
-      cursor: 'pointer',
-      position: 'relative',
-      width: '100%',
-      height: '100%',
-      WebkitTapHighlightColor: 'transparent'
-    }
-  }, React.createElement("span", {
-    style: {
-      position: 'absolute',
-      left: '50%',
-      top: -26,
-      width: 58,
-      height: 58,
-      borderRadius: 29,
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      background: 'linear-gradient(180deg, #7e93e8 0%, #5f76d6 100%)',
-      boxShadow: tab === i ? '0 2px 4px rgba(52,70,150,.30), 0 14px 28px -6px rgba(79,99,196,.52), inset 0 1px 0 rgba(255,255,255,.42)' : '0 2px 4px rgba(52,70,150,.24), 0 9px 20px -5px rgba(79,99,196,.40), inset 0 1px 0 rgba(255,255,255,.42)',
-      border: '3px solid rgba(255,255,255,.97)',
-      transition: 'box-shadow .3s, transform .3s cubic-bezier(.34,1.56,.64,1)',
-      transform: tab === i ? 'translateX(-50%) translateY(-3px) scale(1.05)' : 'translateX(-50%)'
-    }
-  }, React.createElement("span", {
-    className: "msr",
-    style: {
-      fontSize: 30,
-      color: '#fff'
-    }
-  }, it.icon)), React.createElement("span", {
-    className: "mg-ui",
-    style: {
-      position: 'absolute',
-      left: '50%',
-      transform: 'translateX(-50%)',
-      bottom: 3,
-      fontSize: 9,
-      fontWeight: 600,
-      letterSpacing: '.08em',
-      whiteSpace: 'nowrap',
-      color: '#5f76d6'
-    }
-  }, it.label[lang] || it.label.ja)) : React.createElement("button", {
+  }, items.map((it, i) => React.createElement("button", {
     key: it.icon,
     type: "button",
     className: "mg-tap",
@@ -35413,10 +35540,9 @@ function MgTabBar({
       padding: 0,
       cursor: 'pointer',
       display: 'flex',
-      flexDirection: 'column',
       alignItems: 'center',
       justifyContent: 'center',
-      gap: 1,
+      minHeight: 44,
       WebkitTapHighlightColor: 'transparent'
     }
   }, React.createElement("span", {
@@ -35424,23 +35550,15 @@ function MgTabBar({
       iconRefs.current[i] = el;
     },
     className: "msr",
+    "aria-hidden": "true",
     style: {
-      fontSize: 24,
-      color: tab === i ? '#22314a' : '#7f94ab',
+      fontSize: 25,
+      color: tab === i ? 'var(--mg-accent, #5566cf)' : '#8195b4',
+      textShadow: tab === i ? 'none' : '0 1px 2px rgba(255,255,255,.5)',
       transition: 'color .3s, transform .2s cubic-bezier(.34,1.56,.64,1)',
       animation: tab === i ? 'mgTabPop .5s cubic-bezier(.34,1.56,.64,1)' : 'none'
     }
-  }, it.icon), React.createElement("span", {
-    className: "mg-ui",
-    style: {
-      fontSize: 9,
-      fontWeight: 600,
-      letterSpacing: '.06em',
-      whiteSpace: 'nowrap',
-      color: tab === i ? '#22314a' : '#7f94ab',
-      transition: 'color .3s'
-    }
-  }, it.label[lang] || it.label.ja)))));
+  }, it.icon)))));
 }
 class _ShellErrorBoundary extends React.Component {
   constructor(props) {
