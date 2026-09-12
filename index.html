@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-<script>window.__MG_BUILD='20260912123045';</script>
+<script>window.__MG_BUILD='20260912124812';</script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>connec+a — 出会いが、まちを変えていく。</title>
@@ -544,11 +544,16 @@ html{ background:#e9edfc; }
    ホーム リキッドガラス(2026-09-12)。背景=設定のヒーロー写真。
    材質=透明地(文字可読のため僅かにフロスト)+鋭い縁の光+厚み。屈折はChromiumでJS後付け。
    ============================================================ */
+/* 昼(既定)=白ガラス+暗文字。夜(.mg-home-night)=暗ガラス+白文字。時刻18:00-6:00で親にクラス付与。 */
 .mg-glass-card{
   position:relative; isolation:isolate;
-  background:rgba(18,28,50,.30) !important;   /* 写真の上で白文字が読める暗ガラス(代表要望: イベントカードの文字=白) */
+  background:rgba(255,255,255,.30) !important;
   -webkit-backdrop-filter:blur(16px); backdrop-filter:blur(16px);
   border:1px solid transparent !important;
+  box-shadow:0 16px 40px -18px rgba(20,40,80,.42), inset 0 2px 1px rgba(255,255,255,.9), inset 0 -12px 22px -14px rgba(20,40,80,.20) !important;
+}
+.mg-home-night .mg-glass-card{
+  background:rgba(18,28,50,.34) !important;
   box-shadow:0 16px 40px -18px rgba(10,20,45,.5), inset 0 1px 0 rgba(255,255,255,.5), inset 0 -12px 22px -14px rgba(0,0,0,.22) !important;
   color:#fff;
   --mg-ink:#f5f8fd; --mg-ink2:#e7eef9; --mg-ink3:#d7e1f1; --mg-ink4:#c2d0e6; --mg-ink5:#aabbd6; --mg-accent:#aab9f2;
@@ -560,7 +565,8 @@ html{ background:#e9edfc; }
   -webkit-mask-composite:xor; mask-composite:exclude;
 }
 @media (prefers-reduced-transparency: reduce){
-  .mg-glass-card{ -webkit-backdrop-filter:none; backdrop-filter:none; background:rgba(22,32,54,.94) !important; box-shadow:0 10px 26px -12px rgba(10,20,45,.4) !important; }
+  .mg-glass-card{ -webkit-backdrop-filter:none; backdrop-filter:none; background:rgba(255,255,255,.96) !important; box-shadow:0 10px 26px -12px rgba(34,49,74,.3) !important; }
+  .mg-home-night .mg-glass-card{ background:rgba(22,32,54,.94) !important; box-shadow:0 10px 26px -12px rgba(10,20,45,.4) !important; }
   .mg-glass-card::before{ display:none; }
 }
 /* 申し込む等のガラスCTA(periwinkleティント+背後ぼかし+縁の光。色で押せる感は維持) */
@@ -9326,7 +9332,8 @@ function _home_NotifBell({
 }
 function _home_MachiCard({
   A,
-  lang
+  lang,
+  night
 }) {
   const H = (ja, easy, en) => lang === 'easy' ? easy : lang === 'en' ? en : ja;
   const pref = A.user && A.user.prefecture || '';
@@ -9438,11 +9445,11 @@ function _home_MachiCard({
       borderRadius: 16,
       cursor: 'pointer',
       textAlign: 'left',
-      background: 'rgba(255,255,255,.34)',
+      background: night ? 'rgba(255,255,255,.10)' : 'rgba(255,255,255,.34)',
       WebkitBackdropFilter: 'blur(10px)',
       backdropFilter: 'blur(10px)',
-      border: '1px solid rgba(255,255,255,.5)',
-      boxShadow: 'inset 0 1px 0 rgba(255,255,255,.7)'
+      border: night ? '1px solid rgba(255,255,255,.16)' : '1px solid rgba(255,255,255,.5)',
+      boxShadow: night ? 'inset 0 1px 0 rgba(255,255,255,.22)' : 'inset 0 1px 0 rgba(255,255,255,.7)'
     }
   }, React.createElement("span", {
     style: {
@@ -9495,13 +9502,11 @@ function _home_MachiCard({
       animation: 'mgFade 1s .5s ease both'
     }
   }, React.createElement("div", {
+    className: "mg-glass-card",
     style: {
       position: 'relative',
       borderRadius: 28,
-      overflow: 'hidden',
-      background: bg,
-      border: '1px solid rgba(255,255,255,.6)',
-      boxShadow: '0 16px 40px -18px rgba(40,80,150,.4), inset 0 1px 0 rgba(255,255,255,.7)'
+      overflow: 'hidden'
     }
   }, React.createElement("div", {
     style: {
@@ -9530,7 +9535,7 @@ function _home_MachiCard({
     style: {
       fontSize: 15,
       fontWeight: 700,
-      color: '#4a5bb0',
+      color: 'var(--mg-accent, #4a5bb0)',
       letterSpacing: '.02em'
     }
   }, H('あなたのまち', 'あなた の まち', 'Your town'))), React.createElement("div", {
@@ -9581,7 +9586,7 @@ function _home_MachiCard({
   }, t0 ? H('最高', 'さいこう', 'H') + ' ' + t0.tmax + '° / ' + H('最低', 'さいてい', 'L') + ' ' + t0.tmin + '°' : H('天気を取得中…', 'よみこみ中…', 'Loading…')), t0 && t0.pop != null ? React.createElement("span", {
     className: "mg-num",
     style: {
-      color: '#3f72c9',
+      color: 'var(--mg-accent, #3f72c9)',
       fontWeight: 700,
       display: 'inline-flex',
       alignItems: 'center',
@@ -9592,7 +9597,7 @@ function _home_MachiCard({
     size: 15,
     fill: true,
     style: {
-      color: '#3f72c9'
+      color: 'var(--mg-accent, #3f72c9)'
     }
   }), t0.pop, "%") : null))), React.createElement("div", {
     style: {
@@ -9723,6 +9728,15 @@ function TabHome() {
     const slides = (Array.isArray(bundle.heroSlidesMobile) ? bundle.heroSlidesMobile : []).filter(s => s && s.imageUrl && s.enabled !== false);
     return slides[0] ? _home_img(slides[0].imageUrl, 1600) : '';
   }, [bundle.heroSlidesMobile]);
+  const _homeNight = (() => {
+    try {
+      if (typeof window !== 'undefined' && window.__mgHomeNight != null) return !!window.__mgHomeNight;
+      const h = new Date().getHours();
+      return h >= 18 || h < 6;
+    } catch (e) {
+      return false;
+    }
+  })();
   const _homeRef = React.useRef(null);
   React.useEffect(() => {
     if (!heroBg || !_homeRef.current || typeof _mgIsChromium !== 'function' || !_mgIsChromium()) return undefined;
@@ -9814,7 +9828,7 @@ function TabHome() {
     label: L(_home_T.statMembers)
   }];
   return React.createElement("div", {
-    className: "mg-ui",
+    className: 'mg-ui' + (_homeNight ? ' mg-home-night' : ''),
     ref: _homeRef,
     style: {
       color: 'var(--mg-ink, #22314a)',
@@ -9836,7 +9850,7 @@ function TabHome() {
       position: 'fixed',
       inset: 0,
       zIndex: -1,
-      background: 'linear-gradient(180deg, rgba(20,32,52,.36) 0%, rgba(233,240,247,.14) 24%, rgba(233,240,247,.28) 60%, rgba(233,240,247,.44) 100%)'
+      background: _homeNight ? 'linear-gradient(180deg, rgba(8,14,30,.52) 0%, rgba(10,16,34,.44) 40%, rgba(10,16,34,.58) 100%)' : 'linear-gradient(180deg, rgba(20,32,52,.36) 0%, rgba(233,240,247,.14) 24%, rgba(233,240,247,.28) 60%, rgba(233,240,247,.44) 100%)'
     }
   })) : null, React.createElement("div", {
     style: {
@@ -10107,7 +10121,8 @@ function TabHome() {
     key: i
   }, ln))))), React.createElement(_home_MachiCard, {
     A: A,
-    lang: lang
+    lang: lang,
+    night: _homeNight
   }), others.length > 0 && React.createElement("div", {
     style: {
       display: 'flex',
