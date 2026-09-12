@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-<script>window.__MG_BUILD='20260912100659';</script>
+<script>window.__MG_BUILD='20260912101947';</script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>connec+a — 出会いが、まちを変えていく。</title>
@@ -9282,6 +9282,306 @@ function _home_NotifBell({
     }));
   }))), document.body));
 }
+function _home_MachiCard({
+  A,
+  lang
+}) {
+  const H = (ja, easy, en) => lang === 'easy' ? easy : lang === 'en' ? en : ja;
+  const pref = A.user && A.user.prefecture || '';
+  const city = A.user && A.user.city || '';
+  const rec = typeof mgCityRec === 'function' && city ? mgCityRec(pref, city) : null;
+  const lat = rec ? rec[2] : null,
+    lng = rec ? rec[3] : null;
+  const [wk, setWk] = useState(null);
+  useEffect(() => {
+    if (lat == null || typeof _ev_weeklyFor !== 'function') return undefined;
+    let dead = false;
+    (async () => {
+      try {
+        const w = await _ev_weeklyFor(lat, lng);
+        if (!dead && w) setWk(w);
+      } catch (e) {}
+    })();
+    return () => {
+      dead = true;
+    };
+  }, [lat, lng]);
+  const go = () => A.go('/town');
+  const prefDisp = typeof mgOptLabel === 'function' && pref ? mgOptLabel(pref, lang) : pref;
+  const cityDisp = typeof mgOptLabel === 'function' && city ? mgOptLabel(city, lang) : city;
+  if (!city) {
+    return React.createElement("div", {
+      style: {
+        padding: '20px 18px 0',
+        animation: 'mgFade 1s .5s ease both'
+      }
+    }, React.createElement("button", {
+      type: "button",
+      className: "mg-tap mg-ui",
+      onClick: go,
+      style: {
+        width: '100%',
+        textAlign: 'left',
+        border: '1px solid rgba(255,255,255,.6)',
+        borderRadius: 26,
+        padding: '18px',
+        cursor: 'pointer',
+        display: 'flex',
+        alignItems: 'center',
+        gap: 14,
+        background: 'radial-gradient(120% 120% at 50% -20%, #eaf4fe, #cfe4f8 46%, #b6d6f2 100%)',
+        boxShadow: '0 12px 30px -16px rgba(40,80,150,.4), inset 0 1px 0 rgba(255,255,255,.7)'
+      }
+    }, React.createElement("span", {
+      style: {
+        width: 46,
+        height: 46,
+        borderRadius: 15,
+        flex: 'none',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        background: 'rgba(110,134,224,.18)'
+      }
+    }, React.createElement(Icon, {
+      name: "location_city",
+      size: 26,
+      style: {
+        color: '#5a6dd0'
+      }
+    })), React.createElement("span", {
+      style: {
+        flex: 1,
+        minWidth: 0
+      }
+    }, React.createElement("span", {
+      className: "mg-serif",
+      style: {
+        display: 'block',
+        fontSize: 18,
+        color: 'var(--mg-ink, #22314a)'
+      }
+    }, H('あなたのまちを設定', 'あなた の まち を せってい', 'Set your town')), React.createElement("span", {
+      style: {
+        display: 'block',
+        fontSize: 12.5,
+        color: 'var(--mg-ink4, #5b7796)',
+        marginTop: 2
+      }
+    }, H('天気・くらし・運行をまとめて', 'てんき や せいかつ じょうほう', 'Weather, life & transit in one place'))), React.createElement(Icon, {
+      name: "arrow_forward",
+      size: 22,
+      style: {
+        color: 'var(--mg-accent, #6e86e0)',
+        flex: 'none'
+      }
+    })));
+  }
+  const days = wk && Array.isArray(wk.days) ? wk.days : [];
+  const t0 = days[0] || null;
+  const m0 = t0 && typeof _ev_WMO === 'function' ? _ev_WMO(t0.code) : null;
+  const kind = m0 ? m0.mi : 'clear';
+  const bg = typeof _town_wxBg === 'function' ? _town_wxBg(kind, false) : 'radial-gradient(120% 120% at 50% -20%, #eaf4fe, #cfe4f8 46%, #b6d6f2 100%)';
+  const chip = (ic, fg, bgc, title, sub) => React.createElement("button", {
+    type: "button",
+    className: "mg-tap mg-ui",
+    onClick: go,
+    style: {
+      display: 'flex',
+      alignItems: 'center',
+      gap: 10,
+      padding: '12px 13px',
+      borderRadius: 16,
+      cursor: 'pointer',
+      textAlign: 'left',
+      background: 'rgba(255,255,255,.34)',
+      WebkitBackdropFilter: 'blur(10px)',
+      backdropFilter: 'blur(10px)',
+      border: '1px solid rgba(255,255,255,.5)',
+      boxShadow: 'inset 0 1px 0 rgba(255,255,255,.7)'
+    }
+  }, React.createElement("span", {
+    style: {
+      width: 34,
+      height: 34,
+      borderRadius: 11,
+      flex: 'none',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      background: bgc
+    }
+  }, React.createElement(Icon, {
+    name: ic,
+    size: 20,
+    style: {
+      color: fg
+    }
+  })), React.createElement("span", {
+    style: {
+      minWidth: 0
+    }
+  }, React.createElement("span", {
+    style: {
+      display: 'block',
+      fontWeight: 700,
+      fontSize: 13,
+      color: 'var(--mg-ink2, #33456a)',
+      lineHeight: 1.25
+    }
+  }, title), React.createElement("span", {
+    style: {
+      display: 'block',
+      fontWeight: 600,
+      fontSize: 10.5,
+      color: 'var(--mg-ink4, #7088a6)',
+      marginTop: 1,
+      whiteSpace: 'nowrap',
+      overflow: 'hidden',
+      textOverflow: 'ellipsis'
+    }
+  }, sub)));
+  return React.createElement("div", {
+    style: {
+      padding: '20px 18px 0',
+      animation: 'mgFade 1s .5s ease both'
+    }
+  }, React.createElement("div", {
+    style: {
+      position: 'relative',
+      borderRadius: 28,
+      overflow: 'hidden',
+      background: bg,
+      border: '1px solid rgba(255,255,255,.6)',
+      boxShadow: '0 16px 40px -18px rgba(40,80,150,.4), inset 0 1px 0 rgba(255,255,255,.7)'
+    }
+  }, React.createElement("div", {
+    style: {
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      padding: '16px 18px 0'
+    }
+  }, React.createElement("span", {
+    style: {
+      display: 'inline-flex',
+      alignItems: 'center',
+      gap: 5,
+      fontWeight: 700,
+      fontSize: 14,
+      color: 'var(--mg-ink2, #33456a)'
+    }
+  }, React.createElement(Icon, {
+    name: "location_on",
+    size: 18,
+    style: {
+      color: 'var(--mg-accent, #6e86e0)'
+    }
+  }), prefDisp ? prefDisp + ' ' : '', cityDisp), React.createElement("span", {
+    className: "mg-serif",
+    style: {
+      fontSize: 15,
+      fontWeight: 700,
+      color: '#4a5bb0',
+      letterSpacing: '.02em'
+    }
+  }, H('あなたのまち', 'あなた の まち', 'Your town'))), React.createElement("div", {
+    style: {
+      display: 'flex',
+      alignItems: 'center',
+      gap: 14,
+      padding: '6px 20px 14px'
+    }
+  }, React.createElement("span", {
+    "aria-hidden": "true",
+    style: {
+      width: 64,
+      height: 64,
+      flex: 'none',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center'
+    }
+  }, React.createElement(_WxIcon, {
+    kind: kind,
+    size: 58
+  })), React.createElement("div", null, React.createElement("div", {
+    className: "mg-num",
+    style: {
+      fontSize: 52,
+      lineHeight: 1,
+      color: 'var(--mg-ink, #22314a)',
+      letterSpacing: '-.02em'
+    }
+  }, t0 ? t0.tmax : '—', React.createElement("span", {
+    style: {
+      fontSize: 26
+    }
+  }, "\xB0")), React.createElement("div", {
+    style: {
+      display: 'flex',
+      gap: 12,
+      alignItems: 'center',
+      marginTop: 6,
+      fontSize: 13
+    }
+  }, React.createElement("span", {
+    className: "mg-num",
+    style: {
+      color: 'var(--mg-ink4, #5b7796)'
+    }
+  }, t0 ? H('最高', 'さいこう', 'H') + ' ' + t0.tmax + '° / ' + H('最低', 'さいてい', 'L') + ' ' + t0.tmin + '°' : H('天気を取得中…', 'よみこみ中…', 'Loading…')), t0 && t0.pop != null ? React.createElement("span", {
+    className: "mg-num",
+    style: {
+      color: '#3f72c9',
+      fontWeight: 700,
+      display: 'inline-flex',
+      alignItems: 'center',
+      gap: 3
+    }
+  }, React.createElement(Icon, {
+    name: "water_drop",
+    size: 15,
+    fill: true,
+    style: {
+      color: '#3f72c9'
+    }
+  }), t0.pop, "%") : null))), React.createElement("div", {
+    style: {
+      display: 'grid',
+      gridTemplateColumns: '1fr 1fr',
+      gap: 10,
+      padding: '0 18px 4px'
+    }
+  }, chip('cottage', '#5a6dd0', 'rgba(110,134,224,.16)', H('くらしの窓口', 'くらし の まどぐち', 'Living'), H('手続き・生活ガイド', 'てつづき', 'Procedures & guides')), chip('directions_transit', '#3f7fd0', 'rgba(74,123,208,.16)', H('交通・運行', 'こうつう', 'Transit'), H('鉄道の遅延・運休', 'でんしゃ の じょうほう', 'Live train status')), chip('delete', '#2f9d6f', 'rgba(63,174,122,.16)', H('ゴミ・分別', 'ゴミ', 'Garbage'), H('収集日・多言語', 'しゅうしゅうび', 'Collection days')), chip('festival', '#c07a1e', 'rgba(224,160,60,.18)', H('イベント', 'イベント', 'Events'), H('まちの催し', 'まち の イベント', 'Local events'))), React.createElement("button", {
+    type: "button",
+    className: "mg-tap mg-ui",
+    onClick: go,
+    style: {
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      gap: 8,
+      width: 'calc(100% - 36px)',
+      margin: '12px 18px 18px',
+      height: 52,
+      borderRadius: 16,
+      border: 0,
+      cursor: 'pointer',
+      background: 'linear-gradient(180deg, #7e93e8, #5f76d6)',
+      color: '#fff',
+      fontWeight: 800,
+      fontSize: 15.5,
+      boxShadow: '0 10px 22px -8px rgba(79,99,196,.6), inset 0 1px 0 rgba(255,255,255,.4)'
+    }
+  }, H('あなたのまちを開く', 'あなた の まち を ひらく', 'Open your town'), React.createElement(Icon, {
+    name: "arrow_forward",
+    size: 20,
+    style: {
+      color: '#fff'
+    }
+  }))));
+}
 function TabHome() {
   const A = useMg();
   const lang = A.lang || 'ja';
@@ -9705,7 +10005,10 @@ function TabHome() {
     className: "msr"
   }, "auto_awesome")), L(_home_T.emptyEvents).split('\n').map((ln, i) => React.createElement("div", {
     key: i
-  }, ln))))), others.length > 0 && React.createElement("div", {
+  }, ln))))), React.createElement(_home_MachiCard, {
+    A: A,
+    lang: lang
+  }), others.length > 0 && React.createElement("div", {
     style: {
       display: 'flex',
       flexDirection: 'column',
