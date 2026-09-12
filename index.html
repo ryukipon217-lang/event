@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-<script>window.__MG_BUILD='20260912143700';</script>
+<script>window.__MG_BUILD='20260912150945';</script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>connec+a — 出会いが、まちを変えていく。</title>
@@ -565,8 +565,9 @@ html{ background:#e9edfc; }
 .mg-glasspage .mg-card,
 .mg-glasspage .mg-card-lg{
   position:relative; isolation:isolate;
-  background:rgba(255,255,255,.26) !important;
-  -webkit-backdrop-filter:blur(24px) saturate(115%); backdrop-filter:blur(24px) saturate(115%);
+  /* (2026-09-13) 写真ごとにコンソールで調整(カードのみ): 白の不透明度と背後ぼかしを CSS変数化。既定=従来値。 */
+  background:rgba(255,255,255, var(--mg-card-white,.26)) !important;
+  -webkit-backdrop-filter:blur(var(--mg-card-blur,24px)) saturate(115%); backdrop-filter:blur(var(--mg-card-blur,24px)) saturate(115%);
   border:1px solid transparent !important;
   box-shadow:0 16px 40px -18px rgba(20,40,80,.42), inset 0 2px 1px rgba(255,255,255,.9), inset 0 -12px 22px -14px rgba(20,40,80,.20) !important;
 }
@@ -574,7 +575,7 @@ html{ background:#e9edfc; }
 .mg-night .mg-glass-card,
 .mg-night.mg-glasspage .mg-card,
 .mg-night.mg-glasspage .mg-card-lg{
-  background:rgba(18,28,50,.30) !important;
+  background:rgba(18,28,50, var(--mg-card-dark,.30)) !important;   /* (2026-09-13) 夜=暗ガラスの不透明度も写真ごとに調整(ぼかしは昼ブロックのvarを継承) */
   box-shadow:0 16px 40px -18px rgba(10,20,45,.5), inset 0 1px 0 rgba(255,255,255,.5), inset 0 -12px 22px -14px rgba(0,0,0,.22) !important;
 }
 /* 縁の光リム */
@@ -9737,17 +9738,6 @@ function TabHome() {
       surveys: unanswered
     });
   };
-  const bandImg = React.useMemo(() => {
-    const slides = (Array.isArray(bundle.heroSlidesMobile) ? bundle.heroSlidesMobile : []).filter(s => s && s.imageUrl && s.enabled !== false);
-    if (slides[1] && slides[1].imageUrl) return _home_img(slides[1].imageUrl, 1600);
-    if (featured && (featured.heroImageUrl || featured.posterUrl)) return _home_img(featured.heroImageUrl || featured.posterUrl, 1600);
-    if (slides[0] && slides[0].imageUrl) return _home_img(slides[0].imageUrl, 1600);
-    return '';
-  }, [bundle.heroSlidesMobile, featured]);
-  const heroBg = React.useMemo(() => {
-    const slides = (Array.isArray(bundle.heroSlidesMobile) ? bundle.heroSlidesMobile : []).filter(s => s && s.imageUrl && s.enabled !== false);
-    return slides[0] ? _home_img(slides[0].imageUrl, 1600) : '';
-  }, [bundle.heroSlidesMobile]);
   const _homeNight = typeof _mgIsNightNow === 'function' ? _mgIsNightNow() : (() => {
     try {
       const h = new Date().getHours();
@@ -9756,6 +9746,21 @@ function TabHome() {
       return false;
     }
   })();
+  const _bgSlide = React.useMemo(() => {
+    const slides = (Array.isArray(bundle.heroSlidesMobile) ? bundle.heroSlidesMobile : []).filter(s => s && s.imageUrl && s.enabled !== false);
+    return slides[0] || null;
+  }, [bundle.heroSlidesMobile]);
+  const _cardGlassVars = typeof _mgCardGlassVars === 'function' ? _mgCardGlassVars(_bgSlide) : {};
+  const bandImg = React.useMemo(() => {
+    const slides = (Array.isArray(bundle.heroSlidesMobile) ? bundle.heroSlidesMobile : []).filter(s => s && s.imageUrl && s.enabled !== false);
+    if (slides[1] && slides[1].imageUrl) return _home_img(_mgHeroImg(slides[1], _homeNight) || slides[1].imageUrl, 1600);
+    if (featured && (featured.heroImageUrl || featured.posterUrl)) return _home_img(featured.heroImageUrl || featured.posterUrl, 1600);
+    if (slides[0] && slides[0].imageUrl) return _home_img(_mgHeroImg(slides[0], _homeNight) || slides[0].imageUrl, 1600);
+    return '';
+  }, [bundle.heroSlidesMobile, featured, _homeNight]);
+  const heroBg = React.useMemo(() => {
+    return _bgSlide ? _home_img(_mgHeroImg(_bgSlide, _homeNight), 1600) : '';
+  }, [_bgSlide, _homeNight]);
   const _homeRef = React.useRef(null);
   React.useEffect(() => {
     if (!heroBg || !_homeRef.current || typeof _mgIsChromium !== 'function' || !_mgIsChromium()) return undefined;
@@ -9851,7 +9856,8 @@ function TabHome() {
     ref: _homeRef,
     style: {
       color: 'var(--mg-ink, #22314a)',
-      position: 'relative'
+      position: 'relative',
+      ..._cardGlassVars
     }
   }, heroBg ? React.createElement(React.Fragment, null, React.createElement("div", {
     "aria-hidden": "true",
@@ -12678,10 +12684,12 @@ function TabEvents() {
   const t = typeof I18N !== 'undefined' && (I18N[lang] || I18N.ja) || null;
   const [chip, setChip] = useState('all');
   const _evNight = typeof _mgIsNightNow === 'function' ? _mgIsNightNow() : false;
-  const _evHeroBg = (() => {
+  const _evBgSlide = (() => {
     const slides = A && A.bundle && Array.isArray(A.bundle.heroSlidesMobile) ? A.bundle.heroSlidesMobile.filter(s => s && s.imageUrl && s.enabled !== false) : [];
-    return slides[0] && typeof _home_img === 'function' ? _home_img(slides[0].imageUrl, 1600) : '';
+    return slides[0] || null;
   })();
+  const _evHeroBg = _evBgSlide && typeof _home_img === 'function' ? _home_img(_mgHeroImg(_evBgSlide, _evNight), 1600) : '';
+  const _evCardGlassVars = typeof _mgCardGlassVars === 'function' ? _mgCardGlassVars(_evBgSlide) : {};
   const events = React.useMemo(() => _ev_publicEvents(A && A.bundle && A.bundle.events || []), [A && A.bundle]);
   const sorted = React.useMemo(() => events.slice().sort((a, b) => {
     const da = new Date(a.date || a.startDate || 0).getTime();
@@ -12721,7 +12729,8 @@ function TabEvents() {
     className: 'mg-ui mg-glasspage' + (_evNight ? ' mg-night' : ''),
     style: {
       color: 'var(--mg-ink, #22314a)',
-      position: 'relative'
+      position: 'relative',
+      ..._evCardGlassVars
     }
   }, _evHeroBg ? React.createElement(React.Fragment, null, React.createElement("div", {
     "aria-hidden": "true",
@@ -21396,15 +21405,18 @@ function TabMyPage() {
   }[lang] || '日本語';
   const pastShown = histOpen ? derived.past : derived.past.slice(0, 3);
   const _mpNight = typeof _mgIsNightNow === 'function' ? _mgIsNightNow() : false;
-  const _mpHeroBg = (() => {
+  const _mpBgSlide = (() => {
     const slides = A && A.bundle && Array.isArray(A.bundle.heroSlidesMobile) ? A.bundle.heroSlidesMobile.filter(s => s && s.imageUrl && s.enabled !== false) : [];
-    return slides[0] && typeof _home_img === 'function' ? _home_img(slides[0].imageUrl, 1600) : '';
+    return slides[0] || null;
   })();
+  const _mpHeroBg = _mpBgSlide && typeof _home_img === 'function' ? _home_img(_mgHeroImg(_mpBgSlide, _mpNight), 1600) : '';
+  const _mpCardGlassVars = typeof _mgCardGlassVars === 'function' ? _mgCardGlassVars(_mpBgSlide) : {};
   return React.createElement("div", {
     className: 'mg-ui mg-glasspage' + (_mpNight ? ' mg-night' : ''),
     style: {
       color: 'var(--mg-ink, #22314a)',
-      position: 'relative'
+      position: 'relative',
+      ..._mpCardGlassVars
     }
   }, _mpHeroBg ? React.createElement(React.Fragment, null, React.createElement("div", {
     "aria-hidden": "true",
@@ -35870,6 +35882,20 @@ function _mgIsNightNow() {
     return false;
   }
 }
+function _mgHeroImg(slide, night) {
+  if (!slide) return '';
+  return night && slide.imageUrlNight ? slide.imageUrlNight : slide.imageUrl || '';
+}
+function _mgCardGlassVars(slide) {
+  const v = {};
+  if (!slide) return v;
+  if (slide.cardBlur != null && slide.cardBlur !== '' && isFinite(slide.cardBlur)) v['--mg-card-blur'] = Number(slide.cardBlur) + 'px';
+  if (slide.cardWhite != null && slide.cardWhite !== '' && isFinite(slide.cardWhite)) {
+    v['--mg-card-white'] = Number(slide.cardWhite);
+    v['--mg-card-dark'] = Number(slide.cardWhite);
+  }
+  return v;
+}
 function MgTabBar({
   tab,
   lang,
@@ -36416,10 +36442,11 @@ function _ShellRoot() {
   React.useEffect(() => {
     if (user) refreshRegs(false);else setRegs([]);
   }, [user && (user.id || user.userId || user.email)]);
+  const _shellNight = _mgIsNightNow();
   const coverSrcs = React.useMemo(() => {
-    const arr = (bundle && Array.isArray(bundle.heroSlidesMobile) ? bundle.heroSlidesMobile : []).filter(s => s && s.imageUrl && s.enabled !== false).slice(0, 3).map(s => _shell_imgUrl(s.imageUrl)).filter(Boolean);
+    const arr = (bundle && Array.isArray(bundle.heroSlidesMobile) ? bundle.heroSlidesMobile : []).filter(s => s && s.imageUrl && s.enabled !== false).slice(0, 3).map(s => _shell_imgUrl(_mgHeroImg(s, _shellNight))).filter(Boolean);
     return arr;
-  }, [bundle]);
+  }, [bundle, _shellNight]);
   const onPaneScroll = React.useCallback(e => {
     const st = e.target ? e.target.scrollTop : 0;
     if (_scrollRaf.current) return;
