@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-<script>window.__MG_BUILD='20260912132830';</script>
+<script>window.__MG_BUILD='20260912133424';</script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>connec+a — 出会いが、まちを変えていく。</title>
@@ -21384,12 +21384,36 @@ function TabMyPage() {
     en: 'English'
   }[lang] || '日本語';
   const pastShown = histOpen ? derived.past : derived.past.slice(0, 3);
+  const _mpNight = typeof _mgIsNightNow === 'function' ? _mgIsNightNow() : false;
+  const _mpHeroBg = React.useMemo(() => {
+    const slides = A && A.bundle && Array.isArray(A.bundle.heroSlidesMobile) ? A.bundle.heroSlidesMobile.filter(s => s && s.imageUrl && s.enabled !== false) : [];
+    return slides[0] && typeof _home_img === 'function' ? _home_img(slides[0].imageUrl, 1600) : '';
+  }, [A && A.bundle]);
   return React.createElement("div", {
-    className: "mg-ui",
+    className: 'mg-ui mg-glasspage' + (_mpNight ? ' mg-night' : ''),
     style: {
-      color: 'var(--mg-ink, #22314a)'
+      color: 'var(--mg-ink, #22314a)',
+      position: 'relative'
     }
-  }, React.createElement("div", {
+  }, _mpHeroBg ? React.createElement(React.Fragment, null, React.createElement("div", {
+    "aria-hidden": "true",
+    style: {
+      position: 'fixed',
+      inset: 0,
+      zIndex: -1,
+      backgroundImage: 'url(' + _mpHeroBg + ')',
+      backgroundSize: 'cover',
+      backgroundPosition: 'center'
+    }
+  }), React.createElement("div", {
+    "aria-hidden": "true",
+    style: {
+      position: 'fixed',
+      inset: 0,
+      zIndex: -1,
+      background: _mpNight ? 'linear-gradient(180deg, rgba(8,14,30,.56) 0%, rgba(10,16,34,.48) 40%, rgba(10,16,34,.6) 100%)' : 'linear-gradient(180deg, rgba(20,32,52,.34) 0%, rgba(233,240,247,.5) 30%, rgba(233,240,247,.66) 100%)'
+    }
+  })) : null, React.createElement("div", {
     style: {
       height: 112
     },
@@ -36439,7 +36463,7 @@ function _ShellRoot() {
     lang: lang,
     onTab: setTab,
     hidden: chromeHidden,
-    darkBg: _mgIsNightNow() && (tab === 2 || (tab === 0 || tab === 1) && coverSrcs.length > 0)
+    darkBg: _mgIsNightNow() && (tab === 2 || (tab === 0 || tab === 1 || tab === 4) && coverSrcs.length > 0)
   }), React.createElement(SheetEventDetail, sh('eventDetail')), React.createElement(SheetRegister, sh('register')), React.createElement(SheetTicket, sh('ticket')), React.createElement(SheetNewsList, sh('newsList')), React.createElement(SheetNewsDetail, sh('newsDetail')), React.createElement(SheetAbout, sh('about')), React.createElement(SheetSearch, sh('search')), React.createElement(SheetSurvey, sh('survey')), React.createElement(SheetAlbum, sh('album')), React.createElement(SheetHideRequest, sh('hideRequest')), React.createElement(SheetProfileEdit, sh('profileEdit')), React.createElement(SheetLanguage, sh('language')), React.createElement(SheetPoints, sh('points')), React.createElement(SheetConsult, sh('consult')), React.createElement(OverlayRegisterComplete, {
     open: !!complete,
     props: complete || undefined
