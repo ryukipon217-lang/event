@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-<script>window.__MG_BUILD='20260912094949';</script>
+<script>window.__MG_BUILD='20260912100659';</script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>connec+a — 出会いが、まちを変えていく。</title>
@@ -520,14 +520,16 @@ html{ background:#e9edfc; }
   -webkit-mask:linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
   -webkit-mask-composite:xor; mask-composite:exclude;
 }
-/* 走る選択カプセル=素通しレンズ(白塗り無し・縁の光と内側ハイライトで浮かせる) */
+/* 走る選択カプセル=素通しレンズ。★自前のbackdrop-filterは持たない=バーのぼかしと二重にならず、
+   走行中に「レンズが2個」に見えるゴーストを根絶。縁の光+内側ハイライト+ごく淡い地で浮かせる。
+   will-change/translateZ で専用合成レイヤー化=移動時のにじみ/残像も防止。 */
 .mg-tabpill-lens{
-  width:54px; height:48px; border-radius:24px;
-  background:rgba(255,255,255,.06);
-  border:1px solid rgba(255,255,255,.62);
-  box-shadow:inset 0 1.5px 1px rgba(255,255,255,.85), inset 0 -3px 5px rgba(70,105,170,.12), 0 3px 10px rgba(40,70,130,.14);
-  -webkit-backdrop-filter:blur(5px); backdrop-filter:blur(5px);
-  transition:transform .2s ease;
+  width:56px; height:46px; border-radius:23px;
+  background:rgba(255,255,255,.16);
+  border:1px solid rgba(255,255,255,.72);
+  box-shadow:inset 0 1.5px 1px rgba(255,255,255,.92), inset 0 -3px 6px rgba(70,105,170,.14), 0 3px 9px rgba(40,70,130,.14);
+  will-change:transform; transform:translateZ(0);
+  transition:transform .22s ease;
 }
 /* タブ切替時のふくらみ(大きめ=代表要望2026-09-12)。ドラッグ中はJSで直接scale */
 @keyframes mgPillBulge{ 0%{ transform:scale(1) } 42%{ transform:scale(1.28) } 100%{ transform:scale(1) } }
@@ -35397,6 +35399,21 @@ function MgTabBar({
       if (ro) ro.disconnect();
     };
   }, []);
+  const _firstBulge = React.useRef(true);
+  React.useEffect(() => {
+    if (_firstBulge.current) {
+      _firstBulge.current = false;
+      return;
+    }
+    const b = bubbleRef.current;
+    if (!b) return;
+    if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    b.style.transform = 'scale(1.28)';
+    const id = setTimeout(() => {
+      if (bubbleRef.current) bubbleRef.current.style.transform = '';
+    }, 190);
+    return () => clearTimeout(id);
+  }, [tab]);
   const onDown = React.useCallback(e => {
     if (e.isPrimary === false) return;
     const d = _d.current;
@@ -35513,12 +35530,8 @@ function MgTabBar({
       pointerEvents: 'none'
     }
   }, React.createElement("div", {
-    key: tab,
     ref: bubbleRef,
-    className: "mg-tabpill-lens",
-    style: {
-      animation: 'mgPillBulge .5s ease'
-    }
+    className: "mg-tabpill-lens"
   })), React.createElement("div", {
     style: {
       position: 'relative',
@@ -35552,7 +35565,7 @@ function MgTabBar({
     className: "msr",
     "aria-hidden": "true",
     style: {
-      fontSize: 25,
+      fontSize: 29,
       color: tab === i ? 'var(--mg-accent, #5566cf)' : '#8195b4',
       textShadow: tab === i ? 'none' : '0 1px 2px rgba(255,255,255,.5)',
       transition: 'color .3s, transform .2s cubic-bezier(.34,1.56,.64,1)',
