@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-<script>window.__MG_BUILD='20260912133424';</script>
+<script>window.__MG_BUILD='20260912133848';</script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>connec+a — 出会いが、まちを変えていく。</title>
@@ -12667,10 +12667,10 @@ function TabEvents() {
   const t = typeof I18N !== 'undefined' && (I18N[lang] || I18N.ja) || null;
   const [chip, setChip] = useState('all');
   const _evNight = typeof _mgIsNightNow === 'function' ? _mgIsNightNow() : false;
-  const _evHeroBg = React.useMemo(() => {
+  const _evHeroBg = (() => {
     const slides = A && A.bundle && Array.isArray(A.bundle.heroSlidesMobile) ? A.bundle.heroSlidesMobile.filter(s => s && s.imageUrl && s.enabled !== false) : [];
     return slides[0] && typeof _home_img === 'function' ? _home_img(slides[0].imageUrl, 1600) : '';
-  }, [A && A.bundle]);
+  })();
   const events = React.useMemo(() => _ev_publicEvents(A && A.bundle && A.bundle.events || []), [A && A.bundle]);
   const sorted = React.useMemo(() => events.slice().sort((a, b) => {
     const da = new Date(a.date || a.startDate || 0).getTime();
@@ -21385,10 +21385,10 @@ function TabMyPage() {
   }[lang] || '日本語';
   const pastShown = histOpen ? derived.past : derived.past.slice(0, 3);
   const _mpNight = typeof _mgIsNightNow === 'function' ? _mgIsNightNow() : false;
-  const _mpHeroBg = React.useMemo(() => {
+  const _mpHeroBg = (() => {
     const slides = A && A.bundle && Array.isArray(A.bundle.heroSlidesMobile) ? A.bundle.heroSlidesMobile.filter(s => s && s.imageUrl && s.enabled !== false) : [];
     return slides[0] && typeof _home_img === 'function' ? _home_img(slides[0].imageUrl, 1600) : '';
-  }, [A && A.bundle]);
+  })();
   return React.createElement("div", {
     className: 'mg-ui mg-glasspage' + (_mpNight ? ' mg-night' : ''),
     style: {
