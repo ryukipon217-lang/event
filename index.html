@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-<script>window.__MG_BUILD='20260912101947';</script>
+<script>window.__MG_BUILD='20260912103649';</script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>connec+a — 出会いが、まちを変えていく。</title>
@@ -9387,6 +9387,8 @@ function _home_MachiCard({
     className: "mg-tap mg-ui",
     onClick: go,
     style: {
+      minWidth: 0,
+      boxSizing: 'border-box',
       display: 'flex',
       alignItems: 'center',
       gap: 10,
@@ -9419,7 +9421,8 @@ function _home_MachiCard({
     }
   })), React.createElement("span", {
     style: {
-      minWidth: 0
+      minWidth: 0,
+      flex: 1
     }
   }, React.createElement("span", {
     style: {
@@ -9427,7 +9430,10 @@ function _home_MachiCard({
       fontWeight: 700,
       fontSize: 13,
       color: 'var(--mg-ink2, #33456a)',
-      lineHeight: 1.25
+      lineHeight: 1.25,
+      whiteSpace: 'nowrap',
+      overflow: 'hidden',
+      textOverflow: 'ellipsis'
     }
   }, title), React.createElement("span", {
     style: {
@@ -9553,7 +9559,7 @@ function _home_MachiCard({
       gap: 10,
       padding: '0 18px 4px'
     }
-  }, chip('cottage', '#5a6dd0', 'rgba(110,134,224,.16)', H('くらしの窓口', 'くらし の まどぐち', 'Living'), H('手続き・生活ガイド', 'てつづき', 'Procedures & guides')), chip('directions_transit', '#3f7fd0', 'rgba(74,123,208,.16)', H('交通・運行', 'こうつう', 'Transit'), H('鉄道の遅延・運休', 'でんしゃ の じょうほう', 'Live train status')), chip('delete', '#2f9d6f', 'rgba(63,174,122,.16)', H('ゴミ・分別', 'ゴミ', 'Garbage'), H('収集日・多言語', 'しゅうしゅうび', 'Collection days')), chip('festival', '#c07a1e', 'rgba(224,160,60,.18)', H('イベント', 'イベント', 'Events'), H('まちの催し', 'まち の イベント', 'Local events'))), React.createElement("button", {
+  }, chip('cottage', '#5a6dd0', 'rgba(110,134,224,.16)', H('くらしの窓口', 'くらし の まどぐち', 'Living'), H('手続き・ガイド', 'てつづき', 'Procedures')), chip('directions_transit', '#3f7fd0', 'rgba(74,123,208,.16)', H('交通・運行', 'こうつう', 'Transit'), H('遅延・運休', 'でんしゃ', 'Train status')), chip('delete', '#2f9d6f', 'rgba(63,174,122,.16)', H('ゴミ・分別', 'ゴミ', 'Garbage'), H('収集日', 'しゅうしゅうび', 'Collection')), chip('festival', '#c07a1e', 'rgba(224,160,60,.18)', H('イベント', 'イベント', 'Events'), H('まちの催し', 'まち の イベント', 'Local events'))), React.createElement("button", {
     type: "button",
     className: "mg-tap mg-ui",
     onClick: go,
