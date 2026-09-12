@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-<script>window.__MG_BUILD='20260912062559';</script>
+<script>window.__MG_BUILD='20260912063633';</script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>connec+a — 出会いが、まちを変えていく。</title>
@@ -1119,14 +1119,17 @@ select.mg-field,
   --mg-st-ok:#63d29c; --mg-st-warn:#f2b866; --mg-st-bad:#ff8f8f; --mg-st-none:#aabbd6; --mg-rain:#8fb4ef;
 }
 
-/* 天気背景の降雨アニメ(白い雫が落ち続ける。雨・霧雨・にわか雨・雷雨で表示) */
-@keyframes mg-rainfall { 0%{ transform:translateY(-12vh) } 100%{ transform:translateY(112vh) } }
+/* 天気背景の降雨アニメ(雫が落ち続ける。雨・霧雨・にわか雨・雷雨で表示)
+   ★robust animation: reduce-motion の *{animation-duration:.01ms!important} を上書きするため、
+   duration/delay は CSS変数(--rd/--rdl)で渡し、!important の shorthand 内で参照する
+   (* の freeze は animation-duration を狙うが --rd 変数には効かない=雫は必ず落ち続ける)。
+   見た目: 濁るふち(box-shadow)を廃止し、頭=透明→芯=淡い青→先端=白 の柔らかい筋に。
+   淡い空でも先端の白と青芯で見え、夜の紺でも自然。 */
+@keyframes mg-rainfall { 0%{ transform:translateY(-16vh) } 100%{ transform:translateY(116vh) } }
 .mg-rainbg{ position:fixed; inset:0; z-index:-1; pointer-events:none; overflow:hidden; }
-.mg-rainbg span{ position:absolute; top:-12vh; width:2px; height:14vh; border-radius:2px;
-  background:linear-gradient(180deg, rgba(255,255,255,0), rgba(255,255,255,.72) 55%, rgba(255,255,255,.92));
-  /* 淡い水色背景でも白い雫が見えるよう、青灰の淡いふちを付けて分離(夜の紺の上では淡い光暈) */
-  box-shadow:0 0 1.4px rgba(70,95,140,.4);
-  animation:mg-rainfall linear infinite !important; }
+.mg-rainbg span{ position:absolute; top:0; width:1.3px; border-radius:2px;
+  background:linear-gradient(180deg, rgba(255,255,255,0) 0%, rgba(171,197,233,.6) 42%, rgba(236,244,253,.95) 100%);
+  animation:mg-rainfall var(--rd,.8s) linear var(--rdl,0s) infinite !important; }
 
 </style>
 </head>
@@ -28296,20 +28299,20 @@ function PageTown() {
     className: "mg-rainbg",
     "aria-hidden": "true"
   }, Array.from({
-    length: 42
+    length: 58
   }, (_, i) => {
-    const left = (i * 31 + i % 4 * 7) % 100;
-    const dur = 0.62 + i % 5 * 0.11;
-    const delay = -(i * 0.17 % 1.3).toFixed(2);
-    const op = 0.52 + i % 3 * 0.16;
+    const left = (i * 17 + i % 5 * 3) % 100;
+    const dur = 0.5 + i % 6 * 0.09;
+    const delay = -(i * 0.13 % 1.1).toFixed(2);
+    const op = 0.5 + i % 4 * 0.12;
     return React.createElement("span", {
       key: i,
       style: {
         left: left + '%',
-        height: 10 + i % 4 * 3 + 'vh',
-        animationDuration: dur + 's',
-        animationDelay: delay + 's',
-        opacity: op
+        height: 7 + i % 4 * 2.5 + 'vh',
+        opacity: op,
+        '--rd': dur + 's',
+        '--rdl': delay + 's'
       }
     });
   })) : null, React.createElement("div", {
