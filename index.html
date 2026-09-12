@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-<script>window.__MG_BUILD='20260912233909';</script>
+<script>window.__MG_BUILD='20260912235156';</script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>connec+a — 出会いが、まちを変えていく。</title>
@@ -16924,8 +16924,8 @@ function SheetRegister({
       borderRadius: 16,
       textAlign: 'left',
       cursor: couponValidating ? 'not-allowed' : 'pointer',
-      background: 'rgba(255,255,255,.88)',
-      border: '1px solid rgba(34,49,74,.12)',
+      background: _rNight ? 'rgba(255,255,255,.07)' : 'rgba(255,255,255,.88)',
+      border: '1px solid ' + (_rNight ? 'rgba(255,255,255,.16)' : 'rgba(34,49,74,.12)'),
       display: 'flex',
       justifyContent: 'space-between',
       alignItems: 'center',
@@ -17139,8 +17139,8 @@ function SheetRegister({
         display: 'flex',
         alignItems: 'center',
         gap: 12,
-        background: selected ? 'rgba(110,134,224,.1)' : 'rgba(255,255,255,.88)',
-        border: selected ? '1.5px solid rgba(110,134,224,.55)' : '1px solid rgba(34,49,74,.12)',
+        background: selected ? 'rgba(110,134,224,' + (_rNight ? '.24' : '.1') + ')' : _rNight ? 'rgba(255,255,255,.07)' : 'rgba(255,255,255,.88)',
+        border: selected ? '1.5px solid rgba(110,134,224,.55)' : '1px solid ' + (_rNight ? 'rgba(255,255,255,.16)' : 'rgba(34,49,74,.12)'),
         transition: 'all .25s ease'
       }
     }, React.createElement("span", {
@@ -17538,8 +17538,8 @@ function SheetRegister({
         display: 'inline-flex',
         alignItems: 'center',
         justifyContent: 'center',
-        border: agreedPolicy ? '1px solid rgba(255,255,255,.35)' : '1px solid rgba(34,49,74,.3)',
-        background: agreedPolicy ? 'linear-gradient(180deg, #7e93e8 0%, #5f76d6 100%)' : 'rgba(255,255,255,.85)',
+        border: agreedPolicy ? '1px solid rgba(255,255,255,.35)' : '1px solid ' + (_rNight ? 'rgba(255,255,255,.4)' : 'rgba(34,49,74,.3)'),
+        background: agreedPolicy ? 'linear-gradient(180deg, #7e93e8 0%, #5f76d6 100%)' : _rNight ? 'rgba(255,255,255,.1)' : 'rgba(255,255,255,.85)',
         color: '#f2f7fc',
         transition: 'all .25s ease',
         boxShadow: agreedPolicy ? '0 6px 14px rgba(79,99,196,.28)' : 'none'
