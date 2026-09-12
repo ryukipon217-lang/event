@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-<script>window.__MG_BUILD='20260912133848';</script>
+<script>window.__MG_BUILD='20260912135001';</script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>connec+a — 出会いが、まちを変えていく。</title>
@@ -254,6 +254,18 @@ html{ background:#e9edfc; }
   border:1px solid rgba(255,255,255,.78);
   box-shadow:0 1px 2px rgba(34,49,74,.05), 0 8px 18px -5px rgba(34,49,74,.16), inset 0 1px 0 rgba(255,255,255,.9);
   border-radius:26px;
+}
+/* ナイトのガラスタブ(ホーム/イベント/マイページ)ではピルも暗ガラスへ。
+   昼のまま白背景だと、淡インク/アクセント文字(--mg-accent=淡ペリウィンクル)が
+   白ピル上で「灰背景に青紫文字」化して読めない → 背景を暗くして文字を立てる(昼は不変)。 */
+.mg-night .mg-pill{
+  background:linear-gradient(150deg,rgba(30,42,70,.50),rgba(20,30,54,.36));
+  border:1px solid rgba(255,255,255,.15);
+  -webkit-backdrop-filter:blur(12px); backdrop-filter:blur(12px);
+  box-shadow:0 1px 2px rgba(0,0,0,.16), 0 10px 22px -8px rgba(0,0,0,.40), inset 0 1px 0 rgba(255,255,255,.10);
+}
+@media (prefers-reduced-transparency: reduce){
+  .mg-night .mg-pill{ background:#1a2540; -webkit-backdrop-filter:none; backdrop-filter:none; }
 }
 
 /* 写真上の淡ガラス小面(ブラー無し版。ブラー予算を消費しない) */
