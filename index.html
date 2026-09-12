@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-<script>window.__MG_BUILD='20260912225144';</script>
+<script>window.__MG_BUILD='20260912232048';</script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>connec+a — 出会いが、まちを変えていく。</title>
@@ -397,6 +397,8 @@ html{ background:#e9edfc; }
 /* 高さ違い */
 .mg-sheet-tall{ height:calc(100dvh - 54px + var(--mg-vp-gap)); }
 .mg-sheet-auto{ height:auto; max-height:calc(100dvh - 54px + var(--mg-vp-gap)); }
+/* (2026-09-13) イベント詳細シートの夜=暗ガラス面(footer/閉じる等の共有クロムも同テーマに)。SheetShell night prop の時だけ付与。 */
+.mg-sheet.mg-night{ background:linear-gradient(180deg, rgba(20,28,48,.98), rgba(13,20,38,.985)); }
 
 /* シート背後の暗幕(ブラー無し。ブラー予算温存) */
 .mg-sheet-backdrop{
@@ -921,6 +923,8 @@ select.mg-field,
 .mg-scrim-photo{
   background:linear-gradient(180deg, rgba(34,49,74,.35), transparent 55%, rgba(255,255,255,.55));
 }
+/* (2026-09-13) 夜の詳細ヒーロー: 下端フェードを暗ガラス面に合わせて暗く(白フェードだと暗カードと衝突) */
+.mg-night .mg-scrim-photo{ background:linear-gradient(180deg, rgba(8,14,30,.42), transparent 52%, rgba(11,18,36,.62)); }
 /* にじみ(絶対配置の radial 円。装飾用) */
 .mg-blot{
   position:absolute;
@@ -4908,7 +4912,8 @@ function SheetShell({
   header,
   footer,
   children,
-  fullBleedTop = false
+  fullBleedTop = false,
+  night = false
 }) {
   const bodyRef = useRef(null);
   useEffect(() => {
@@ -5015,9 +5020,9 @@ function SheetShell({
       width: 34,
       height: 34,
       borderRadius: 17,
-      border: '1px solid rgba(255,255,255,.75)',
-      background: fullBleedTop ? 'rgba(255,255,255,.86)' : 'linear-gradient(150deg, rgba(255,255,255,.75), rgba(255,255,255,.42))',
-      boxShadow: '0 4px 12px rgba(34,49,74,.14), inset 0 1px 0 rgba(255,255,255,.9)',
+      border: night ? '1px solid rgba(255,255,255,.30)' : '1px solid rgba(255,255,255,.75)',
+      background: night ? 'rgba(26,38,62,.82)' : fullBleedTop ? 'rgba(255,255,255,.86)' : 'linear-gradient(150deg, rgba(255,255,255,.75), rgba(255,255,255,.42))',
+      boxShadow: night ? '0 4px 12px rgba(0,0,0,.3), inset 0 1px 0 rgba(255,255,255,.18)' : '0 4px 12px rgba(34,49,74,.14), inset 0 1px 0 rgba(255,255,255,.9)',
       display: 'inline-flex',
       alignItems: 'center',
       justifyContent: 'center',
@@ -5048,7 +5053,7 @@ function SheetShell({
     }
   }), React.createElement("div", {
     ref: sheetRef,
-    className: _uk_cx('mg-sheet', open ? 'mg-sheet-on is-open' : ''),
+    className: _uk_cx('mg-sheet', open ? 'mg-sheet-on is-open' : '', night ? 'mg-night' : ''),
     role: "dialog",
     "aria-modal": "true",
     style: {
@@ -5093,7 +5098,7 @@ function SheetShell({
       width: 40,
       height: 4,
       borderRadius: 2,
-      background: 'rgba(34,49,74,.28)',
+      background: night ? 'rgba(255,255,255,.5)' : 'rgba(34,49,74,.28)',
       boxShadow: '0 1px 2px rgba(255,255,255,.35)'
     }
   }), React.createElement("div", {
@@ -13262,6 +13267,7 @@ function SheetEventDetail({
       cancelled = true;
     };
   }, [open, user, eventId]);
+  const _dNight = typeof _mgIsNightNow === 'function' ? _mgIsNightNow() : false;
   const _wlUserId = user ? String(user.id || user.userId || user.email || '1') : '';
   useEffect(() => {
     setWlErr('');
@@ -13734,15 +13740,36 @@ function SheetEventDetail({
     const items = isMulti ? sessions : null;
     const pastSrcs = [].concat(Array.isArray(ev.pastPhotos) ? ev.pastPhotos : []).concat(Array.isArray(ev.photos) ? ev.photos : []).filter(Boolean).slice(0, 2);
     body = React.createElement("div", {
-      className: "mg-ui",
+      className: 'mg-ui mg-glasspage' + (_dNight ? ' mg-night' : ''),
       style: {
-        color: 'var(--mg-ink, #22314a)'
+        color: 'var(--mg-ink, #22314a)',
+        position: 'relative',
+        minHeight: '100%'
       }
-    }, React.createElement("div", {
+    }, heroImg ? React.createElement(React.Fragment, null, React.createElement("div", {
+      "aria-hidden": "true",
+      style: {
+        position: 'absolute',
+        inset: 0,
+        zIndex: 0,
+        backgroundImage: 'url(' + heroImg + ')',
+        backgroundSize: 'cover',
+        backgroundPosition: 'center'
+      }
+    }), React.createElement("div", {
+      "aria-hidden": "true",
+      style: {
+        position: 'absolute',
+        inset: 0,
+        zIndex: 0,
+        background: _dNight ? 'linear-gradient(180deg, rgba(8,14,30,.55) 0%, rgba(10,16,34,.74) 34%, rgba(10,16,34,.88) 100%)' : 'linear-gradient(180deg, rgba(20,32,52,.18) 0%, rgba(240,244,250,.86) 30%, rgba(240,244,250,.96) 100%)'
+      }
+    })) : null, React.createElement("div", {
       style: {
         height: 240,
         position: 'relative',
-        overflow: 'hidden'
+        overflow: 'hidden',
+        zIndex: 1
       }
     }, React.createElement(ImageSlot, {
       src: heroImg || undefined,
@@ -13761,11 +13788,13 @@ function SheetEventDetail({
         pointerEvents: 'none'
       }
     })), React.createElement("div", {
+      className: "mg-card",
       style: {
-        padding: '18px 22px 0',
+        padding: '20px 22px 24px',
         marginTop: -26,
         position: 'relative',
-        zIndex: 1
+        zIndex: 1,
+        borderRadius: 28
       }
     }, React.createElement("div", {
       className: "mg-h-article",
@@ -14097,8 +14126,9 @@ function SheetEventDetail({
           alignItems: 'center',
           borderRadius: 22,
           padding: '14px 14px',
-          border: '1px solid ' + borderColor,
-          boxShadow: selected && !sDisabled ? '0 12px 26px rgba(110,134,224,.2)' : undefined,
+          outline: selected || sState !== 'available' ? '2px solid ' + borderColor : 'none',
+          outlineOffset: '-2px',
+          boxShadow: selected && !sDisabled ? '0 12px 26px rgba(110,134,224,.28)' : undefined,
           opacity: sFull && !isLocked || sIsMyPending || sPast ? .6 : 1,
           cursor: sDisabled ? 'default' : 'pointer'
         }
@@ -14329,7 +14359,8 @@ function SheetEventDetail({
     z: 45,
     height: "790px",
     fullBleedTop: true,
-    footer: footer
+    footer: footer,
+    sheetClass: _dNight ? 'mg-night' : ''
   }, body);
 }
 const _reg_L = (lang, o) => o ? o[lang] != null ? o[lang] : o.ja : '';
