@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-<script>window.__MG_BUILD='20260912232048';</script>
+<script>window.__MG_BUILD='20260912233909';</script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>connec+a — 出会いが、まちを変えていく。</title>
@@ -652,6 +652,8 @@ html{ background:#e9edfc; }
 }
 .mg-field:focus{ border-bottom-color:var(--mg-accent); }
 .mg-field::placeholder{ color:var(--mg-ink5); }
+/* (2026-09-13) 夜(申込/詳細シート等)は下罫線が暗navyだと暗面に同化→白系に。背景transparent・文字はvar階調で追従済。 */
+.mg-night .mg-field{ border-bottom-color:rgba(255,255,255,.3); }
 .mg-field[aria-invalid="true"],
 .mg-field.is-error{ border-bottom-color:rgba(143,53,66,.7); }
 
@@ -5041,7 +5043,8 @@ function SheetShell({
       visibility: open ? 'visible' : 'hidden',
       transition: 'visibility 0s linear ' + (open ? '0s' : '.62s')
     },
-    "aria-hidden": !open
+    "aria-hidden": !open,
+    inert: !open ? '' : undefined
   }, React.createElement("div", {
     onClick: onClose,
     style: {
@@ -13996,15 +13999,21 @@ function SheetEventDetail({
         marginBottom: 14
       }
     }, isLocked ? L(_ev_T.lockedHelp) : L(_ev_T.selectHelp)), isUniformFee && totalEventFee > 0 ? React.createElement("div", {
-      className: "mg-cream",
+      className: "mg-ui",
       style: {
         padding: '13px 16px',
         marginBottom: 14,
+        borderRadius: 18,
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
         gap: 12,
-        flexWrap: 'wrap'
+        flexWrap: 'wrap',
+        background: _dNight ? 'rgba(110,132,224,.20)' : 'rgba(255,255,255,.34)',
+        WebkitBackdropFilter: 'blur(var(--mg-card-blur,16px))',
+        backdropFilter: 'blur(var(--mg-card-blur,16px))',
+        border: '1px solid ' + (_dNight ? 'rgba(255,255,255,.16)' : 'rgba(255,255,255,.62)'),
+        boxShadow: _dNight ? 'inset 0 1px 0 rgba(255,255,255,.14)' : 'inset 0 1px 0 rgba(255,255,255,.72), 0 8px 18px -10px rgba(20,40,80,.28)'
       }
     }, React.createElement("div", {
       style: {
@@ -14014,21 +14023,21 @@ function SheetEventDetail({
       style: {
         fontSize: 10,
         letterSpacing: '.18em',
-        fontWeight: 500,
-        color: '#8a6d1c',
+        fontWeight: 600,
+        color: 'var(--mg-accent, #6e86e0)',
         marginBottom: 3
       }
     }, L(_ev_T.flatRate)), React.createElement("div", {
       style: {
         fontSize: 12.5,
         lineHeight: 1.6,
-        color: '#6b5312'
+        color: 'var(--mg-ink3, #4c6584)'
       }
     }, L(_ev_T.flatDesc))), React.createElement("div", {
       className: "mg-num",
       style: {
         fontSize: 24,
-        color: '#8a6d1c'
+        color: 'var(--mg-ink, #22314a)'
       }
     }, "\xA5", totalEventFee.toLocaleString())) : null, isUniformFee && totalEventFee === 0 ? React.createElement("div", {
       style: {
@@ -14165,7 +14174,7 @@ function SheetEventDetail({
           height: 22,
           flex: 'none',
           borderRadius: 7,
-          border: '2px solid ' + (selected ? 'var(--mg-accent, #6e86e0)' : 'rgba(34,49,74,.25)'),
+          border: '2px solid ' + (selected ? 'var(--mg-accent, #6e86e0)' : _dNight ? 'rgba(255,255,255,.45)' : 'rgba(34,49,74,.25)'),
           background: selected ? 'linear-gradient(180deg, #7e93e8 0%, #5f76d6 100%)' : 'transparent',
           color: '#fbfcfd',
           display: 'inline-flex',
@@ -15430,7 +15439,8 @@ function _reg_CompanionSection({
   eligibilityRule,
   eligibilityStrength,
   alertFn,
-  confirmFn
+  confirmFn,
+  night = false
 }) {
   const c = t && t.companion || {};
   const [editing, setEditing] = useState(null);
@@ -15599,8 +15609,8 @@ function _reg_CompanionSection({
       gap: 10,
       padding: '12px 14px',
       borderRadius: 20,
-      background: 'rgba(255,255,255,.86)',
-      border: '1px solid rgba(34,49,74,.1)'
+      background: night ? 'rgba(255,255,255,.08)' : 'rgba(255,255,255,.86)',
+      border: '1px solid ' + (night ? 'rgba(255,255,255,.16)' : 'rgba(34,49,74,.1)')
     }
   }, React.createElement("span", {
     "aria-hidden": "true",
@@ -15748,8 +15758,8 @@ function _reg_CompanionSection({
         padding: '12px 4px 10px',
         borderRadius: 16,
         cursor: 'pointer',
-        border: on ? '1.5px solid var(--mg-accent, #6e86e0)' : '1px solid rgba(34,49,74,.1)',
-        background: on ? 'rgba(110,134,224,.08)' : 'rgba(255,255,255,.72)',
+        border: on ? '1.5px solid var(--mg-accent, #6e86e0)' : '1px solid ' + (night ? 'rgba(255,255,255,.16)' : 'rgba(34,49,74,.1)'),
+        background: on ? 'rgba(110,134,224,' + (night ? '.24' : '.08') + ')' : night ? 'rgba(255,255,255,.07)' : 'rgba(255,255,255,.72)',
         boxShadow: on ? '0 6px 14px rgba(110,134,224,.16)' : 'none',
         transition: 'border-color .2s, background .2s, box-shadow .2s'
       }
@@ -16169,6 +16179,8 @@ function SheetRegister({
   const loading = !event && !evFetchDone;
   const error = !loading && !event ? L(_reg_T.notFound) : '';
   const ev = event;
+  const _rNight = typeof _mgIsNightNow === 'function' ? _mgIsNightNow() : false;
+  const _rBg = ev && typeof _ev_img === 'function' ? _ev_img(ev.posterUrl || ev.heroImage || ev.thumbnail || '', 1200) : '';
   useEffect(() => {
     if (!open || _regDefaulted.current) return;
     if (!ev || ev.format !== 'multi' || !regSessLoaded || registerSessions.length === 0) return;
@@ -17174,7 +17186,7 @@ function SheetRegister({
         borderRadius: '50%',
         flexShrink: 0,
         background: '#fff',
-        border: selected ? '6px solid var(--mg-accent, #6e86e0)' : '2px solid rgba(34,49,74,.25)',
+        border: selected ? '6px solid var(--mg-accent, #6e86e0)' : '2px solid ' + (_rNight ? 'rgba(255,255,255,.4)' : 'rgba(34,49,74,.25)'),
         transition: 'all .25s ease'
       }
     }));
@@ -17269,11 +17281,32 @@ function SheetRegister({
     }));
   } else {
     body = React.createElement("div", {
+      className: 'mg-ui mg-glasspage' + (_rNight ? ' mg-night' : ''),
       style: {
-        padding: '4px 20px 24px'
-      },
-      className: "mg-ui"
-    }, React.createElement("div", {
+        padding: '4px 20px 24px',
+        position: 'relative',
+        isolation: 'isolate',
+        minHeight: '100%'
+      }
+    }, _rBg ? React.createElement(React.Fragment, null, React.createElement("div", {
+      "aria-hidden": "true",
+      style: {
+        position: 'absolute',
+        inset: 0,
+        zIndex: -1,
+        backgroundImage: 'url(' + _rBg + ')',
+        backgroundSize: 'cover',
+        backgroundPosition: 'center'
+      }
+    }), React.createElement("div", {
+      "aria-hidden": "true",
+      style: {
+        position: 'absolute',
+        inset: 0,
+        zIndex: -1,
+        background: _rNight ? 'linear-gradient(180deg, rgba(8,14,30,.66) 0%, rgba(10,16,34,.82) 42%, rgba(10,16,34,.9) 100%)' : 'linear-gradient(180deg, rgba(232,239,248,.88) 0%, rgba(240,244,250,.94) 42%, rgba(240,244,250,.97) 100%)'
+      }
+    })) : null, React.createElement("div", {
       style: {
         fontSize: 12,
         color: 'var(--mg-ink3, #4c6584)',
@@ -17462,7 +17495,8 @@ function SheetRegister({
       eligibilityRule: parsedEligibilityRule,
       eligibilityStrength: ev.eligibilityStrength || '',
       alertFn: m => dlgAlert(m),
-      confirmFn: o => dlgConfirm(o)
+      confirmFn: o => dlgConfirm(o),
+      night: _rNight
     })), 'secComp'), card(React.createElement("div", null, secTitle('02 — ' + L(_reg_T.secPolicy), true), React.createElement("div", {
       className: "mg-hidebar",
       style: {
@@ -17576,8 +17610,8 @@ function SheetRegister({
           cursor: 'pointer',
           padding: '12px 13px',
           borderRadius: 18,
-          border: on ? '1.5px solid var(--mg-accent, #6e86e0)' : '1px solid rgba(34,49,74,.1)',
-          background: on ? 'rgba(110,134,224,.07)' : 'rgba(255,255,255,.7)',
+          border: on ? '1.5px solid var(--mg-accent, #6e86e0)' : '1px solid ' + (_rNight ? 'rgba(255,255,255,.16)' : 'rgba(34,49,74,.1)'),
+          background: on ? 'rgba(110,134,224,' + (_rNight ? '.24' : '.07') + ')' : _rNight ? 'rgba(255,255,255,.07)' : 'rgba(255,255,255,.7)',
           boxShadow: on ? '0 8px 18px rgba(110,134,224,.16)' : 'none',
           transition: 'border-color .2s, background .2s, box-shadow .2s'
         }
@@ -17627,7 +17661,7 @@ function SheetRegister({
           display: 'inline-flex',
           alignItems: 'center',
           justifyContent: 'center',
-          border: on ? '0' : '1.5px solid rgba(34,49,74,.25)',
+          border: on ? '0' : '1.5px solid ' + (_rNight ? 'rgba(255,255,255,.45)' : 'rgba(34,49,74,.25)'),
           background: on ? 'linear-gradient(180deg, #7e93e8, #5f76d6)' : 'transparent',
           color: '#fff'
         }
@@ -17831,7 +17865,8 @@ function SheetRegister({
         whiteSpace: 'nowrap'
       }
     }, L(_reg_T.title))),
-    footer: footer
+    footer: footer,
+    night: _rNight
   }, body), open && React.createElement(_reg_Dialog, {
     d: dlg,
     lang: lang,
