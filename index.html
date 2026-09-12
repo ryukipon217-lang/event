@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-<script>window.__MG_BUILD='20260912150945';</script>
+<script>window.__MG_BUILD='20260912222903';</script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>connec+a — 出会いが、まちを変えていく。</title>
@@ -9748,7 +9748,7 @@ function TabHome() {
   })();
   const _bgSlide = React.useMemo(() => {
     const slides = (Array.isArray(bundle.heroSlidesMobile) ? bundle.heroSlidesMobile : []).filter(s => s && s.imageUrl && s.enabled !== false);
-    return slides[0] || null;
+    return slides.find(s => s.isAppBg) || slides[0] || null;
   }, [bundle.heroSlidesMobile]);
   const _cardGlassVars = typeof _mgCardGlassVars === 'function' ? _mgCardGlassVars(_bgSlide) : {};
   const bandImg = React.useMemo(() => {
@@ -12686,7 +12686,7 @@ function TabEvents() {
   const _evNight = typeof _mgIsNightNow === 'function' ? _mgIsNightNow() : false;
   const _evBgSlide = (() => {
     const slides = A && A.bundle && Array.isArray(A.bundle.heroSlidesMobile) ? A.bundle.heroSlidesMobile.filter(s => s && s.imageUrl && s.enabled !== false) : [];
-    return slides[0] || null;
+    return slides.find(s => s.isAppBg) || slides[0] || null;
   })();
   const _evHeroBg = _evBgSlide && typeof _home_img === 'function' ? _home_img(_mgHeroImg(_evBgSlide, _evNight), 1600) : '';
   const _evCardGlassVars = typeof _mgCardGlassVars === 'function' ? _mgCardGlassVars(_evBgSlide) : {};
@@ -21407,7 +21407,7 @@ function TabMyPage() {
   const _mpNight = typeof _mgIsNightNow === 'function' ? _mgIsNightNow() : false;
   const _mpBgSlide = (() => {
     const slides = A && A.bundle && Array.isArray(A.bundle.heroSlidesMobile) ? A.bundle.heroSlidesMobile.filter(s => s && s.imageUrl && s.enabled !== false) : [];
-    return slides[0] || null;
+    return slides.find(s => s.isAppBg) || slides[0] || null;
   })();
   const _mpHeroBg = _mpBgSlide && typeof _home_img === 'function' ? _home_img(_mgHeroImg(_mpBgSlide, _mpNight), 1600) : '';
   const _mpCardGlassVars = typeof _mgCardGlassVars === 'function' ? _mgCardGlassVars(_mpBgSlide) : {};
