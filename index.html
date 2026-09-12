@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-<script>window.__MG_BUILD='20260912140257';</script>
+<script>window.__MG_BUILD='20260912143700';</script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>connec+a — 出会いが、まちを変えていく。</title>
@@ -1722,7 +1722,7 @@ async function postToGAS(action, payload, retryCount) {
 }
 async function postFastRead(action, payload) {
   const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), 8000);
+  const timeoutId = setTimeout(() => controller.abort(), 12000);
   try {
     const res = await fetch(READ_API_URL, {
       method: 'POST',
@@ -2049,7 +2049,7 @@ const authApi = {
     });
   },
   async me(sessionToken) {
-    return postToGAS('auth.me', {
+    return postFastRead('auth.me', {
       sessionToken
     });
   },
@@ -2099,7 +2099,7 @@ const authApi = {
     });
   },
   async getMyRegistrations(sessionToken) {
-    return postToGAS('auth.getMyRegistrations', {
+    return postFastRead('auth.getMyRegistrations', {
       sessionToken
     });
   },
