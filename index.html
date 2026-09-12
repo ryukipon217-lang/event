@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-<script>window.__MG_BUILD='20260912131734';</script>
+<script>window.__MG_BUILD='20260912132830';</script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>connec+a — 出会いが、まちを変えていく。</title>
@@ -544,30 +544,40 @@ html{ background:#e9edfc; }
    ホーム リキッドガラス(2026-09-12)。背景=設定のヒーロー写真。
    材質=透明地(文字可読のため僅かにフロスト)+鋭い縁の光+厚み。屈折はChromiumでJS後付け。
    ============================================================ */
-/* 昼(既定)=白ガラス+暗文字。夜(.mg-home-night)=暗ガラス+白文字。時刻18:00-6:00で親にクラス付与。 */
-.mg-glass-card{
+/* 昼(既定)=白ガラス+暗文字。夜(.mg-night をルートに付与)=暗ガラス+白文字。時刻18:00-6:00。
+   ホーム=各カードに .mg-glass-card / イベント・マイページ=ルートに .mg-glasspage で .mg-card を自動ガラス化。 */
+/* 夜テーマ(ルート): 文字色(var階調)を明色へ一括反転 */
+.mg-night{ color:#f5f8fd; --mg-ink:#f5f8fd; --mg-ink2:#e7eef9; --mg-ink3:#d7e1f1; --mg-ink4:#c2d0e6; --mg-ink5:#aabbd6; --mg-accent:#aab9f2; }
+/* ガラスカード 昼=白 */
+.mg-glass-card,
+.mg-glasspage .mg-card,
+.mg-glasspage .mg-card-lg{
   position:relative; isolation:isolate;
   background:rgba(255,255,255,.26) !important;
   -webkit-backdrop-filter:blur(24px) saturate(115%); backdrop-filter:blur(24px) saturate(115%);
   border:1px solid transparent !important;
   box-shadow:0 16px 40px -18px rgba(20,40,80,.42), inset 0 2px 1px rgba(255,255,255,.9), inset 0 -12px 22px -14px rgba(20,40,80,.20) !important;
 }
-.mg-home-night .mg-glass-card{
+/* ガラスカード 夜=暗 */
+.mg-night .mg-glass-card,
+.mg-night.mg-glasspage .mg-card,
+.mg-night.mg-glasspage .mg-card-lg{
   background:rgba(18,28,50,.30) !important;
   box-shadow:0 16px 40px -18px rgba(10,20,45,.5), inset 0 1px 0 rgba(255,255,255,.5), inset 0 -12px 22px -14px rgba(0,0,0,.22) !important;
-  color:#fff;
-  --mg-ink:#f5f8fd; --mg-ink2:#e7eef9; --mg-ink3:#d7e1f1; --mg-ink4:#c2d0e6; --mg-ink5:#aabbd6; --mg-accent:#aab9f2;
 }
-.mg-glass-card::before{
+/* 縁の光リム */
+.mg-glass-card::before,
+.mg-glasspage .mg-card::before,
+.mg-glasspage .mg-card-lg::before{
   content:''; position:absolute; inset:0; border-radius:inherit; pointer-events:none; z-index:2; padding:1.3px;
   background:linear-gradient(135deg, rgba(255,255,255,.98), rgba(255,255,255,0) 45%, rgba(255,255,255,.6));
   -webkit-mask:linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
   -webkit-mask-composite:xor; mask-composite:exclude;
 }
 @media (prefers-reduced-transparency: reduce){
-  .mg-glass-card{ -webkit-backdrop-filter:none; backdrop-filter:none; background:rgba(255,255,255,.96) !important; box-shadow:0 10px 26px -12px rgba(34,49,74,.3) !important; }
-  .mg-home-night .mg-glass-card{ background:rgba(22,32,54,.94) !important; box-shadow:0 10px 26px -12px rgba(10,20,45,.4) !important; }
-  .mg-glass-card::before{ display:none; }
+  .mg-glass-card, .mg-glasspage .mg-card, .mg-glasspage .mg-card-lg{ -webkit-backdrop-filter:none; backdrop-filter:none; background:rgba(255,255,255,.96) !important; box-shadow:0 10px 26px -12px rgba(34,49,74,.3) !important; }
+  .mg-night .mg-glass-card, .mg-night.mg-glasspage .mg-card, .mg-night.mg-glasspage .mg-card-lg{ background:rgba(22,32,54,.94) !important; box-shadow:0 10px 26px -12px rgba(10,20,45,.4) !important; }
+  .mg-glass-card::before, .mg-glasspage .mg-card::before, .mg-glasspage .mg-card-lg::before{ display:none; }
 }
 /* 申し込む等のガラスCTA(periwinkleティント+背後ぼかし+縁の光。色で押せる感は維持) */
 .mg-glass-cta{
@@ -9826,7 +9836,7 @@ function TabHome() {
     label: L(_home_T.statMembers)
   }];
   return React.createElement("div", {
-    className: 'mg-ui' + (_homeNight ? ' mg-home-night' : ''),
+    className: 'mg-ui' + (_homeNight ? ' mg-night' : ''),
     ref: _homeRef,
     style: {
       color: 'var(--mg-ink, #22314a)',
@@ -12656,6 +12666,11 @@ function TabEvents() {
   const L = o => _ev_L(lang, o);
   const t = typeof I18N !== 'undefined' && (I18N[lang] || I18N.ja) || null;
   const [chip, setChip] = useState('all');
+  const _evNight = typeof _mgIsNightNow === 'function' ? _mgIsNightNow() : false;
+  const _evHeroBg = React.useMemo(() => {
+    const slides = A && A.bundle && Array.isArray(A.bundle.heroSlidesMobile) ? A.bundle.heroSlidesMobile.filter(s => s && s.imageUrl && s.enabled !== false) : [];
+    return slides[0] && typeof _home_img === 'function' ? _home_img(slides[0].imageUrl, 1600) : '';
+  }, [A && A.bundle]);
   const events = React.useMemo(() => _ev_publicEvents(A && A.bundle && A.bundle.events || []), [A && A.bundle]);
   const sorted = React.useMemo(() => events.slice().sort((a, b) => {
     const da = new Date(a.date || a.startDate || 0).getTime();
@@ -12692,11 +12707,30 @@ function TabEvents() {
     label: L(_ev_T.chipEasy)
   }];
   return React.createElement("div", {
-    className: "mg-ui",
+    className: 'mg-ui mg-glasspage' + (_evNight ? ' mg-night' : ''),
     style: {
-      color: 'var(--mg-ink, #22314a)'
+      color: 'var(--mg-ink, #22314a)',
+      position: 'relative'
     }
-  }, React.createElement("div", {
+  }, _evHeroBg ? React.createElement(React.Fragment, null, React.createElement("div", {
+    "aria-hidden": "true",
+    style: {
+      position: 'fixed',
+      inset: 0,
+      zIndex: -1,
+      backgroundImage: 'url(' + _evHeroBg + ')',
+      backgroundSize: 'cover',
+      backgroundPosition: 'center'
+    }
+  }), React.createElement("div", {
+    "aria-hidden": "true",
+    style: {
+      position: 'fixed',
+      inset: 0,
+      zIndex: -1,
+      background: _evNight ? 'linear-gradient(180deg, rgba(8,14,30,.56) 0%, rgba(10,16,34,.48) 40%, rgba(10,16,34,.6) 100%)' : 'linear-gradient(180deg, rgba(20,32,52,.34) 0%, rgba(233,240,247,.5) 30%, rgba(233,240,247,.66) 100%)'
+    }
+  })) : null, React.createElement("div", {
     style: {
       height: 112
     },
@@ -36405,7 +36439,7 @@ function _ShellRoot() {
     lang: lang,
     onTab: setTab,
     hidden: chromeHidden,
-    darkBg: tab === 0 && coverSrcs.length > 0 && _mgIsNightNow()
+    darkBg: _mgIsNightNow() && (tab === 2 || (tab === 0 || tab === 1) && coverSrcs.length > 0)
   }), React.createElement(SheetEventDetail, sh('eventDetail')), React.createElement(SheetRegister, sh('register')), React.createElement(SheetTicket, sh('ticket')), React.createElement(SheetNewsList, sh('newsList')), React.createElement(SheetNewsDetail, sh('newsDetail')), React.createElement(SheetAbout, sh('about')), React.createElement(SheetSearch, sh('search')), React.createElement(SheetSurvey, sh('survey')), React.createElement(SheetAlbum, sh('album')), React.createElement(SheetHideRequest, sh('hideRequest')), React.createElement(SheetProfileEdit, sh('profileEdit')), React.createElement(SheetLanguage, sh('language')), React.createElement(SheetPoints, sh('points')), React.createElement(SheetConsult, sh('consult')), React.createElement(OverlayRegisterComplete, {
     open: !!complete,
     props: complete || undefined
