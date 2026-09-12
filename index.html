@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-<script>window.__MG_BUILD='20260912124812';</script>
+<script>window.__MG_BUILD='20260912130029';</script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>connec+a — 出会いが、まちを変えていく。</title>
@@ -547,13 +547,13 @@ html{ background:#e9edfc; }
 /* 昼(既定)=白ガラス+暗文字。夜(.mg-home-night)=暗ガラス+白文字。時刻18:00-6:00で親にクラス付与。 */
 .mg-glass-card{
   position:relative; isolation:isolate;
-  background:rgba(255,255,255,.30) !important;
-  -webkit-backdrop-filter:blur(16px); backdrop-filter:blur(16px);
+  background:rgba(255,255,255,.26) !important;
+  -webkit-backdrop-filter:blur(24px) saturate(115%); backdrop-filter:blur(24px) saturate(115%);
   border:1px solid transparent !important;
   box-shadow:0 16px 40px -18px rgba(20,40,80,.42), inset 0 2px 1px rgba(255,255,255,.9), inset 0 -12px 22px -14px rgba(20,40,80,.20) !important;
 }
 .mg-home-night .mg-glass-card{
-  background:rgba(18,28,50,.34) !important;
+  background:rgba(18,28,50,.30) !important;
   box-shadow:0 16px 40px -18px rgba(10,20,45,.5), inset 0 1px 0 rgba(255,255,255,.5), inset 0 -12px 22px -14px rgba(0,0,0,.22) !important;
   color:#fff;
   --mg-ink:#f5f8fd; --mg-ink2:#e7eef9; --mg-ink3:#d7e1f1; --mg-ink4:#c2d0e6; --mg-ink5:#aabbd6; --mg-accent:#aab9f2;
@@ -572,7 +572,7 @@ html{ background:#e9edfc; }
 /* 申し込む等のガラスCTA(periwinkleティント+背後ぼかし+縁の光。色で押せる感は維持) */
 .mg-glass-cta{
   background:linear-gradient(180deg, rgba(110,132,224,.44), rgba(84,102,204,.40)) !important;
-  -webkit-backdrop-filter:blur(9px); backdrop-filter:blur(9px);
+  -webkit-backdrop-filter:blur(16px); backdrop-filter:blur(16px);
   box-shadow:0 10px 22px -10px rgba(60,80,170,.55), inset 0 1.5px 1px rgba(255,255,255,.78), inset 0 -6px 12px -8px rgba(30,50,120,.35) !important;
   color:#fff !important; text-shadow:0 1px 2px rgba(30,50,120,.5);
 }
@@ -9446,8 +9446,8 @@ function _home_MachiCard({
       cursor: 'pointer',
       textAlign: 'left',
       background: night ? 'rgba(255,255,255,.10)' : 'rgba(255,255,255,.34)',
-      WebkitBackdropFilter: 'blur(10px)',
-      backdropFilter: 'blur(10px)',
+      WebkitBackdropFilter: 'blur(16px)',
+      backdropFilter: 'blur(16px)',
       border: night ? '1px solid rgba(255,255,255,.16)' : '1px solid rgba(255,255,255,.5)',
       boxShadow: night ? 'inset 0 1px 0 rgba(255,255,255,.22)' : 'inset 0 1px 0 rgba(255,255,255,.7)'
     }
@@ -9608,7 +9608,7 @@ function _home_MachiCard({
     }
   }, chip('cottage', '#5a6dd0', 'rgba(110,134,224,.16)', H('くらしの窓口', 'くらし の まどぐち', 'Living'), H('手続き・ガイド', 'てつづき', 'Procedures')), chip('directions_transit', '#3f7fd0', 'rgba(74,123,208,.16)', H('交通・運行', 'こうつう', 'Transit'), H('遅延・運休', 'でんしゃ', 'Train status')), chip('delete', '#2f9d6f', 'rgba(63,174,122,.16)', H('ゴミ・分別', 'ゴミ', 'Garbage'), H('収集日', 'しゅうしゅうび', 'Collection')), chip('festival', '#c07a1e', 'rgba(224,160,60,.18)', H('イベント', 'イベント', 'Events'), H('まちの催し', 'まち の イベント', 'Local events'))), React.createElement("button", {
     type: "button",
-    className: "mg-tap mg-ui",
+    className: "mg-tap mg-ui mg-glass-cta",
     onClick: go,
     style: {
       display: 'flex',
@@ -9621,11 +9621,9 @@ function _home_MachiCard({
       borderRadius: 16,
       border: 0,
       cursor: 'pointer',
-      background: 'linear-gradient(180deg, #7e93e8, #5f76d6)',
       color: '#fff',
       fontWeight: 800,
-      fontSize: 15.5,
-      boxShadow: '0 10px 22px -8px rgba(79,99,196,.6), inset 0 1px 0 rgba(255,255,255,.4)'
+      fontSize: 15.5
     }
   }, H('あなたのまちを開く', 'あなた の まち を ひらく', 'Open your town'), React.createElement(Icon, {
     name: "arrow_forward",
@@ -9747,7 +9745,7 @@ function TabHome() {
         _homeRef.current.querySelectorAll('.mg-glass-card').forEach(el => _mgGlassRefract(el, {
           refraction: 44,
           bezel: 28,
-          blur: 12
+          blur: 18
         }));
       } catch (e) {}
     };
@@ -10285,14 +10283,12 @@ function TabHome() {
       padding: '22px 18px 0'
     }
   }, React.createElement("div", {
+    className: "mg-glass-card",
     style: {
-      borderRadius: 16,
+      borderRadius: 20,
       padding: 20,
       display: 'grid',
-      gridTemplateColumns: '1fr 1fr 1fr',
-      background: 'radial-gradient(120% 95% at 102% 108%, rgba(244,200,214,.6), rgba(244,200,214,0) 55%), radial-gradient(110% 90% at 0% 0%, rgba(190,214,244,.5), rgba(190,214,244,0) 52%), linear-gradient(150deg, #c4dcf3 0%, #d6cfec 52%, #f0d8e3 100%)',
-      border: '1px solid rgba(255,255,255,.66)',
-      boxShadow: '0 16px 36px -18px rgba(120,120,190,.34), inset 0 1px 0 rgba(255,255,255,.75)'
+      gridTemplateColumns: '1fr 1fr 1fr'
     }
   }, stats.map((s, i) => React.createElement("div", {
     key: s.icon,
@@ -10302,15 +10298,15 @@ function TabHome() {
       alignItems: 'center',
       gap: 3,
       ...(i === 1 ? {
-        borderLeft: '1px solid rgba(90,110,180,.2)',
-        borderRight: '1px solid rgba(90,110,180,.2)'
+        borderLeft: '1px solid rgba(140,160,210,.28)',
+        borderRight: '1px solid rgba(140,160,210,.28)'
       } : {})
     }
   }, React.createElement(Icon, {
     name: s.icon,
     size: 20,
     style: {
-      color: '#5f7fe0'
+      color: 'var(--mg-accent, #5f7fe0)'
     }
   }), React.createElement(Counter, {
     to: s.to,
@@ -10318,12 +10314,12 @@ function TabHome() {
     style: {
       fontSize: 30,
       lineHeight: 1,
-      color: '#33488a'
+      color: 'var(--mg-ink, #33488a)'
     }
   }), React.createElement("span", {
     style: {
       fontSize: 11.5,
-      color: 'rgba(60,78,140,.75)'
+      color: 'var(--mg-ink4, #5b7796)'
     }
   }, s.label))))), React.createElement("div", {
     style: {
@@ -10355,18 +10351,14 @@ function TabHome() {
       background: 'linear-gradient(180deg, rgba(20,32,50,.14), rgba(20,32,50,.02) 45%, rgba(20,32,50,.28))'
     }
   }), React.createElement("div", {
+    className: "mg-glass-card",
     style: {
       position: 'absolute',
       left: 16,
       right: 16,
       bottom: 16,
       borderRadius: 22,
-      padding: '16px 18px',
-      background: 'rgba(255,255,255,.5)',
-      border: '1px solid rgba(255,255,255,.6)',
-      backdropFilter: 'blur(18px) saturate(165%)',
-      WebkitBackdropFilter: 'blur(18px) saturate(165%)',
-      boxShadow: 'inset 0 1px 0 rgba(255,255,255,.65), 0 10px 26px -14px rgba(20,32,50,.3)'
+      padding: '16px 18px'
     }
   }, React.createElement("div", {
     className: "mg-serif",
@@ -10396,7 +10388,7 @@ function TabHome() {
       padding: '22px 18px 0'
     }
   }, React.createElement("div", {
-    className: "mg-cream mg-tap",
+    className: "mg-glass-card mg-tap",
     onClick: openSurvey,
     role: "button",
     style: {
@@ -10405,14 +10397,13 @@ function TabHome() {
       gap: 14,
       padding: '16px 18px',
       borderRadius: 26,
-      cursor: 'pointer',
-      boxShadow: '0 16px 32px rgba(34,49,74,.16), inset 0 1px 0 rgba(255,255,255,.8)'
+      cursor: 'pointer'
     }
   }, React.createElement(Icon, {
     name: "rate_review",
     size: 26,
     style: {
-      color: '#6b5f31',
+      color: 'var(--mg-accent, #c07a1e)',
       flex: 'none'
     }
   }), React.createElement("div", {
@@ -10429,7 +10420,7 @@ function TabHome() {
   }, surveyTitle), React.createElement("div", {
     style: {
       fontSize: 11.5,
-      color: '#6b5f31',
+      color: 'var(--mg-ink4, #6b5f31)',
       marginTop: 4
     }
   }, (surveyDayNote ? surveyDayNote + ' ／ ' : '') + L(_home_T.surveySub))), React.createElement("span", {
@@ -10501,12 +10492,10 @@ function TabHome() {
     },
     "aria-hidden": "true"
   }), L(_home_T.newsNew), " ", newCount)), React.createElement("div", {
+    className: "mg-glass-card",
     style: {
       borderRadius: 30,
-      overflow: 'hidden',
-      background: 'linear-gradient(155deg,rgba(255,255,255,.93),rgba(255,255,255,.83))',
-      border: '1px solid rgba(255,255,255,.9)',
-      boxShadow: '0 20px 42px rgba(34,49,74,.22), inset 0 1px 0 rgba(255,255,255,.9)'
+      overflow: 'hidden'
     }
   }, news3.length === 0 ? React.createElement("div", {
     className: "mg-empty"
@@ -10529,7 +10518,7 @@ function TabHome() {
         gap: 14,
         padding: '17px 18px',
         alignItems: 'flex-start',
-        borderBottom: i < news3.length - 1 ? '1px solid rgba(34,49,74,.10)' : 'none'
+        borderBottom: i < news3.length - 1 ? '1px solid rgba(140,160,205,.22)' : 'none'
       }
     }, React.createElement("span", {
       "aria-hidden": "true",
@@ -10594,8 +10583,8 @@ function TabHome() {
       padding: 14,
       fontSize: 12.5,
       color: 'var(--mg-accent, #6e86e0)',
-      borderTop: '1px solid rgba(34,49,74,.08)',
-      background: 'rgba(110,134,224,.05)'
+      borderTop: '1px solid rgba(140,160,205,.2)',
+      background: 'rgba(110,134,224,.08)'
     }
   }, L(_home_T.newsAll), React.createElement(Icon, {
     name: "arrow_forward",
