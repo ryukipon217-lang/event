@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-<script>window.__MG_BUILD='20260912103649';</script>
+<script>window.__MG_BUILD='20260912120751';</script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>connec+a — 出会いが、まちを変えていく。</title>
@@ -539,6 +539,45 @@ html{ background:#e9edfc; }
   .mg-tabpill-lens{ -webkit-backdrop-filter:none; backdrop-filter:none; background:rgba(110,134,224,.16); }
 }
 @media (prefers-reduced-motion: reduce){ .mg-tabpill-lens{ animation:none !important; } }
+
+/* ============================================================
+   ホーム リキッドガラス(2026-09-12)。背景=設定のヒーロー写真。
+   材質=透明地(文字可読のため僅かにフロスト)+鋭い縁の光+厚み。屈折はChromiumでJS後付け。
+   ============================================================ */
+.mg-glass-card{
+  position:relative; isolation:isolate;
+  background:rgba(255,255,255,.22) !important;
+  -webkit-backdrop-filter:blur(16px); backdrop-filter:blur(16px);
+  border:1px solid transparent !important;
+  box-shadow:0 16px 40px -18px rgba(20,40,80,.42), inset 0 2px 1px rgba(255,255,255,.9), inset 0 -12px 22px -14px rgba(20,40,80,.20) !important;
+}
+.mg-glass-card::before{
+  content:''; position:absolute; inset:0; border-radius:inherit; pointer-events:none; z-index:2; padding:1.3px;
+  background:linear-gradient(135deg, rgba(255,255,255,.98), rgba(255,255,255,0) 45%, rgba(255,255,255,.6));
+  -webkit-mask:linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite:xor; mask-composite:exclude;
+}
+@media (prefers-reduced-transparency: reduce){
+  .mg-glass-card{ -webkit-backdrop-filter:none; backdrop-filter:none; background:rgba(255,255,255,.96) !important; box-shadow:0 10px 26px -12px rgba(34,49,74,.3) !important; }
+  .mg-glass-card::before{ display:none; }
+}
+/* 申し込む等のガラスCTA(periwinkleティント+背後ぼかし+縁の光。色で押せる感は維持) */
+.mg-glass-cta{
+  background:linear-gradient(180deg, rgba(110,132,224,.44), rgba(84,102,204,.40)) !important;
+  -webkit-backdrop-filter:blur(9px); backdrop-filter:blur(9px);
+  box-shadow:0 10px 22px -10px rgba(60,80,170,.55), inset 0 1.5px 1px rgba(255,255,255,.78), inset 0 -6px 12px -8px rgba(30,50,120,.35) !important;
+  color:#fff !important; text-shadow:0 1px 2px rgba(30,50,120,.5);
+}
+.mg-glass-cta::before{
+  content:''; position:absolute; inset:0; border-radius:inherit; pointer-events:none; z-index:2; padding:1.2px;
+  background:linear-gradient(135deg, rgba(255,255,255,.95), rgba(255,255,255,0) 46%, rgba(255,255,255,.5));
+  -webkit-mask:linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite:xor; mask-composite:exclude;
+}
+@media (prefers-reduced-transparency: reduce){
+  .mg-glass-cta{ background:linear-gradient(180deg,#7e93e8,#5f76d6) !important; -webkit-backdrop-filter:none; backdrop-filter:none; }
+  .mg-glass-cta::before{ display:none; }
+}
 
 /* チケットクイックピル(fixed left20 bottom96 h44。ブラー無しカード面) */
 .mg-ticket-pill{
@@ -5086,12 +5125,13 @@ function PrimaryBtn({
   onClick,
   disabled,
   loading,
-  style
+  style,
+  className
 }) {
   const off = disabled || loading;
   return React.createElement("button", {
     type: "button",
-    className: _uk_cx('mg-btn-primary', 'mg-ui', off ? '' : 'mg-tap'),
+    className: _uk_cx('mg-btn-primary', 'mg-ui', off ? '' : 'mg-tap', className),
     onClick: off ? undefined : onClick,
     disabled: off,
     style: {
@@ -9677,6 +9717,38 @@ function TabHome() {
     if (slides[0] && slides[0].imageUrl) return _home_img(slides[0].imageUrl, 1600);
     return '';
   }, [bundle.heroSlidesMobile, featured]);
+  const heroBg = React.useMemo(() => {
+    const slides = (Array.isArray(bundle.heroSlidesMobile) ? bundle.heroSlidesMobile : []).filter(s => s && s.imageUrl && s.enabled !== false);
+    return slides[0] ? _home_img(slides[0].imageUrl, 1600) : '';
+  }, [bundle.heroSlidesMobile]);
+  const _homeRef = React.useRef(null);
+  React.useEffect(() => {
+    if (!heroBg || !_homeRef.current || typeof _mgIsChromium !== 'function' || !_mgIsChromium()) return undefined;
+    if (window.matchMedia && window.matchMedia('(prefers-reduced-transparency: reduce)').matches) return undefined;
+    let raf = 0;
+    const apply = () => {
+      try {
+        _homeRef.current.querySelectorAll('.mg-glass-card').forEach(el => _mgGlassRefract(el, {
+          refraction: 44,
+          bezel: 28,
+          blur: 12
+        }));
+      } catch (e) {}
+    };
+    const t1 = setTimeout(apply, 140),
+      t2 = setTimeout(apply, 650);
+    const onR = () => {
+      cancelAnimationFrame(raf);
+      raf = requestAnimationFrame(apply);
+    };
+    window.addEventListener('resize', onR);
+    return () => {
+      clearTimeout(t1);
+      clearTimeout(t2);
+      cancelAnimationFrame(raf);
+      window.removeEventListener('resize', onR);
+    };
+  }, [heroBg, featured, others.length]);
   const titleLines = _shell_setTxt(settings, ['hero_headline', 'opening_main'], lang, t && t.hero && t.hero.title || '出会いが、\nまちを\n変えていく。').split('\n');
   const homeTagline = _shell_setTxt(settings, ['hero_catch', 'opening_subtitle'], lang, 'Tokyo, since 2019');
   let fDp = null,
@@ -9741,11 +9813,30 @@ function TabHome() {
   }];
   return React.createElement("div", {
     className: "mg-ui",
+    ref: _homeRef,
     style: {
       color: 'var(--mg-ink, #22314a)',
       position: 'relative'
     }
-  }, React.createElement("div", {
+  }, heroBg ? React.createElement(React.Fragment, null, React.createElement("div", {
+    "aria-hidden": "true",
+    style: {
+      position: 'fixed',
+      inset: 0,
+      zIndex: -1,
+      backgroundImage: 'url(' + heroBg + ')',
+      backgroundSize: 'cover',
+      backgroundPosition: 'center'
+    }
+  }), React.createElement("div", {
+    "aria-hidden": "true",
+    style: {
+      position: 'fixed',
+      inset: 0,
+      zIndex: -1,
+      background: 'linear-gradient(180deg, rgba(20,32,52,.36) 0%, rgba(233,240,247,.14) 24%, rgba(233,240,247,.28) 60%, rgba(233,240,247,.44) 100%)'
+    }
+  })) : null, React.createElement("div", {
     style: {
       position: 'absolute',
       top: 'calc(env(safe-area-inset-top, 0px) + 14px)',
@@ -9806,7 +9897,7 @@ function TabHome() {
       animation: 'mgFade 1s .45s ease both'
     }
   }, featured ? React.createElement("div", {
-    className: "mg-card-lg",
+    className: "mg-card-lg mg-glass-card",
     style: {
       position: 'relative',
       overflow: 'hidden',
@@ -9996,12 +10087,13 @@ function TabHome() {
       icon: fRegistered ? 'event_note' : 'confirmation_number',
       label: fRegistered ? lang === 'en' ? 'Registered — details' : lang === 'easy' ? 'もうしこみずみ — くわしく みる' : '申込済み — 詳細はこちら' : fFull ? L(_home_T.full) : L(_home_T.register),
       onClick: () => A.go('/events/' + featured.id),
+      className: "mg-glass-cta",
       style: {
         marginTop: 18
       }
     });
   })()) : React.createElement("div", {
-    className: "mg-card-lg",
+    className: "mg-card-lg mg-glass-card",
     style: {
       borderRadius: 32
     }
@@ -10031,7 +10123,7 @@ function TabHome() {
     const isRegd = (A && A.regs || []).some(r => String(r.eventId) === String(ev.id) && ACT2.indexOf(r.status) >= 0);
     return React.createElement("div", {
       key: ev.id,
-      className: "mg-tap",
+      className: "mg-tap mg-glass-card",
       onClick: () => A.go('/events/' + ev.id),
       style: {
         display: 'flex',
