@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-<script>window.__MG_BUILD='20260912222903';</script>
+<script>window.__MG_BUILD='20260912225144';</script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>connec+a — 出会いが、まちを変えていく。</title>
@@ -595,7 +595,8 @@ html{ background:#e9edfc; }
 /* 申し込む等のガラスCTA(periwinkleティント+背後ぼかし+縁の光。色で押せる感は維持) */
 .mg-glass-cta{
   background:linear-gradient(180deg, rgba(110,132,224,.44), rgba(84,102,204,.40)) !important;
-  -webkit-backdrop-filter:blur(16px); backdrop-filter:blur(16px);
+  /* (2026-09-13) 背後ぼかしはカードガラスの調整(写真ごと)に連動。色は固定=押せる感は維持。 */
+  -webkit-backdrop-filter:blur(var(--mg-card-blur,16px)); backdrop-filter:blur(var(--mg-card-blur,16px));
   box-shadow:0 10px 22px -10px rgba(60,80,170,.55), inset 0 1.5px 1px rgba(255,255,255,.78), inset 0 -6px 12px -8px rgba(30,50,120,.35) !important;
   color:#fff !important; text-shadow:0 1px 2px rgba(30,50,120,.5);
 }
@@ -9468,9 +9469,9 @@ function _home_MachiCard({
       borderRadius: 16,
       cursor: 'pointer',
       textAlign: 'left',
-      background: night ? 'rgba(255,255,255,.10)' : 'rgba(255,255,255,.34)',
-      WebkitBackdropFilter: 'blur(16px)',
-      backdropFilter: 'blur(16px)',
+      background: night ? 'rgba(255,255,255, var(--mg-card-white,.10))' : 'rgba(255,255,255, var(--mg-card-white,.34))',
+      WebkitBackdropFilter: 'blur(var(--mg-card-blur,16px))',
+      backdropFilter: 'blur(var(--mg-card-blur,16px))',
       border: night ? '1px solid rgba(255,255,255,.16)' : '1px solid rgba(255,255,255,.5)',
       boxShadow: night ? 'inset 0 1px 0 rgba(255,255,255,.22)' : 'inset 0 1px 0 rgba(255,255,255,.7)'
     }
