@@ -6,6 +6,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="robots" content="noindex, nofollow, noarchive, noimageindex">
 <meta name="googlebot" content="noindex, nofollow, noarchive, noimageindex">
+<meta name="referrer" content="strict-origin-when-cross-origin">
 <title>connec+a — 出会いが、まちを変えていく。</title>
 <meta name="description" content="在日外国人留学生と日本に住む人をつなぐ国際交流プラットフォーム connec+a">
 <meta property="og:title" content="connec+a">
@@ -42,9 +43,9 @@ window.__earlyBundlePromise = fetch('bundle.json', { cache: 'no-store' })
 <!-- (A11y/FOUT) アイコンフォント実読込までリガチャ生テキスト(home/event等)を透明化。display=blockの3秒タイムアウト後の露出も防ぐ。読込失敗時は8秒で解除(無表示恒久化はしない) -->
 <style>html:not(.mg-icons-ready) .msr{color:transparent!important}</style>
 <script>(function(){var on=function(){document.documentElement.classList.add('mg-icons-ready')};try{if(document.fonts&&document.fonts.load){document.fonts.load('24px "Material Symbols Rounded"').then(on,on);setTimeout(on,8000);}else{on();}}catch(e){on();}})();</script>
-<script src="https://unpkg.com/react@18.3.1/umd/react.production.min.js" crossorigin></script>
-<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.production.min.js" crossorigin></script>
-<script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.js"></script>
+<script src="https://unpkg.com/react@18.3.1/umd/react.production.min.js" integrity="sha384-DGyLxAyjq0f9SPpVevD6IgztCFlnMF6oW/XQGmfe+IsZ8TqEiDrcHkMLKI6fiB/Z" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.production.min.js" integrity="sha384-gTGxhz21lVGYNMcdJOyq01Edg0jhn/c22nsx0kyqP0TxaV5WVdsSH1fSDUf5YJj1" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.js" integrity="sha384-8FWZA6BGMXhsfO+BLtrJK0We6gg5o1JyO8xQm6peWDEUs17ACA5ziE/NIAkl9z2k" crossorigin="anonymous"></script>
 <style>
 /* ==== 01-design.css: 定義するグローバル: (CSSのみ・JSグローバルなし) ====
  *
