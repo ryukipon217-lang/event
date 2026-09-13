@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-<script>window.__MG_BUILD='20260913145807';</script>
+<script>window.__MG_BUILD='20260913152636';</script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>connec+a — 出会いが、まちを変えていく。</title>
@@ -1680,11 +1680,19 @@ const I18N = {
     }
   }
 };
+const _WRITE_ACTIONS = {
+  'auth.registerEvent': 1,
+  'auth.cancelRegistration': 1,
+  'auth.cancelApplication': 1,
+  'application.cancelRegistration': 1,
+  'application.reapply': 1
+};
 async function postToGAS(action, payload, retryCount) {
   retryCount = retryCount || 0;
   const MAX_RETRIES = 2;
+  const isWrite = !!_WRITE_ACTIONS[action];
   const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), 18000);
+  const timeoutId = setTimeout(() => controller.abort(), isWrite ? 32000 : 18000);
   try {
     const res = await fetch(CONFIG.GAS_URL, {
       method: 'POST',
@@ -1718,14 +1726,14 @@ async function postToGAS(action, payload, retryCount) {
   } catch (err) {
     clearTimeout(timeoutId);
     if (err.name === 'AbortError') {
-      if (retryCount < 1) {
+      if (!isWrite && retryCount < 1) {
         console.warn('[postToGAS] timeout, retrying (attempt ' + (retryCount + 2) + ')');
         await new Promise(r => setTimeout(r, 500));
         return postToGAS(action, payload, retryCount + 1);
       }
-      throw new Error('通信がタイムアウトしました。電波状況を確認して、もう一度お試しください');
+      throw new Error(isWrite ? '処理に時間がかかっています。二重送信を避けるため、少し待ってから画面を更新して反映をご確認ください' : '通信がタイムアウトしました。電波状況を確認して、もう一度お試しください');
     }
-    if (err instanceof TypeError && retryCount < MAX_RETRIES) {
+    if (!isWrite && err instanceof TypeError && retryCount < MAX_RETRIES) {
       console.warn('[postToGAS] network error, retrying (attempt ' + (retryCount + 2) + ')');
       await new Promise(r => setTimeout(r, 500 * Math.pow(2, retryCount)));
       return postToGAS(action, payload, retryCount + 1);
@@ -2086,10 +2094,20 @@ const authApi = {
     });
   },
   async cancelRegistration(sessionToken, regId) {
-    return postToGAS('auth.cancelRegistration', {
-      sessionToken,
-      regId
-    });
+    try {
+      return await postToGAS('auth.cancelRegistration', {
+        sessionToken,
+        regId
+      });
+    } catch (e) {
+      const m = String(e && e.message || '');
+      if (/既に(キャンセル|返金)/.test(m)) return {
+        ok: true,
+        idempotent: true,
+        regId
+      };
+      throw e;
+    }
   },
   async joinWaitlist(sessionToken, eventId, sessionId) {
     return postToGAS('auth.joinWaitlist', {
@@ -23720,7 +23738,7 @@ function SheetTicket({
         if (!cancelled) {
           if (!found) {
             setError(L(_eng_T.tNotFound));
-          } else if (found.status === 'キャンセル') {
+          } else if (found.status === 'キャンセル' || found.status === '返金' || found.status === '返金待ち') {
             setError(L(_eng_T.tCancelled));
           } else {
             setReg(found);
@@ -32054,6 +32072,9 @@ function ScreenCancel({
         }
       }
       invalidateRegsCache();
+      try {
+        targets.forEach(id => localStorage.removeItem('cca_ticket_' + id));
+      } catch (e) {}
       setCancelling(false);
       if (failures.length === 0) {
         await dialog.success({
