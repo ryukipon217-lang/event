@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-<script>window.__MG_BUILD='20260913152636';</script>
+<script>window.__MG_BUILD='20260913154145';</script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="robots" content="noindex, nofollow, noarchive, noimageindex">
@@ -1685,6 +1685,7 @@ const I18N = {
 const _WRITE_ACTIONS = {
   'auth.registerEvent': 1,
   'auth.cancelRegistration': 1,
+  'auth.cancelRegistrations': 1,
   'auth.cancelApplication': 1,
   'application.cancelRegistration': 1,
   'application.reapply': 1
@@ -2110,6 +2111,13 @@ const authApi = {
       };
       throw e;
     }
+  },
+  async cancelRegistrations(sessionToken, regIds, reason) {
+    return postToGAS('auth.cancelRegistrations', {
+      sessionToken,
+      regIds: regIds || [],
+      reason: reason || ''
+    });
   },
   async joinWaitlist(sessionToken, eventId, sessionId) {
     return postToGAS('auth.joinWaitlist', {
@@ -32065,12 +32073,17 @@ function ScreenCancel({
     try {
       const token = authStore.getToken();
       const targets = Array.from(selectedRegIds);
-      const failures = [];
-      for (let i = 0; i < targets.length; i++) {
-        try {
-          await authApi.cancelRegistration(token, targets[i]);
-        } catch (e) {
-          failures.push(e);
+      let failures = [];
+      try {
+        await authApi.cancelRegistrations(token, targets, '');
+      } catch (eBatch) {
+        failures = [];
+        for (let i = 0; i < targets.length; i++) {
+          try {
+            await authApi.cancelRegistration(token, targets[i]);
+          } catch (e) {
+            failures.push(e);
+          }
         }
       }
       invalidateRegsCache();
