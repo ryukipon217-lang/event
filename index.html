@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-<script>window.__MG_BUILD='20260913025159';</script>
+<script>window.__MG_BUILD='20260913032655';</script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>connec+a — 出会いが、まちを変えていく。</title>
@@ -2276,15 +2276,22 @@ async function getMyRegistrationsCached(token, {
   forceRefresh = false
 } = {}) {
   if (!forceRefresh) {
-    const cached = readRegsCache();
+    let entry = null;
+    try {
+      const c = localStorage.getItem(regsCacheKey());
+      if (c) entry = JSON.parse(c);
+    } catch (e) {}
+    const cached = entry && entry._cachedAt && Date.now() - entry._cachedAt < REGS_CACHE_TTL ? entry.result : null;
     if (cached) {
-      (async () => {
-        try {
-          const fresh = await authApi.getMyRegistrations(token);
-          writeRegsCache(fresh);
-          if (onFresh) onFresh(fresh);
-        } catch (e) {}
-      })();
+      if (Date.now() - entry._cachedAt >= 3 * 60 * 1000) {
+        (async () => {
+          try {
+            const fresh = await authApi.getMyRegistrations(token);
+            writeRegsCache(fresh);
+            if (onFresh) onFresh(fresh);
+          } catch (e) {}
+        })();
+      }
       return cached;
     }
   }
@@ -2330,10 +2337,21 @@ function AuthProvider({
         favoritesStore.load().catch(function () {});
         prefetchMyRegistrations();
       }
+      let _meVerAt = 0;
+      try {
+        _meVerAt = Number(localStorage.getItem('mg_me_verified_at')) || 0;
+      } catch (e) {}
+      if (snap && Date.now() - _meVerAt < 10 * 60 * 1000) {
+        if (!cancelled) setLoading(false);
+        return;
+      }
       try {
         const result = await authApi.me(token);
         if (!cancelled) {
           setUser(result.user || null);
+          try {
+            if (result.user) localStorage.setItem('mg_me_verified_at', String(Date.now()));
+          } catch (e) {}
           if (!result.user) {
             authStore.clear();
           } else {
@@ -13164,6 +13182,12 @@ function SheetEventDetail({
       token = typeof authStore !== 'undefined' && authStore && authStore.getToken ? authStore.getToken() : null;
     } catch (e) {}
     if (!token || typeof authApi === 'undefined' || !authApi || !authApi.getMyPoints) return undefined;
+    try {
+      const uk = A.user.id || A.user.userId || A.user.email;
+      if (uk && typeof isSwrFresh === 'function' && isSwrFresh('myPoints_' + uk)) return () => {
+        dead = true;
+      };
+    } catch (e) {}
     authApi.getMyPoints(token).then(r => {
       if (dead || !r || !r.ok) return;
       setMyPts(r);
@@ -13185,17 +13209,21 @@ function SheetEventDetail({
     try {
       if (typeof logAction === 'function') logAction('event_view', String(eventId));
     } catch (e) {}
-    const cachedEv = (() => {
+    let fullCached = null;
+    try {
+      if (typeof getSwrCached === 'function') {
+        const c = getSwrCached('event:' + eventId);
+        if (c) fullCached = c;
+      }
+    } catch (e) {}
+    const bundleEv = (() => {
       try {
-        const be = A && A.bundle && Array.isArray(A.bundle.events) ? A.bundle.events.find(e => String(e.id) === String(eventId)) : null;
-        if (be) return be;
-        if (typeof getSwrCached === 'function') {
-          const c = getSwrCached('event:' + eventId);
-          if (c) return c;
-        }
-      } catch (e) {}
-      return null;
+        return A && A.bundle && Array.isArray(A.bundle.events) ? A.bundle.events.find(e => String(e.id) === String(eventId)) || null : null;
+      } catch (e) {
+        return null;
+      }
     })();
+    const cachedEv = bundleEv || fullCached;
     _defaulted.current = false;
     setRegsLoaded(false);
     let cachedSess = null;
@@ -13205,20 +13233,36 @@ function SheetEventDetail({
         if (Array.isArray(cs)) cachedSess = cs;
       }
     } catch (e) {}
+    let cachedActs = null;
+    try {
+      if (typeof getSwrCached === 'function') {
+        const ca = getSwrCached('evacts:' + eventId);
+        if (Array.isArray(ca)) cachedActs = ca;
+      }
+    } catch (e) {}
     setEv(cachedEv);
     setSessions(cachedSess || []);
-    setActivities([]);
+    setActivities(cachedActs || []);
     setSessLoaded(!!cachedSess);
     setLoading(!cachedEv);
-    if (typeof fetchEventActivities === 'function') {
+    if (typeof fetchEventActivities === 'function' && !(cachedActs && typeof isSwrFresh === 'function' && isSwrFresh('evacts:' + eventId))) {
       fetchEventActivities(eventId).then(acts => {
-        if (!cancelled) setActivities(Array.isArray(acts) ? acts : []);
+        if (cancelled) return;
+        const a = Array.isArray(acts) ? acts : [];
+        setActivities(a);
+        try {
+          if (typeof setSwrCache === 'function') setSwrCache('evacts:' + eventId, a);
+        } catch (e) {}
       }).catch(() => {});
     }
     let sessKicked = false;
     const kickSessions = () => {
       if (sessKicked || typeof fetchEventSessions !== 'function') return;
       sessKicked = true;
+      if (cachedSess && typeof isSwrFresh === 'function' && isSwrFresh('evsess:' + eventId)) {
+        setSessLoaded(true);
+        return;
+      }
       fetchEventSessions(eventId).then(d => {
         if (cancelled) return;
         if (Array.isArray(d)) {
@@ -13234,6 +13278,12 @@ function SheetEventDetail({
     };
     if (cachedEv && cachedEv.format === 'multi') kickSessions();
     (async () => {
+      if (fullCached && typeof isSwrFresh === 'function' && isSwrFresh('event:' + eventId)) {
+        setEv(fullCached);
+        setLoading(false);
+        if (fullCached.format === 'multi') kickSessions();
+        return;
+      }
       const eventData = typeof fetchEvent === 'function' ? await fetchEvent(eventId) : null;
       if (cancelled) return;
       if (eventData) {
@@ -20321,30 +20371,60 @@ function SheetPoints({
 }) {
   const A = useMg();
   const lang = A && A.lang || 'ja';
-  const [pts, setPts] = useState(null);
-  const [shop, setShop] = useState(null);
-  const [camp, setCamp] = useState(null);
+  const _ptUk = A && A.user ? A.user.id || A.user.userId || A.user.email || '' : '';
+  const _ptSeed = k => {
+    try {
+      return _ptUk && typeof getSwrCached === 'function' ? getSwrCached(k + '_' + _ptUk) || null : null;
+    } catch (e) {
+      return null;
+    }
+  };
+  const [pts, setPts] = useState(() => _ptSeed('myPoints'));
+  const [shop, setShop] = useState(() => _ptSeed('pointRewards'));
+  const [camp, setCamp] = useState(() => _ptSeed('pointCampaigns'));
   const [view, setView] = useState('shop');
   const [cat, setCat] = useState('all');
   const [sel, setSel] = useState(null);
   const [busy, setBusy] = useState(false);
   const [result, setResult] = useState(null);
-  const load = React.useCallback(() => {
+  const load = React.useCallback(force => {
     let token = null;
     try {
       token = typeof authStore !== 'undefined' && authStore && authStore.getToken ? authStore.getToken() : null;
     } catch (e) {}
     if (!token || typeof authApi === 'undefined') return;
-    if (authApi.getMyPoints) authApi.getMyPoints(token).then(r => {
-      if (r && r.ok) setPts(r);
+    const uk = A && A.user ? A.user.id || A.user.userId || A.user.email || '' : '';
+    const fresh = k => {
+      try {
+        return !force && uk && typeof isSwrFresh === 'function' && isSwrFresh(k + '_' + uk);
+      } catch (e) {
+        return false;
+      }
+    };
+    const keep = (k, r) => {
+      try {
+        if (uk && typeof setSwrCache === 'function') setSwrCache(k + '_' + uk, r);
+      } catch (e) {}
+    };
+    if (authApi.getMyPoints && !fresh('myPoints')) authApi.getMyPoints(token).then(r => {
+      if (r && r.ok) {
+        setPts(r);
+        keep('myPoints', r);
+      }
     }).catch(() => {});
-    if (authApi.listPointRewards) authApi.listPointRewards(token).then(r => {
-      if (r && r.ok) setShop(r);
+    if (authApi.listPointRewards && !fresh('pointRewards')) authApi.listPointRewards(token).then(r => {
+      if (r && r.ok) {
+        setShop(r);
+        keep('pointRewards', r);
+      }
     }).catch(() => {});
-    if (authApi.listPointCampaigns) authApi.listPointCampaigns(token).then(r => {
-      if (r && r.ok) setCamp(r);
+    if (authApi.listPointCampaigns && !fresh('pointCampaigns')) authApi.listPointCampaigns(token).then(r => {
+      if (r && r.ok) {
+        setCamp(r);
+        keep('pointCampaigns', r);
+      }
     }).catch(() => {});
-  }, []);
+  }, [A && A.user]);
   useEffect(() => {
     if (open) load();
   }, [open, load]);
@@ -20401,7 +20481,7 @@ function SheetPoints({
           res: res
         });
         setSel(null);
-        load();
+        load(true);
         if (A) A.toast(lang === 'en' ? 'Redeemed' : '交換しました');
       }
     }).catch(e => {
