@@ -1,2 +1,7 @@
 
 index.html.bak-*
+
+# 検証/ビルド用ファイルは公開配信しない（ローカルには残す）
+predeploy_check.js
+package.json
+.predeploy_state.json
