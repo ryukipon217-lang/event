@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-<script>window.__MG_BUILD='20260912235156';</script>
+<script>window.__MG_BUILD='20260913025159';</script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>connec+a — 出会いが、まちを変えていく。</title>
@@ -20,11 +20,14 @@
 <meta name="apple-mobile-web-app-title" content="connec+a">
 <meta name="twitter:image" content="https://connectahubapp.com/ogp.jpg">
 <meta name="theme-color" content="#e9edfc">
-<!-- (Perf) getFrontBundle を最速で先読み(HEAD最上部・fetchFrontBundleが1回だけ消費)。GAS応答が数秒かかるため、React/Babel/フォント読込と並行してネットワークを先行させる -->
+<!-- (Perf/根治 2026-09-13) 起動バンドルは静的 bundle.json(同一オリジン・launchd定期発行=数分鮮度)を最速先読み。
+     従来は毎ロードで本体GAS getFrontBundle を叩き、実行ダッシュボードの doGet 洪水(同時実行枠飽和→全体20s+)の主因だった。
+     bundle.json は全ユーザー共有=本体GAS 0往復。欠落/不正時のみ GAS へフォールバック(degrade-safe)。 -->
 <link rel="preconnect" href="https://script.google.com" crossorigin>
 <script>
-window.__earlyBundlePromise = fetch('https://script.google.com/macros/s/AKfycbxLs1eXm39MHM0lSioBf9ghVFL8p8fIhIdYJpBBweBTCLOFDqWclPhoF66c0FgfrbHg/exec?action=getFrontBundle')
+window.__earlyBundlePromise = fetch('bundle.json', { cache: 'no-store' })
   .then(function (r) { return r.ok ? r.json() : null; })
+  .then(function (j) { return (j && j.ok && j.data) ? j : fetch('https://script.google.com/macros/s/AKfycbxLs1eXm39MHM0lSioBf9ghVFL8p8fIhIdYJpBBweBTCLOFDqWclPhoF66c0FgfrbHg/exec?action=getFrontBundle').then(function (r) { return r.ok ? r.json() : null; }); })
   .catch(function () { return null; });
 </script>
 <link rel="manifest" href='data:application/manifest+json,%7B%22name%22%3A%22connec%2Ba%22%2C%22short_name%22%3A%22connec%2Ba%22%2C%22description%22%3A%22%E5%9C%A8%E6%97%A5%E5%A4%96%E5%9B%BD%E4%BA%BA%E7%95%99%E5%AD%A6%E7%94%9F%E3%81%A8%E6%97%A5%E6%9C%AC%E4%BA%BA%E3%82%92%E3%81%A4%E3%81%AA%E3%81%90%E5%9B%BD%E9%9A%9B%E4%BA%A4%E6%B5%81%E3%83%97%E3%83%A9%E3%83%83%E3%83%88%E3%83%95%E3%82%A9%E3%83%BC%E3%83%A0%22%2C%22start_url%22%3A%22.%2F%22%2C%22display%22%3A%22standalone%22%2C%22orientation%22%3A%22portrait-primary%22%2C%22background_color%22%3A%22%23e9edfc%22%2C%22theme_color%22%3A%22%23e9edfc%22%2C%22lang%22%3A%22ja%22%2C%22categories%22%3A%5B%22events%22%2C%22social%22%2C%22education%22%5D%7D'>
@@ -1254,6 +1257,7 @@ select.mg-field,
 function _extends() { return _extends = Object.assign ? Object.assign.bind() : function (n) { for (var e = 1; e < arguments.length; e++) { var t = arguments[e]; for (var r in t) ({}).hasOwnProperty.call(t, r) && (n[r] = t[r]); } return n; }, _extends.apply(null, arguments); }
 const CONFIG = {
   GAS_URL: 'https://script.google.com/macros/s/AKfycbxLs1eXm39MHM0lSioBf9ghVFL8p8fIhIdYJpBBweBTCLOFDqWclPhoF66c0FgfrbHg/exec',
+  EDGE_READ_URL: '',
   ORG: {
     name: 'connec+a',
     nameEn: 'connec+a · Tokyo',
@@ -1265,6 +1269,7 @@ const CONFIG = {
 };
 const CONTACT_GAS_URL = 'https://script.google.com/macros/s/AKfycbxApwccYEPblBPtVHA4B2kw6xPrlxA07R31uHAt2iEb8pda26G83wuIK7ByEhYBAidxqQ/exec';
 const READ_API_URL = 'https://script.google.com/macros/s/AKfycbxm-_IBapGbmilVQSzPhsLhL6cMwm8_bIwxyq8Wh8j3IxXjGjBz234EwEohFe18EAY/exec';
+const READ_BASE = CONFIG.EDGE_READ_URL || CONFIG.GAS_URL;
 const I18N = {
   ja: {
     nav: {
@@ -2453,12 +2458,24 @@ async function fetchFrontBundle() {
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), 15000);
   try {
-    const res = await fetch(`${CONFIG.GAS_URL}?action=getFrontBundle`, {
-      signal: controller.signal
-    });
+    let json = null;
+    try {
+      const sres = await fetch('bundle.json', {
+        cache: 'no-store',
+        signal: controller.signal
+      });
+      if (sres.ok) {
+        const sj = await sres.json();
+        if (sj && sj.ok && sj.data) json = sj;
+      }
+    } catch (e) {}
+    if (!json) {
+      const res = await fetch(`${CONFIG.GAS_URL}?action=getFrontBundle`, {
+        signal: controller.signal
+      });
+      json = res.ok ? await res.json() : null;
+    }
     clearTimeout(timeoutId);
-    if (!res.ok) return null;
-    const json = await res.json();
     return validateFrontBundle(json);
   } catch (e) {
     clearTimeout(timeoutId);
@@ -2622,7 +2639,7 @@ async function fetchEvents() {
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), 15000);
   try {
-    const url = `${CONFIG.GAS_URL}?action=listEvents`;
+    const url = `${READ_BASE}?action=listEvents`;
     console.log('[Participants] fetchEvents: requesting', url);
     const res = await fetch(url, {
       signal: controller.signal
@@ -2656,7 +2673,7 @@ async function fetchAds() {
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), 15000);
   try {
-    const url = `${CONFIG.GAS_URL}?action=listAds`;
+    const url = `${READ_BASE}?action=listAds`;
     const res = await fetch(url, {
       signal: controller.signal
     });
@@ -2677,7 +2694,7 @@ async function fetchHeroSlides() {
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), 15000);
   try {
-    const url = `${CONFIG.GAS_URL}?action=listHeroSlides`;
+    const url = `${READ_BASE}?action=listHeroSlides`;
     const res = await fetch(url, {
       signal: controller.signal
     });
@@ -2698,7 +2715,7 @@ async function fetchHeroSlidesMobile() {
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), 15000);
   try {
-    const url = `${CONFIG.GAS_URL}?action=listHeroSlidesMobile`;
+    const url = `${READ_BASE}?action=listHeroSlidesMobile`;
     const res = await fetch(url, {
       signal: controller.signal
     });
@@ -2719,7 +2736,7 @@ async function fetchSiteSettings() {
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), 15000);
   try {
-    const url = `${CONFIG.GAS_URL}?action=getSettings`;
+    const url = `${READ_BASE}?action=getSettings`;
     const res = await fetch(url, {
       signal: controller.signal
     });
@@ -2740,7 +2757,7 @@ async function fetchFrontNews() {
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), 15000);
   try {
-    const url = `${CONFIG.GAS_URL}?action=listFrontNews`;
+    const url = `${READ_BASE}?action=listFrontNews`;
     const res = await fetch(url, {
       signal: controller.signal
     });
@@ -2761,7 +2778,7 @@ async function fetchLifeInfo() {
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), 15000);
   try {
-    const url = `${CONFIG.GAS_URL}?action=getLifeInfo`;
+    const url = `${READ_BASE}?action=getLifeInfo`;
     const res = await fetch(url, {
       signal: controller.signal
     });
@@ -2816,7 +2833,7 @@ async function fetchEvent(eventId) {
     const params = encodeURIComponent(JSON.stringify({
       eventId
     }));
-    const url = `${CONFIG.GAS_URL}?action=getEvent&params=${params}&_t=${Date.now()}`;
+    const url = `${READ_BASE}?action=getEvent&params=${params}&_t=${Date.now()}`;
     const res = await fetch(url, {
       signal: controller.signal
     });
@@ -2839,7 +2856,7 @@ async function fetchEventActivities(eventId) {
     const params = encodeURIComponent(JSON.stringify({
       eventId
     }));
-    const url = `${CONFIG.GAS_URL}?action=listActivities&params=${params}&_t=${Date.now()}`;
+    const url = `${READ_BASE}?action=listActivities&params=${params}&_t=${Date.now()}`;
     const res = await fetch(url, {
       signal: controller.signal
     });
@@ -2862,7 +2879,7 @@ async function fetchEventSessions(eventId) {
     const params = encodeURIComponent(JSON.stringify({
       eventId
     }));
-    const url = `${CONFIG.GAS_URL}?action=listEventSessions&params=${params}&_t=${Date.now()}`;
+    const url = `${READ_BASE}?action=listEventSessions&params=${params}&_t=${Date.now()}`;
     const res = await fetch(url, {
       signal: controller.signal
     });
@@ -2882,7 +2899,7 @@ async function fetchAlbums() {
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), 15000);
   try {
-    const url = `${CONFIG.GAS_URL}?action=listAlbums`;
+    const url = `${READ_BASE}?action=listAlbums`;
     const res = await fetch(url, {
       signal: controller.signal
     });
@@ -2907,7 +2924,7 @@ async function fetchAlbum(albumId) {
     const params = encodeURIComponent(JSON.stringify({
       albumId
     }));
-    const url = `${CONFIG.GAS_URL}?action=getAlbum&params=${params}&_t=${Date.now()}`;
+    const url = `${READ_BASE}?action=getAlbum&params=${params}&_t=${Date.now()}`;
     const res = await fetch(url, {
       signal: controller.signal
     });
