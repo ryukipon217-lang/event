@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-<script>window.__MG_BUILD='20260913032655';</script>
+<script>window.__MG_BUILD='20260913145807';</script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>connec+a — 出会いが、まちを変えていく。</title>
@@ -16343,14 +16343,22 @@ function SheetRegister({
   };
   const policyText = evtPolicy || fallbackPolicy || DEFAULT_POLICY[lang] || DEFAULT_POLICY.ja;
   const hasPolicy = true;
+  const _regHasActiveThisEvent = (() => {
+    try {
+      return (A && A.regs || []).some(r => String(r.eventId) === String(eventId) && r.status !== 'キャンセル' && r.status !== '返金' && r.status !== '返金待ち' && r.sessionId);
+    } catch (e) {
+      return false;
+    }
+  })();
+  const isUniformAddOn = !!(ev && ev.format === 'multi' && (ev.feeMode || 'uniform') === 'uniform' && _regHasActiveThisEvent);
   const isMultiNoSession = !!(ev && ev.format === 'multi' && selectedSessionIds.length === 0);
-  const canSubmit = hasPolicy && agreedPolicy && !isMultiNoSession && !(ev && ev.format === 'multi' && !regSessLoaded) && (isFree || isPaid && paymentMethod);
+  const canSubmit = hasPolicy && agreedPolicy && !isMultiNoSession && !(ev && ev.format === 'multi' && !regSessLoaded) && (isFree || isUniformAddOn || isPaid && paymentMethod);
   const calculateSubTotal = () => {
     if (!isPaid || !ev) return 0;
     const isMultiEvent = ev.format === 'multi';
     if (!isMultiEvent) return Number(ev.fee) || 0;
     const feeMode = ev.feeMode || 'uniform';
-    if (feeMode === 'uniform') return Number(ev.fee) || 0;
+    if (feeMode === 'uniform') return isUniformAddOn ? 0 : Number(ev.fee) || 0;
     const baseFee = Number(ev.fee) || 0;
     let sum = 0;
     selectedSessionIds.forEach(sid => {
@@ -16392,7 +16400,7 @@ function SheetRegister({
     };
   }, [subTotal]);
   const displayTotal = appliedCoupon ? Math.max(0, subTotal - appliedCoupon.discount) : subTotal;
-  const grandTotal = displayTotal + companionTotal;
+  const grandTotal = isUniformAddOn ? 0 : displayTotal + companionTotal;
   const parsedEligibilityRule = (() => {
     const raw = ev && ev.eligibilityRule;
     if (!raw) return null;
@@ -17550,7 +17558,27 @@ function SheetRegister({
         lineHeight: 1,
         color: isFree ? '#8f3542' : 'var(--mg-ink, #22314a)'
       }
-    }, isFree ? L(_reg_T.free) : '¥' + grandTotal.toLocaleString())))), 'sec1'), allowComp && card(React.createElement("div", null, secTitle('＋ — ' + (t.companion && t.companion.sectionTitle || '同伴者 (任意)')), React.createElement(_reg_CompanionSection, {
+    }, isFree ? L(_reg_T.free) : '¥' + grandTotal.toLocaleString()))), isUniformAddOn && React.createElement("div", {
+      className: "mg-cream mg-ui",
+      style: {
+        marginTop: 12,
+        padding: '11px 14px',
+        borderRadius: 16,
+        fontSize: 12,
+        lineHeight: 1.75,
+        color: '#6b5f31',
+        display: 'flex',
+        gap: 9,
+        alignItems: 'flex-start'
+      }
+    }, React.createElement(Icon, {
+      name: "info",
+      size: 16,
+      style: {
+        flex: 'none',
+        marginTop: 2
+      }
+    }), React.createElement("span", null, lang === 'en' ? 'Adding days to your existing registration. As this is a flat-rate event, there is no additional charge.' : lang === 'easy' ? 'いまの もうしこみに ひにちを ふやします。りょうきんは かわりません（ついか りょうきんは 0えん）。' : 'いまの申込に日程を追加します。一律料金のため追加料金はかかりません（¥0・既存の申込に合流します）。'))), 'sec1'), allowComp && card(React.createElement("div", null, secTitle('＋ — ' + (t.companion && t.companion.sectionTitle || '同伴者 (任意)')), React.createElement(_reg_CompanionSection, {
       lang: lang,
       t: t,
       adultFee: Number(ev.fee) || 0,
@@ -17743,7 +17771,7 @@ function SheetRegister({
         lineHeight: 1.6,
         margin: '12px 2px 0'
       }
-    }, L(_reg_T.photoNote))), 'secPhoto'), isPaid && card(React.createElement("div", null, secTitle('03 — ' + L(_reg_T.secPayment), true), (isCouponApplied || hasPaidCompanions) && React.createElement("div", {
+    }, L(_reg_T.photoNote))), 'secPhoto'), isPaid && !isUniformAddOn && card(React.createElement("div", null, secTitle('03 — ' + L(_reg_T.secPayment), true), (isCouponApplied || hasPaidCompanions) && React.createElement("div", {
       className: "mg-cream mg-ui",
       style: {
         padding: '12px 15px',
@@ -24131,6 +24159,20 @@ function SheetTicket({
         try {
           window.open(gcal, '_blank', 'noopener');
         } catch (e) {}
+      }
+    })), event && event.format === 'multi' && React.createElement("div", {
+      style: {
+        marginTop: 10,
+        display: 'flex'
+      }
+    }, React.createElement(_eng_MidBtn, {
+      icon: "add",
+      label: lang === 'en' ? 'Add more days' : lang === 'easy' ? 'ひにちを ふやす' : '日程を追加',
+      onClick: () => {
+        if (A) {
+          A.closeSheet();
+          A.go('/events/' + encodeURIComponent(event && event.id || '') + '/register');
+        }
       }
     })), (() => {
       const today = _eng_todayYmd();
@@ -32003,8 +32045,14 @@ function ScreenCancel({
     try {
       const token = authStore.getToken();
       const targets = Array.from(selectedRegIds);
-      const results = await Promise.allSettled(targets.map(id => authApi.cancelRegistration(token, id)));
-      const failures = results.filter(r => r.status === 'rejected');
+      const failures = [];
+      for (let i = 0; i < targets.length; i++) {
+        try {
+          await authApi.cancelRegistration(token, targets[i]);
+        } catch (e) {
+          failures.push(e);
+        }
+      }
       invalidateRegsCache();
       setCancelling(false);
       if (failures.length === 0) {
