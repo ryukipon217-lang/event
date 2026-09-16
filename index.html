@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-<script>window.__MG_BUILD='20260916042536';</script>
+<script>window.__MG_BUILD='20260916112252';</script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="robots" content="noindex, nofollow, noarchive, noimageindex">
@@ -19079,6 +19079,16 @@ const _my_T = {
     easy: 'しゃしん',
     en: 'Photos'
   },
+  mementoLoad: {
+    ja: '記念写真を読み込んでいます',
+    easy: 'きねん しゃしんを よみこんでいます',
+    en: 'Loading photos'
+  },
+  mementoNone: {
+    ja: '記念写真はまだ公開されていません',
+    easy: 'きねん しゃしんは まだ ありません',
+    en: 'The photos are not available yet'
+  },
   showAll: {
     ja: 'すべて見る',
     easy: 'ぜんぶ みる',
@@ -19704,6 +19714,75 @@ function _my_groupByApplicationId(regs, allRegsWithEvent) {
 function _my_isUnpaid(r) {
   if ((Number(r.amount) || 0) <= 0) return false;
   return r.status === '申込済み' && !r.paid || r.status === '未決済';
+}
+function _my_mementoPhotos(r) {
+  if (!r) return [];
+  const ev = r.event || {};
+  const mTest = !!r.mementoTestVisible;
+  if (!mTest && r.status !== 'チェックイン済') return [];
+  const now = new Date();
+  const pubS = r.sessionMementoPublishAt ? new Date(r.sessionMementoPublishAt) : null;
+  const sessHidden = !mTest && pubS && !isNaN(pubS.getTime()) && pubS > now;
+  const sMain = !sessHidden && r.sessionMementoPhotoUrl ? [r.sessionMementoPhotoUrl] : [];
+  const sGal = !sessHidden && Array.isArray(r.sessionMementoGallery) ? r.sessionMementoGallery.filter(Boolean) : [];
+  const allS = sMain.concat(sGal.filter(u => u !== sMain[0]));
+  if (allS.length) return allS;
+  if (ev.format === 'multi' && !mTest) return [];
+  const pub = ev.mementoPublishAt ? new Date(ev.mementoPublishAt) : null;
+  if (!mTest && pub && !isNaN(pub.getTime()) && pub > now) return [];
+  const eMain = ev.mementoPhotoUrl ? [ev.mementoPhotoUrl] : [];
+  const eGal = Array.isArray(ev.mementoGallery) ? ev.mementoGallery.filter(Boolean) : [];
+  return eMain.concat(eGal.filter(u => u !== eMain[0]));
+}
+function _my_mviewerPayload(r, photos, lang) {
+  const ev = r && r.event || {};
+  const yg = Array.isArray(r.sessionYosegaki) && r.sessionYosegaki.length ? r.sessionYosegaki : ev.format !== 'multi' && Array.isArray(r.eventYosegaki) ? r.eventYosegaki : [];
+  return {
+    title: _my_i18nField(ev, 'title', lang) || ev.title || '',
+    dayN: _my_dayN(r, ev),
+    dateStr: r.sessionDate || ev.date || '',
+    photos: photos,
+    yosegaki: yg,
+    sealType: r.sessionId && r.sessionSealType || ev.sealType || '',
+    sealPos: r.sessionId && r.sessionSealPos || ev.sealPos || ''
+  };
+}
+function _my_mementoReq(hash) {
+  let h = '';
+  try {
+    h = String((hash == null ? typeof window !== 'undefined' ? window.location.hash : '' : hash) || '');
+  } catch (e) {
+    h = '';
+  }
+  const qi = h.indexOf('?');
+  if (qi < 0) return null;
+  const q = {};
+  h.slice(qi + 1).split('&').forEach(kv => {
+    if (!kv) return;
+    const i = kv.indexOf('=');
+    const k = i < 0 ? kv : kv.slice(0, i);
+    const v = i < 0 ? '' : kv.slice(i + 1);
+    try {
+      q[decodeURIComponent(k)] = decodeURIComponent(v.replace(/\+/g, ' '));
+    } catch (e) {
+      q[k] = v;
+    }
+  });
+  const id = String(q.memento || '').trim();
+  if (!id) return null;
+  return {
+    id: id,
+    n: String(q._r || '')
+  };
+}
+function _my_clearMementoHash() {
+  try {
+    const h = String(window.location.hash || '');
+    const qi = h.indexOf('?');
+    if (qi < 0 || h.indexOf('memento=') < 0) return;
+    const base = h.slice(0, qi) || '#/mypage';
+    window.history.replaceState(null, '', window.location.pathname + window.location.search + base);
+  } catch (e) {}
 }
 function _my_Pill({
   children
@@ -21516,6 +21595,65 @@ function TabMyPage() {
     return m;
   }, [unanswered]);
   const [mviewer, setMviewer] = useState(null);
+  const [mreq, setMreq] = useState(() => _my_mementoReq());
+  const [mreqBusy, setMreqBusy] = useState(false);
+  useEffect(() => {
+    const fromHash = () => {
+      const q = _my_mementoReq();
+      if (q) setMreq(q);
+    };
+    const fromPush = e => {
+      const q = _my_mementoReq(e && e.detail && e.detail.hash);
+      if (q) setMreq(q);
+    };
+    window.addEventListener('hashchange', fromHash);
+    window.addEventListener('mg-push-open', fromPush);
+    return () => {
+      window.removeEventListener('hashchange', fromHash);
+      window.removeEventListener('mg-push-open', fromPush);
+    };
+  }, []);
+  const mreqKey = mreq ? mreq.id + '|' + mreq.n : '';
+  useEffect(() => {
+    if (!mreq || !mreq.id || !userKey) return undefined;
+    let dead = false;
+    setMreqBusy(true);
+    (async () => {
+      let list = [];
+      try {
+        list = await A.refreshRegs(true);
+      } catch (e) {
+        list = [];
+      }
+      if (dead) return;
+      setMreqBusy(false);
+      _my_clearMementoHash();
+      const id = String(mreq.id);
+      const rows = (Array.isArray(list) ? list : []).filter(r => r && (String(r.sessionId || '') === id || String(r.event && r.event.id || r.eventId || '') === id));
+      let hit = null;
+      for (let i = 0; i < rows.length; i++) {
+        const ph = _my_mementoPhotos(rows[i]);
+        if (ph.length) {
+          hit = {
+            r: rows[i],
+            photos: ph
+          };
+          break;
+        }
+      }
+      if (!hit) {
+        if (A && A.toast) A.toast(L(_my_T.mementoNone));
+        return;
+      }
+      try {
+        if (typeof logAction === 'function') logAction('memento_view', String(hit.r.event && hit.r.event.id || hit.r.eventId || ''));
+      } catch (e) {}
+      setMviewer(_my_mviewerPayload(hit.r, hit.photos, lang));
+    })();
+    return () => {
+      dead = true;
+    };
+  }, [mreqKey, userKey]);
   const [pushState, setPushState] = useState('default');
   useEffect(() => {
     if (typeof window === 'undefined' || !('Notification' in window) || !('serviceWorker' in navigator) || !('PushManager' in window)) {
@@ -22008,19 +22146,7 @@ function TabMyPage() {
     const sv = surveyOn ? surveyByEvent[evKey + '|' + String(r.sessionId || '')] || surveyByEvent[evKey + '|'] : null;
     const dayN2 = _my_dayN(r, ev);
     const mTest = !!r.mementoTestVisible;
-    const photos = (() => {
-      if (!mTest && r.status !== 'チェックイン済') return [];
-      const pubS = r.sessionMementoPublishAt ? new Date(r.sessionMementoPublishAt) : null;
-      const sessHidden = !mTest && pubS && !isNaN(pubS.getTime()) && pubS > new Date();
-      const main = !sessHidden && r.sessionMementoPhotoUrl ? [r.sessionMementoPhotoUrl] : [];
-      const sg = !sessHidden && Array.isArray(r.sessionMementoGallery) ? r.sessionMementoGallery.filter(Boolean) : [];
-      const allS = main.concat(sg.filter(u => u !== main[0]));
-      if (allS.length) return allS;
-      if (ev.format === 'multi' && !mTest) return [];
-      const pub = ev.mementoPublishAt ? new Date(ev.mementoPublishAt) : null;
-      if (!mTest && pub && !isNaN(pub.getTime()) && pub > new Date()) return [];
-      return ev.mementoPhotoUrl ? [ev.mementoPhotoUrl] : [];
-    })();
+    const photos = _my_mementoPhotos(r);
     return React.createElement("div", {
       key: r.regId || i,
       style: {
@@ -22073,18 +22199,7 @@ function TabMyPage() {
         try {
           if (typeof logAction === 'function') logAction('memento_view', evKey);
         } catch (e) {}
-        const yg = Array.isArray(r.sessionYosegaki) && r.sessionYosegaki.length ? r.sessionYosegaki : ev.format !== 'multi' && Array.isArray(r.eventYosegaki) ? r.eventYosegaki : [];
-        const sealT = r.sessionId && r.sessionSealType || ev.sealType || '';
-        const sealP = r.sessionId && r.sessionSealPos || ev.sealPos || '';
-        setMviewer({
-          title,
-          dayN: dayN2,
-          dateStr: r.sessionDate || ev.date || '',
-          photos,
-          yosegaki: yg,
-          sealType: sealT,
-          sealPos: sealP
-        });
+        setMviewer(_my_mviewerPayload(r, photos, lang));
       },
       "aria-label": L(_my_T.photos),
       style: {
@@ -22320,7 +22435,30 @@ function TabMyPage() {
     right: null,
     onClick: () => setConfirmLogout(true),
     last: true
-  }))), mviewer ? React.createElement("div", {
+  }))), mreqBusy && !mviewer ? React.createElement("div", {
+    "aria-live": "polite",
+    style: {
+      position: 'fixed',
+      left: '50%',
+      top: 'calc(env(safe-area-inset-top) + 74px)',
+      transform: 'translateX(-50%)',
+      zIndex: 130,
+      display: 'inline-flex',
+      alignItems: 'center',
+      gap: 9,
+      padding: '10px 16px',
+      borderRadius: 22,
+      background: 'rgba(255,255,255,.92)',
+      border: '1px solid rgba(34,49,74,.10)',
+      boxShadow: '0 10px 26px rgba(34,49,74,.14)',
+      fontSize: 12.5,
+      color: 'var(--mg-ink3, #3c536f)',
+      whiteSpace: 'nowrap'
+    }
+  }, React.createElement(_uk_Spinner, {
+    size: 16,
+    color: "var(--mg-accent, #6e86e0)"
+  }), L(_my_T.mementoLoad)) : null, mviewer ? React.createElement("div", {
     role: "dialog",
     "aria-label": mviewer.title,
     style: {
@@ -36755,6 +36893,11 @@ function _ShellRoot() {
     };
   }, []);
   const [regs, setRegs] = React.useState([]);
+  const _regsRef = React.useRef([]);
+  const _regsForceP = React.useRef(null);
+  React.useEffect(() => {
+    _regsRef.current = regs;
+  }, [regs]);
   const refreshRegs = React.useCallback(async force => {
     let token = null;
     try {
@@ -36764,28 +36907,86 @@ function _ShellRoot() {
       setRegs([]);
       return [];
     }
-    try {
-      let result;
-      if (typeof getMyRegistrationsCached === 'function') {
-        result = await getMyRegistrationsCached(token, {
-          forceRefresh: force !== false,
-          onFresh: fresh => {
-            setRegs(fresh && fresh.registrations || []);
-          }
-        });
-      } else if (typeof authApi !== 'undefined' && authApi && authApi.getMyRegistrations) {
-        result = await authApi.getMyRegistrations(token);
+    const forced = force !== false;
+    if (forced && _regsForceP.current) return _regsForceP.current;
+    const run = (async () => {
+      try {
+        let result;
+        if (typeof getMyRegistrationsCached === 'function') {
+          result = await getMyRegistrationsCached(token, {
+            forceRefresh: forced,
+            onFresh: fresh => {
+              setRegs(fresh && fresh.registrations || []);
+            }
+          });
+        } else if (typeof authApi !== 'undefined' && authApi && authApi.getMyRegistrations) {
+          result = await authApi.getMyRegistrations(token);
+        }
+        const list = result && result.registrations || [];
+        setRegs(list);
+        return list;
+      } catch (e) {
+        return _regsRef.current || [];
       }
-      const list = result && result.registrations || [];
-      setRegs(list);
-      return list;
-    } catch (e) {
-      return regs;
+    })();
+    if (forced) {
+      _regsForceP.current = run;
+      run.then(() => {
+        _regsForceP.current = null;
+      }, () => {
+        _regsForceP.current = null;
+      });
     }
+    return run;
   }, []);
   React.useEffect(() => {
     if (user) refreshRegs(false);else setRegs([]);
   }, [user && (user.id || user.userId || user.email)]);
+  const _regsForcedAt = React.useRef(0);
+  React.useEffect(() => {
+    if (!user) return undefined;
+    const hard = () => {
+      _regsForcedAt.current = Date.now();
+      try {
+        if (typeof invalidateRegsCache === 'function') invalidateRegsCache();
+      } catch (e) {}
+      try {
+        refreshRegs(true);
+      } catch (e) {}
+    };
+    const onVis = () => {
+      if (document.hidden) return;
+      if (Date.now() - _regsForcedAt.current < 15000) return;
+      hard();
+    };
+    const onSwMsg = ev => {
+      const d = ev && ev.data;
+      if (!d || d.type !== 'cca-push-open') return;
+      hard();
+      try {
+        window.dispatchEvent(new CustomEvent('mg-push-open', {
+          detail: {
+            url: d.url || '',
+            hash: d.hash || ''
+          }
+        }));
+      } catch (e) {}
+    };
+    document.addEventListener('visibilitychange', onVis);
+    let swTarget = null;
+    try {
+      if (navigator.serviceWorker) {
+        swTarget = navigator.serviceWorker;
+        swTarget.addEventListener('message', onSwMsg);
+      }
+    } catch (e) {}
+    return () => {
+      document.removeEventListener('visibilitychange', onVis);
+      try {
+        if (swTarget) swTarget.removeEventListener('message', onSwMsg);
+      } catch (e) {}
+    };
+  }, [user && (user.id || user.userId || user.email), refreshRegs]);
   const _shellNight = _mgIsNightNow();
   const coverSrcs = React.useMemo(() => {
     const arr = (bundle && Array.isArray(bundle.heroSlidesMobile) ? bundle.heroSlidesMobile : []).filter(s => s && s.imageUrl && s.enabled !== false).slice(0, 3).map(s => _shell_imgUrl(_mgHeroImg(s, _shellNight))).filter(Boolean);

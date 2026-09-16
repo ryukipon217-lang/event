@@ -7,7 +7,12 @@
  *   (2) activate 時の旧バージョンキャッシュ掃除 (v3 以前の cca-cache-* も回収)
  *   を追加。GAS API (script.google.com / googleusercontent.com) は従来どおり一切キャッシュしない。
  */
-const VERSION = 'v6';
+/* v7 (2026-09-16): 通知タップの「開いたまま問題」を解消。
+ *   ・hash に再入キー(_r)を付けて、同じ画面を開いていても必ず hashchange を起こす
+ *   ・アプリ本体へ cca-push-open を postMessage → 本体が申込一覧などを強制再取得する
+ *   (これが無いと、通知は届くのに画面は公開前の状態のまま=「見れない」ように見える)
+ */
+const VERSION = 'v7';
 const CACHE_NAME = 'cca-cache-' + VERSION;   // 静的アセット (cache-first + 裏更新)
 const HTML_CACHE = 'cca-html-' + VERSION;    // ナビゲーションHTML (network-first / 圏外フォールバック専用)
 
@@ -102,22 +107,32 @@ self.addEventListener('notificationclick', (event) => {
     else if (raw.charAt(0) === '#') absolute = scope + raw;        // scope直下のindex + hash
     else absolute = new URL(raw, scope).href;                      // 相対は scope 基準
   } catch (e) { absolute = scope; }
-  const hash = absolute.indexOf('#') >= 0 ? absolute.slice(absolute.indexOf('#')) : '';
+  // (v7) 再入キー _r: 既に同じ画面(同じhash)を開いていると hashchange が発火せず、
+  //   アプリは何も起きない=古い表示のまま固まる。毎回違う値を付けて必ず発火させる。
+  const hi = absolute.indexOf('#');
+  const base = hi >= 0 ? absolute.slice(0, hi) : absolute;
+  let hash = hi >= 0 ? absolute.slice(hi) : '';
+  if (hash) hash += (hash.indexOf('?') >= 0 ? '&' : '?') + '_r=' + Date.now();
+  const target = hash ? (base + hash) : absolute;
   event.waitUntil(
     self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then((list) => {
       for (const c of list) {
         // sw.js を指すタブは無視。アプリのタブ(同一オリジン)があれば、それに hash を適用して前面化。
         if (c.url && c.url.indexOf('/sw.js') >= 0) continue;
         if ('focus' in c) {
+          let navTo = target;
           try {
             const cu = new URL(c.url);
-            const navTo = hash ? (cu.origin + cu.pathname + cu.search + hash) : absolute;
+            navTo = hash ? (cu.origin + cu.pathname + cu.search + hash) : target;
             if (c.navigate) { c.navigate(navTo).catch(() => {}); }
           } catch (e) {}
+          // (v7) 開いたままのアプリは自動で再読込されない=データが古いまま。
+          //   通知タップを本体へ通報し、本体側で最新化(+記念写真などの目的画面を開く)。
+          try { c.postMessage({ type: 'cca-push-open', url: navTo, hash: hash }); } catch (e) {}
           return c.focus();
         }
       }
-      if (self.clients.openWindow) return self.clients.openWindow(absolute);
+      if (self.clients.openWindow) return self.clients.openWindow(target);
     })
   );
 });
