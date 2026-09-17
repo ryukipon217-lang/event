@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-<script>window.__MG_BUILD='20260917070549';</script>
+<script>window.__MG_BUILD='20260917085812';</script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="robots" content="noindex, nofollow, noarchive, noimageindex">
@@ -1260,7 +1260,7 @@ select.mg-field,
 function _extends() { return _extends = Object.assign ? Object.assign.bind() : function (n) { for (var e = 1; e < arguments.length; e++) { var t = arguments[e]; for (var r in t) ({}).hasOwnProperty.call(t, r) && (n[r] = t[r]); } return n; }, _extends.apply(null, arguments); }
 const CONFIG = {
   GAS_URL: 'https://script.google.com/macros/s/AKfycbxLs1eXm39MHM0lSioBf9ghVFL8p8fIhIdYJpBBweBTCLOFDqWclPhoF66c0FgfrbHg/exec',
-  EDGE_READ_URL: '',
+  EDGE_READ_URL: 'https://connecta-edge-read.solitary-cloud-f083.workers.dev',
   ORG: {
     name: 'connec+a',
     nameEn: 'connec+a · Tokyo',
@@ -1272,7 +1272,69 @@ const CONFIG = {
 };
 const CONTACT_GAS_URL = 'https://script.google.com/macros/s/AKfycbxApwccYEPblBPtVHA4B2kw6xPrlxA07R31uHAt2iEb8pda26G83wuIK7ByEhYBAidxqQ/exec';
 const READ_API_URL = 'https://script.google.com/macros/s/AKfycbxm-_IBapGbmilVQSzPhsLhL6cMwm8_bIwxyq8Wh8j3IxXjGjBz234EwEohFe18EAY/exec';
-const READ_BASE = CONFIG.EDGE_READ_URL || CONFIG.GAS_URL;
+const READ_BASE = CONFIG.GAS_URL;
+const EDGE_READ_ACTIONS = {
+  getEvent: 1,
+  listEventSessions: 1,
+  listActivities: 1,
+  getFrontBundle: 1,
+  listFrontNews: 1,
+  listHeroSlides: 1,
+  listHeroSlidesMobile: 1,
+  getLifeInfo: 1,
+  listAlbums: 1,
+  getAlbum: 1
+};
+const EDGE_READ_TIMEOUT_MS = 3500;
+let __edgeFails = 0,
+  __edgeOffUntil = 0;
+try {
+  window.__mgEdge = {
+    edge: 0,
+    gas: 0,
+    fallback: 0
+  };
+} catch (e) {}
+async function mgReadFetch(action, qs, gasSignal) {
+  const suffix = '?action=' + action + (qs || '');
+  if (CONFIG.EDGE_READ_URL && EDGE_READ_ACTIONS[action] && Date.now() >= __edgeOffUntil) {
+    const ctl = typeof AbortController !== 'undefined' ? new AbortController() : null;
+    const to = ctl ? setTimeout(() => {
+      try {
+        ctl.abort();
+      } catch (e) {}
+    }, EDGE_READ_TIMEOUT_MS) : null;
+    try {
+      const res = await fetch(CONFIG.EDGE_READ_URL + suffix, {
+        signal: ctl ? ctl.signal : undefined,
+        cache: 'no-store'
+      });
+      if (to) clearTimeout(to);
+      if (res.ok) {
+        __edgeFails = 0;
+        try {
+          window.__mgEdge.edge++;
+        } catch (e) {}
+        return res;
+      }
+    } catch (e) {
+      if (to) clearTimeout(to);
+    }
+    if (++__edgeFails >= 2) {
+      __edgeOffUntil = Date.now() + 300000;
+      __edgeFails = 0;
+    }
+    try {
+      window.__mgEdge.fallback++;
+    } catch (e) {}
+  }
+  try {
+    window.__mgEdge.gas++;
+  } catch (e) {}
+  return fetch(CONFIG.GAS_URL + suffix, {
+    signal: gasSignal
+  });
+}
 const I18N = {
   ja: {
     nav: {
@@ -2552,9 +2614,7 @@ async function fetchFrontBundle() {
       }
     } catch (e) {}
     if (!json) {
-      const res = await fetch(`${CONFIG.GAS_URL}?action=getFrontBundle`, {
-        signal: controller.signal
-      });
+      const res = await mgReadFetch('getFrontBundle', '', controller.signal);
       json = res.ok ? await res.json() : null;
     }
     clearTimeout(timeoutId);
@@ -2776,10 +2836,7 @@ async function fetchHeroSlides() {
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), 15000);
   try {
-    const url = `${READ_BASE}?action=listHeroSlides`;
-    const res = await fetch(url, {
-      signal: controller.signal
-    });
+    const res = await mgReadFetch('listHeroSlides', '', controller.signal);
     clearTimeout(timeoutId);
     if (!res.ok) return [];
     const json = await res.json();
@@ -2797,10 +2854,7 @@ async function fetchHeroSlidesMobile() {
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), 15000);
   try {
-    const url = `${READ_BASE}?action=listHeroSlidesMobile`;
-    const res = await fetch(url, {
-      signal: controller.signal
-    });
+    const res = await mgReadFetch('listHeroSlidesMobile', '', controller.signal);
     clearTimeout(timeoutId);
     if (!res.ok) return [];
     const json = await res.json();
@@ -2839,10 +2893,7 @@ async function fetchFrontNews() {
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), 15000);
   try {
-    const url = `${READ_BASE}?action=listFrontNews`;
-    const res = await fetch(url, {
-      signal: controller.signal
-    });
+    const res = await mgReadFetch('listFrontNews', '', controller.signal);
     clearTimeout(timeoutId);
     if (!res.ok) return [];
     const json = await res.json();
@@ -2860,10 +2911,7 @@ async function fetchLifeInfo() {
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), 15000);
   try {
-    const url = `${READ_BASE}?action=getLifeInfo`;
-    const res = await fetch(url, {
-      signal: controller.signal
-    });
+    const res = await mgReadFetch('getLifeInfo', '', controller.signal);
     clearTimeout(timeoutId);
     if (!res.ok) return null;
     const json = await res.json();
@@ -2915,10 +2963,7 @@ async function fetchEvent(eventId) {
     const params = encodeURIComponent(JSON.stringify({
       eventId
     }));
-    const url = `${READ_BASE}?action=getEvent&params=${params}&_t=${Date.now()}`;
-    const res = await fetch(url, {
-      signal: controller.signal
-    });
+    const res = await mgReadFetch('getEvent', `&params=${params}&_t=${Date.now()}`, controller.signal);
     clearTimeout(timeoutId);
     if (!res.ok) return null;
     const json = await res.json();
@@ -2938,10 +2983,7 @@ async function fetchEventActivities(eventId) {
     const params = encodeURIComponent(JSON.stringify({
       eventId
     }));
-    const url = `${READ_BASE}?action=listActivities&params=${params}&_t=${Date.now()}`;
-    const res = await fetch(url, {
-      signal: controller.signal
-    });
+    const res = await mgReadFetch('listActivities', `&params=${params}&_t=${Date.now()}`, controller.signal);
     clearTimeout(timeoutId);
     if (!res.ok) return [];
     const json = await res.json();
@@ -2961,10 +3003,7 @@ async function fetchEventSessions(eventId) {
     const params = encodeURIComponent(JSON.stringify({
       eventId
     }));
-    const url = `${READ_BASE}?action=listEventSessions&params=${params}&_t=${Date.now()}`;
-    const res = await fetch(url, {
-      signal: controller.signal
-    });
+    const res = await mgReadFetch('listEventSessions', `&params=${params}&_t=${Date.now()}`, controller.signal);
     clearTimeout(timeoutId);
     if (!res.ok) return [];
     const json = await res.json();
@@ -2981,10 +3020,7 @@ async function fetchAlbums() {
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), 15000);
   try {
-    const url = `${READ_BASE}?action=listAlbums`;
-    const res = await fetch(url, {
-      signal: controller.signal
-    });
+    const res = await mgReadFetch('listAlbums', '', controller.signal);
     clearTimeout(timeoutId);
     if (!res.ok) return [];
     const json = await res.json();
@@ -3006,10 +3042,7 @@ async function fetchAlbum(albumId) {
     const params = encodeURIComponent(JSON.stringify({
       albumId
     }));
-    const url = `${READ_BASE}?action=getAlbum&params=${params}&_t=${Date.now()}`;
-    const res = await fetch(url, {
-      signal: controller.signal
-    });
+    const res = await mgReadFetch('getAlbum', `&params=${params}&_t=${Date.now()}`, controller.signal);
     clearTimeout(timeoutId);
     if (!res.ok) return null;
     const json = await res.json();
@@ -19093,6 +19126,31 @@ const _my_T = {
     easy: 'きねん しゃしんは まだ ありません',
     en: 'The photos are not available yet'
   },
+  mementoSlow: {
+    ja: '混み合っています。読み込み中…',
+    easy: 'こんでいます。まってね',
+    en: 'Busy right now — still loading'
+  },
+  mementoFail: {
+    ja: '写真を読み込めませんでした',
+    easy: 'しゃしんを よみこめませんでした',
+    en: 'Could not load the photos'
+  },
+  mementoFailSub: {
+    ja: '通信が混み合っています。もう一度お試しください。',
+    easy: 'つうしんが こんでいます。もういちど ためしてね',
+    en: 'The network is busy. Please try again.'
+  },
+  mementoRetry: {
+    ja: 'もう一度',
+    easy: 'もういちど',
+    en: 'Try again'
+  },
+  close: {
+    ja: 'とじる',
+    easy: 'とじる',
+    en: 'Close'
+  },
   showAll: {
     ja: 'すべて見る',
     easy: 'ぜんぶ みる',
@@ -21601,6 +21659,9 @@ function TabMyPage() {
   const [mviewer, setMviewer] = useState(null);
   const [mreq, setMreq] = useState(() => _my_mementoReq());
   const [mreqBusy, setMreqBusy] = useState(false);
+  const [mreqSlow, setMreqSlow] = useState(false);
+  const [mreqErr, setMreqErr] = useState(false);
+  const [mreqTry, setMreqTry] = useState(0);
   useEffect(() => {
     const fromHash = () => {
       const q = _my_mementoReq();
@@ -21617,45 +21678,81 @@ function TabMyPage() {
       window.removeEventListener('mg-push-open', fromPush);
     };
   }, []);
-  const mreqKey = mreq ? mreq.id + '|' + mreq.n : '';
+  const mreqKey = mreq ? mreq.id + '|' + mreq.n + '|' + mreqTry : '';
+  const _mreqHit = (list, id) => {
+    const rows = (Array.isArray(list) ? list : []).filter(r => r && (String(r.sessionId || '') === String(id) || String(r.event && r.event.id || r.eventId || '') === String(id)));
+    for (let i = 0; i < rows.length; i++) {
+      const ph = _my_mementoPhotos(rows[i]);
+      if (ph.length) return {
+        r: rows[i],
+        photos: ph
+      };
+    }
+    return null;
+  };
   useEffect(() => {
     if (!mreq || !mreq.id || !userKey) return undefined;
     let dead = false;
-    setMreqBusy(true);
-    (async () => {
-      let list = [];
+    const id = String(mreq.id);
+    setMreqErr(false);
+    setMreqSlow(false);
+    _my_clearMementoHash();
+    const localList = A && Array.isArray(A.regs) && A.regs.length ? A.regs : ((typeof readRegsCache === 'function' ? readRegsCache() : null) || {}).registrations || [];
+    const local = _mreqHit(localList, id);
+    if (local) {
       try {
-        list = await A.refreshRegs(true);
+        if (typeof logAction === 'function') logAction('memento_view', String(local.r.event && local.r.event.id || local.r.eventId || ''));
+      } catch (e) {}
+      setMviewer(_my_mviewerPayload(local.r, local.photos, lang));
+      (async () => {
+        const res = await A.refreshRegs(true, {
+          meta: true
+        });
+        if (dead || !res || !res.ok) return;
+        const fresh = _mreqHit(res.list, id);
+        if (fresh && fresh.photos.length > local.photos.length) setMviewer(_my_mviewerPayload(fresh.r, fresh.photos, lang));
+      })();
+      return () => {
+        dead = true;
+      };
+    }
+    setMreqBusy(true);
+    const slowT = setTimeout(() => {
+      if (!dead) setMreqSlow(true);
+    }, 8000);
+    (async () => {
+      let res = null;
+      try {
+        res = await A.refreshRegs(true, {
+          meta: true
+        });
       } catch (e) {
-        list = [];
+        res = {
+          list: [],
+          ok: false
+        };
       }
       if (dead) return;
+      clearTimeout(slowT);
       setMreqBusy(false);
-      _my_clearMementoHash();
-      const id = String(mreq.id);
-      const rows = (Array.isArray(list) ? list : []).filter(r => r && (String(r.sessionId || '') === id || String(r.event && r.event.id || r.eventId || '') === id));
-      let hit = null;
-      for (let i = 0; i < rows.length; i++) {
-        const ph = _my_mementoPhotos(rows[i]);
-        if (ph.length) {
-          hit = {
-            r: rows[i],
-            photos: ph
-          };
-          break;
-        }
+      setMreqSlow(false);
+      const hit = _mreqHit(res && res.list || [], id);
+      if (hit) {
+        try {
+          if (typeof logAction === 'function') logAction('memento_view', String(hit.r.event && hit.r.event.id || hit.r.eventId || ''));
+        } catch (e) {}
+        setMviewer(_my_mviewerPayload(hit.r, hit.photos, lang));
+        return;
       }
-      if (!hit) {
+      if (res && res.ok) {
         if (A && A.toast) A.toast(L(_my_T.mementoNone));
         return;
       }
-      try {
-        if (typeof logAction === 'function') logAction('memento_view', String(hit.r.event && hit.r.event.id || hit.r.eventId || ''));
-      } catch (e) {}
-      setMviewer(_my_mviewerPayload(hit.r, hit.photos, lang));
+      setMreqErr(true);
     })();
     return () => {
       dead = true;
+      clearTimeout(slowT);
     };
   }, [mreqKey, userKey]);
   const [pushState, setPushState] = useState('default');
@@ -22462,7 +22559,60 @@ function TabMyPage() {
   }, React.createElement(_uk_Spinner, {
     size: 16,
     color: "var(--mg-accent, #6e86e0)"
-  }), L(_my_T.mementoLoad)) : null, mviewer ? React.createElement("div", {
+  }), mreqSlow ? L(_my_T.mementoSlow) : L(_my_T.mementoLoad)) : null, mreqErr && !mviewer ? React.createElement("div", {
+    role: "alert",
+    style: {
+      position: 'fixed',
+      left: 16,
+      right: 16,
+      top: 'calc(env(safe-area-inset-top) + 70px)',
+      zIndex: 130,
+      maxWidth: 420,
+      margin: '0 auto',
+      padding: '14px 16px',
+      borderRadius: 18,
+      background: 'rgba(255,255,255,.96)',
+      border: '1px solid rgba(34,49,74,.12)',
+      boxShadow: '0 14px 34px rgba(34,49,74,.16)'
+    }
+  }, React.createElement("div", {
+    style: {
+      fontSize: 13.5,
+      color: 'var(--mg-ink, #22314a)'
+    }
+  }, L(_my_T.mementoFail)), React.createElement("div", {
+    style: {
+      fontSize: 12,
+      lineHeight: 1.7,
+      color: 'var(--mg-ink4, #5b7796)',
+      marginTop: 4
+    }
+  }, L(_my_T.mementoFailSub)), React.createElement("div", {
+    style: {
+      display: 'flex',
+      gap: 8,
+      marginTop: 12
+    }
+  }, React.createElement(GhostBtn, {
+    label: L(_my_T.close),
+    onClick: () => setMreqErr(false),
+    style: {
+      height: 42,
+      borderRadius: 21,
+      fontSize: 13
+    }
+  }), React.createElement(PrimaryBtn, {
+    label: L(_my_T.mementoRetry),
+    onClick: () => {
+      setMreqErr(false);
+      setMreqTry(n => n + 1);
+    },
+    style: {
+      height: 42,
+      borderRadius: 21,
+      fontSize: 13
+    }
+  }))) : null, mviewer ? React.createElement("div", {
     role: "dialog",
     "aria-label": mviewer.title,
     style: {
@@ -36902,17 +37052,23 @@ function _ShellRoot() {
   React.useEffect(() => {
     _regsRef.current = regs;
   }, [regs]);
-  const refreshRegs = React.useCallback(async force => {
+  const refreshRegs = React.useCallback(async (force, opts) => {
+    const wantMeta = !!(opts && opts.meta);
+    const unwrap = r => wantMeta ? r : r.list;
     let token = null;
     try {
       token = typeof authStore !== 'undefined' && authStore && authStore.getToken ? authStore.getToken() : null;
     } catch (e) {}
     if (!token) {
       setRegs([]);
-      return [];
+      return unwrap({
+        list: [],
+        ok: false,
+        reason: 'noauth'
+      });
     }
     const forced = force !== false;
-    if (forced && _regsForceP.current) return _regsForceP.current;
+    if (forced && _regsForceP.current) return unwrap(await _regsForceP.current);
     const run = (async () => {
       try {
         let result;
@@ -36928,9 +37084,16 @@ function _ShellRoot() {
         }
         const list = result && result.registrations || [];
         setRegs(list);
-        return list;
+        return {
+          list: list,
+          ok: true
+        };
       } catch (e) {
-        return _regsRef.current || [];
+        return {
+          list: _regsRef.current || [],
+          ok: false,
+          reason: String(e && e.message || 'error')
+        };
       }
     })();
     if (forced) {
@@ -36941,7 +37104,7 @@ function _ShellRoot() {
         _regsForceP.current = null;
       });
     }
-    return run;
+    return unwrap(await run);
   }, []);
   React.useEffect(() => {
     if (user) refreshRegs(false);else setRegs([]);
