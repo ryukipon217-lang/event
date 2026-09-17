@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-<script>window.__MG_BUILD='20260916112252';</script>
+<script>window.__MG_BUILD='20260917070549';</script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="robots" content="noindex, nofollow, noarchive, noimageindex">
@@ -1774,9 +1774,9 @@ async function postToGAS(action, payload, retryCount) {
     throw err;
   }
 }
-async function postFastRead(action, payload) {
+async function postFastRead(action, payload, _retried) {
   const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), 12000);
+  const timeoutId = setTimeout(() => controller.abort(), 6000);
   try {
     const res = await fetch(READ_API_URL, {
       method: 'POST',
@@ -1799,6 +1799,10 @@ async function postFastRead(action, payload) {
   } catch (err) {
     clearTimeout(timeoutId);
     if (err && err.message === 'ログインが必要です') throw err;
+    if (!_retried && err && err.name === 'AbortError') {
+      console.warn('[postFastRead] 6秒で応答なし→read-apiへ張り直し:', action);
+      return postFastRead(action, payload, true);
+    }
     console.warn('[postFastRead] read-api失敗→本体へフォールバック:', action, err && err.message);
   }
   return postToGAS(action, payload);
