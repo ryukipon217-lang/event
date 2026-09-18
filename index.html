@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-<script>window.__MG_BUILD='20260918034037';</script>
+<script>window.__MG_BUILD='20260918115416';</script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="robots" content="noindex, nofollow, noarchive, noimageindex">
@@ -1029,6 +1029,53 @@ select.mg-field,
 /* ============================================================
    13. キーフレーム+アニメ補助
    ============================================================ */
+/* ============================================================
+   ふりかえり(満足度調査)の動き (2026-09-18)
+   ★どれも「画面を飾るため」ではなく、起きたことを伝えるための動き。
+     光らせる・跳ねさせるはしない。prefers-reduced-motion では下の一括ガードで全部止まる。
+   ============================================================ */
+/* ① 問いが横に送られる。進むと右から、戻ると左から = 紙をめくる向きと同じ */
+.mg-qin-next{ animation:mgQInNext .34s cubic-bezier(.22,1,.36,1) both; }
+.mg-qin-prev{ animation:mgQInPrev .34s cubic-bezier(.22,1,.36,1) both; }
+/* ★振れ幅は14pxまで: カード幅+外余白の関係で20pxだと右に2pxはみ出し、
+   シート本文(overflow-y:auto → x も auto 扱い)が一瞬横スクロールする */
+@keyframes mgQInNext{ from{ opacity:0; transform:translate3d(14px,0,0); } to{ opacity:1; transform:none; } }
+@keyframes mgQInPrev{ from{ opacity:0; transform:translate3d(-14px,0,0); } to{ opacity:1; transform:none; } }
+
+/* ② 進捗の1本が左から右へ満ちる = 一問終えた手応え */
+.mg-segfill{ animation:mgSegFill .42s cubic-bezier(.22,1,.36,1) both; transform-origin:left center; }
+@keyframes mgSegFill{ from{ transform:scaleX(0); } to{ transform:scaleX(1); } }
+
+/* ③ お礼の顔が一度だけ会釈する = 受け取りました、の合図 */
+.mg-nod{ animation:mgNod .9s cubic-bezier(.36,.07,.19,.97) .45s both; }
+@keyframes mgNod{ 0%{ transform:rotate(0deg); } 32%{ transform:rotate(-6deg); } 64%{ transform:rotate(4deg); } 100%{ transform:rotate(0deg); } }
+
+/* ④ 水彩の地がごくゆっくり揺れる = 絵の具がまだ乾いていない感じ。1周24秒・振幅わずか */
+.mg-wash-drift{ animation:mgWashDrift 24s ease-in-out infinite alternate; will-change:transform; }
+@keyframes mgWashDrift{ from{ transform:translate3d(0,0,0) scale(1); } to{ transform:translate3d(-8px,6px,0) scale(1.035); } }
+
+/* (2026-09-18) 満足度スライダー: 未回答のあいだ「動かせる」ことを示すヒント。
+   つまみが左右に小さく揺れ、揺れた側の矢印が明るくなる。触れた時点で消える。
+   ★上の prefers-reduced-motion 一括ガードで動きは自動的に止まり、矢印は静止して残る
+     (=動かせることは伝わったまま、揺れだけが消える)。 */
+.mg-slidehint{ animation:mgSlideHint 2s ease-in-out infinite; }
+@keyframes mgSlideHint{
+  0%,100%{ transform:translate(-50%,-50%); }
+  28%{ transform:translate(calc(-50% - 11px),-50%); }
+  64%{ transform:translate(calc(-50% + 11px),-50%); }
+}
+.mg-hintarrow-l{ animation:mgHintArrowL 2s ease-in-out infinite; }
+.mg-hintarrow-r{ animation:mgHintArrowR 2s ease-in-out infinite; }
+@keyframes mgHintArrowL{ 0%,100%{ opacity:.45; } 28%{ opacity:1; } }
+@keyframes mgHintArrowR{ 0%,100%{ opacity:.45; } 64%{ opacity:1; } }
+
+/* (2026-09-18) 満足度スライダーの顔。値が変わるたびに一度だけ小さく弾む。
+   ★上の prefers-reduced-motion 一括ガードで自動的に無効化される。 */
+.mg-facepop{ animation:mgFacePop .28s cubic-bezier(.22,1,.36,1) both; }
+@keyframes mgFacePop{
+  0%{ opacity:.25; transform:scale(.86) rotate(-5deg); }
+  100%{ opacity:1; transform:scale(1) rotate(0deg); }
+}
 @keyframes mgLineUp{
   from{ opacity:0; transform:translateY(110%); }
   to{ opacity:1; transform:none; }
@@ -19138,6 +19185,21 @@ const _my_T = {
     easy: 'しゃしん',
     en: 'Photos'
   },
+  mementoSec: {
+    ja: '記念写真',
+    easy: 'きねん しゃしん',
+    en: 'Your photos'
+  },
+  mementoSecSub: {
+    ja: '参加した日の写真が届いています',
+    easy: 'さんかした ひの しゃしんが とどいています',
+    en: 'Photos from the days you joined'
+  },
+  mementoCount: {
+    ja: '枚',
+    easy: 'まい',
+    en: ''
+  },
   mementoLoad: {
     ja: '記念写真を読み込んでいます',
     easy: 'きねん しゃしんを よみこんでいます',
@@ -21926,6 +21988,23 @@ function TabMyPage() {
       unpaid
     };
   }, [regs]);
+  const mementoCards = React.useMemo(() => {
+    const out = [];
+    (derived.past || []).forEach(r => {
+      const photos = _my_mementoPhotos(r);
+      if (!photos.length) return;
+      const ev = r.event || {};
+      const dp = _my_dateParts(r.sessionDate || ev.date);
+      out.push({
+        r: r,
+        photos: photos,
+        test: !!r.mementoTestVisible,
+        title: _my_i18nField(ev, 'title', lang) || ev.title || '',
+        dateLabel: dp ? dp.md2 : ''
+      });
+    });
+    return out.slice(0, 12);
+  }, [derived.past, lang]);
   if (!user) {
     return React.createElement("div", {
       style: {
@@ -21947,6 +22026,106 @@ function TabMyPage() {
   })();
   const _mpHeroBg = _mpBgSlide && typeof _home_img === 'function' ? _home_img(_mgHeroImg(_mpBgSlide, _mpNight), 1600) : '';
   const _mpCardGlassVars = typeof _mgCardGlassVars === 'function' ? _mgCardGlassVars(_mpBgSlide) : {};
+  const _mpMementoCard = (m, i, mode) => {
+    const big = mode === 'full';
+    const wrap = mode === 'strip' ? {
+      flex: 'none',
+      width: 176,
+      scrollSnapAlign: 'start'
+    } : {
+      width: '100%',
+      minWidth: 0
+    };
+    return React.createElement("button", {
+      key: m.r.regId || i,
+      type: "button",
+      className: "mg-tap",
+      onClick: () => {
+        try {
+          if (typeof logAction === 'function') logAction('memento_view', String(m.r.event && m.r.event.id || m.r.eventId || ''));
+        } catch (e) {}
+        setMviewer(_my_mviewerPayload(m.r, m.photos, lang));
+      },
+      "aria-label": m.title + ' ' + L(_my_T.photos),
+      style: {
+        padding: 0,
+        border: 0,
+        background: 'none',
+        textAlign: 'left',
+        cursor: 'pointer',
+        ...wrap
+      }
+    }, React.createElement("div", {
+      style: {
+        position: 'relative',
+        width: '100%',
+        aspectRatio: '4 / 3',
+        borderRadius: big ? 26 : 20,
+        overflow: 'hidden',
+        background: 'rgba(34,49,74,.06)',
+        boxShadow: '0 10px 24px rgba(34,49,74,.14), 0 1px 0 rgba(255,255,255,.7) inset'
+      }
+    }, React.createElement("img", {
+      src: m.photos[0],
+      alt: "",
+      loading: "lazy",
+      style: {
+        width: '100%',
+        height: '100%',
+        objectFit: 'cover',
+        display: 'block'
+      }
+    }), m.photos.length > 1 ? React.createElement("span", {
+      className: "mg-ui",
+      style: {
+        position: 'absolute',
+        right: big ? 10 : 8,
+        top: big ? 10 : 8,
+        display: 'inline-flex',
+        alignItems: 'center',
+        gap: 4,
+        padding: '3px 9px',
+        borderRadius: 12,
+        fontSize: 11,
+        background: 'rgba(20,32,50,.56)',
+        color: '#fff'
+      }
+    }, React.createElement(Icon, {
+      name: "photo_library",
+      size: 13
+    }), m.photos.length, L(_my_T.mementoCount)) : null, m.test ? React.createElement("span", {
+      className: "mg-ui",
+      style: {
+        position: 'absolute',
+        left: big ? 10 : 8,
+        top: big ? 10 : 8,
+        padding: '2px 8px',
+        borderRadius: 11,
+        fontSize: 10.5,
+        letterSpacing: '.06em',
+        color: '#8a6d1c',
+        background: 'rgba(250,243,215,.92)',
+        border: '1px solid rgba(233,208,106,.7)'
+      }
+    }, lang === 'en' ? 'TEST' : 'テスト') : null), React.createElement("div", {
+      style: {
+        padding: big ? '11px 4px 0' : '9px 3px 0'
+      }
+    }, React.createElement("div", {
+      className: "mg-num",
+      style: {
+        fontSize: big ? 12.5 : 12,
+        color: 'var(--mg-ink4, #5b7796)'
+      }
+    }, m.dateLabel), React.createElement("div", {
+      className: "mg-clamp1",
+      style: {
+        fontSize: big ? 14 : 12.5,
+        color: 'var(--mg-ink, #22314a)',
+        marginTop: 2
+      }
+    }, m.title)));
+  };
   return React.createElement("div", {
     className: 'mg-ui mg-glasspage' + (_mpNight ? ' mg-night' : ''),
     style: {
@@ -22250,7 +22429,38 @@ function TabMyPage() {
   }, React.createElement(Icon, {
     name: "event",
     size: 16
-  }), L(_my_T.findEvents))))), React.createElement("div", {
+  }), L(_my_T.findEvents))))), mementoCards.length > 0 ? React.createElement("div", {
+    style: {
+      padding: '0 0 18px'
+    }
+  }, React.createElement("div", {
+    style: {
+      padding: '0 18px'
+    }
+  }, React.createElement(_my_Pill, null, L(_my_T.mementoSec))), mementoCards.length === 1 ? React.createElement("div", {
+    style: {
+      padding: '0 18px'
+    }
+  }, _mpMementoCard(mementoCards[0], 0, 'full')) : mementoCards.length === 2 ? React.createElement("div", {
+    style: {
+      display: 'grid',
+      gridTemplateColumns: '1fr 1fr',
+      gap: 12,
+      padding: '0 18px'
+    }
+  }, mementoCards.map((m, i) => _mpMementoCard(m, i, 'half'))) : React.createElement("div", {
+    className: "mg-hidebar",
+    style: {
+      display: 'flex',
+      gap: 12,
+      overflowX: 'auto',
+      padding: '0 18px 4px',
+      scrollSnapType: 'x proximity',
+      scrollPaddingLeft: 18,
+      scrollPaddingRight: 18,
+      WebkitOverflowScrolling: 'touch'
+    }
+  }, mementoCards.map((m, i) => _mpMementoCard(m, i, 'strip')))) : null, React.createElement("div", {
     style: {
       padding: '0 18px 16px'
     }
@@ -23543,6 +23753,11 @@ const _eng_T = {
     easy: 'つぎに いかします',
     en: 'Your voice shapes our next event'
   },
+  svPick: {
+    ja: '動かして選んでください',
+    easy: 'うごかして えらんでね',
+    en: 'Drag to choose'
+  },
   svPlaceholder: {
     ja: 'ご自由にご記入ください',
     easy: 'じゆうに かいて ください',
@@ -23578,6 +23793,21 @@ const _eng_T = {
     easy: 'ほかの アンケート',
     en: 'Other surveys'
   },
+  svNext: {
+    ja: 'つぎへ',
+    easy: 'つぎへ',
+    en: 'Next'
+  },
+  svBackStep: {
+    ja: 'もどる',
+    easy: 'もどる',
+    en: 'Back'
+  },
+  svOptional: {
+    ja: '任意',
+    easy: 'なくても いい',
+    en: 'optional'
+  },
   svLoginNeed: {
     ja: 'アンケートに答えるには、ログインしてください。',
     easy: 'アンケートに こたえるには、ログインして ください。',
@@ -23587,6 +23817,16 @@ const _eng_T = {
     ja: ['よくない', 'ふつう', 'よかった', 'とても'],
     easy: ['よくない', 'ふつう', 'よかった', 'とても'],
     en: ['Not good', 'Okay', 'Good', 'Great']
+  },
+  svFaceNps5: {
+    ja: ['すすめない', 'あまり', 'ふつう', 'すすめたい', 'ぜひ'],
+    easy: ['すすめない', 'あまり', 'ふつう', 'すすめたい', 'ぜひ'],
+    en: ['Not likely', 'Unlikely', 'Neutral', 'Likely', 'Very likely']
+  },
+  svFace5: {
+    ja: ['よくない', 'あまり', 'ふつう', 'よかった', 'とても'],
+    easy: ['よくない', 'あまり', 'ふつう', 'よかった', 'とても'],
+    en: ['Poor', 'Fair', 'Okay', 'Good', 'Great']
   },
   alHead: {
     ja: '参加履歴 ／ 記念写真',
@@ -23885,6 +24125,11 @@ function _eng_gcalUrl(event, regId, lang, dateStr, timeOverride, venueOverride) 
   } catch (e) {
     return null;
   }
+}
+const _eng_FACE_EMOJI = ['😞', '🙁', '😐', '😊', '🤩'];
+function _eng_faceEmoji(r) {
+  const t = Math.max(0, Math.min(1, isNaN(r) ? 0 : r));
+  return _eng_FACE_EMOJI[Math.min(_eng_FACE_EMOJI.length - 1, Math.round(t * (_eng_FACE_EMOJI.length - 1)))];
 }
 function _eng_faceIcon(v, lo, hi) {
   const span = hi - lo || 1;
@@ -24660,6 +24905,244 @@ function SheetTicket({
     header: header
   }, body);
 }
+const _eng_MOOD_INK = [[0.00, [110, 134, 224]], [0.40, [150, 126, 216]], [0.72, [200, 120, 176]], [1.00, [222, 112, 152]]];
+function _eng_moodRgb(r, stops) {
+  const t = Math.max(0, Math.min(1, isNaN(r) ? 0 : r));
+  for (let i = 1; i < stops.length; i++) {
+    if (t <= stops[i][0] || i === stops.length - 1) {
+      const a = stops[i - 1],
+        b = stops[i];
+      const k = b[0] - a[0] ? (t - a[0]) / (b[0] - a[0]) : 0;
+      const kk = Math.max(0, Math.min(1, k));
+      return [0, 1, 2].map(function (j) {
+        return Math.round(a[1][j] + (b[1][j] - a[1][j]) * kk);
+      });
+    }
+  }
+  return stops[0][1];
+}
+function _eng_moodInk(r) {
+  const c = _eng_moodRgb(r, _eng_MOOD_INK);
+  return 'rgb(' + c[0] + ',' + c[1] + ',' + c[2] + ')';
+}
+function _eng_moodGlow(r, a) {
+  const c = _eng_moodRgb(r, _eng_MOOD_INK);
+  return 'rgba(' + c[0] + ',' + c[1] + ',' + c[2] + ',' + a + ')';
+}
+function _eng_FaceSlider({
+  lo,
+  hi,
+  value,
+  words,
+  lowLabel,
+  highLabel,
+  pickHint,
+  onChange,
+  ariaLabel
+}) {
+  const span = hi - lo || 1;
+  const has = value != null;
+  const v = has ? value : Math.round((lo + hi) / 2);
+  const pct = (v - lo) / span * 100;
+  const ratio = (v - lo) / span;
+  const idx = words ? Math.min(words.length - 1, Math.max(0, Math.round((v - lo) / span * (words.length - 1)))) : 0;
+  const trackRef = useRef(null);
+  const [grab, setGrab] = useState(false);
+  const emit = next => {
+    if (next === value) return;
+    try {
+      if (navigator && typeof navigator.vibrate === 'function') navigator.vibrate(8);
+    } catch (_e) {}
+    onChange(next);
+  };
+  const fromClientX = clientX => {
+    const el = trackRef.current;
+    if (!el) return;
+    const r = el.getBoundingClientRect();
+    if (!r.width) return;
+    let p = (clientX - r.left) / r.width;
+    p = Math.max(0, Math.min(1, p));
+    emit(Math.round(lo + p * span));
+  };
+  const step = d => emit(Math.max(lo, Math.min(hi, (has ? v : Math.round((lo + hi) / 2)) + d)));
+  return React.createElement("div", null, React.createElement("div", {
+    style: {
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      gap: 14,
+      minHeight: 104
+    }
+  }, React.createElement("div", {
+    style: {
+      position: 'relative',
+      width: 96,
+      height: 96,
+      display: 'grid',
+      placeItems: 'center',
+      flex: 'none'
+    }
+  }, React.createElement("div", {
+    "aria-hidden": "true",
+    style: {
+      position: 'absolute',
+      inset: 0,
+      borderRadius: 48,
+      pointerEvents: 'none',
+      background: has ? 'radial-gradient(circle at 50% 34%, ' + _eng_moodGlow(ratio, .52) + ' 0%, ' + _eng_moodGlow(ratio, .16) + ' 58%, ' + _eng_moodGlow(ratio, 0) + ' 74%)' : 'radial-gradient(circle at 50% 34%, rgba(34,49,74,.07) 0%, rgba(34,49,74,0) 70%)',
+      boxShadow: has ? '0 12px 28px -10px ' + _eng_moodGlow(ratio, .55) : 'none',
+      transform: has ? 'scale(1)' : 'scale(.9)',
+      transition: 'background .18s linear, box-shadow .34s ease, transform .34s cubic-bezier(.22,1,.36,1)'
+    }
+  }), React.createElement("span", {
+    key: 'f' + (has ? v : 'x'),
+    className: grab ? '' : 'mg-facepop',
+    role: "img",
+    "aria-hidden": "true",
+    style: {
+      position: 'relative',
+      fontSize: 60,
+      lineHeight: 1,
+      filter: has ? 'none' : 'grayscale(1)',
+      opacity: has ? 1 : .45
+    }
+  }, has ? _eng_faceEmoji(ratio) : '😐')), React.createElement("div", {
+    className: has ? 'mg-serif' : 'mg-ui',
+    "aria-live": "polite",
+    style: {
+      maxWidth: 200,
+      fontSize: has ? 24 : 13,
+      lineHeight: 1.45,
+      color: has ? 'var(--mg-ink, #22314a)' : 'var(--mg-ink4, #5b7796)'
+    }
+  }, has ? words ? words[idx] : String(v) : pickHint)), React.createElement("div", {
+    ref: trackRef,
+    role: "slider",
+    tabIndex: 0,
+    "aria-label": ariaLabel,
+    "aria-valuemin": lo,
+    "aria-valuemax": hi,
+    "aria-valuenow": has ? v : undefined,
+    "aria-valuetext": has && words ? words[idx] : undefined,
+    onKeyDown: e => {
+      if (e.key === 'ArrowLeft' || e.key === 'ArrowDown') {
+        e.preventDefault();
+        step(-1);
+      } else if (e.key === 'ArrowRight' || e.key === 'ArrowUp') {
+        e.preventDefault();
+        step(1);
+      } else if (e.key === 'Home') {
+        e.preventDefault();
+        emit(lo);
+      } else if (e.key === 'End') {
+        e.preventDefault();
+        emit(hi);
+      }
+    },
+    onPointerDown: e => {
+      try {
+        e.currentTarget.setPointerCapture(e.pointerId);
+      } catch (_e) {}
+      setGrab(true);
+      fromClientX(e.clientX);
+    },
+    onPointerMove: e => {
+      if (grab) fromClientX(e.clientX);
+    },
+    onPointerUp: () => setGrab(false),
+    onPointerCancel: () => setGrab(false),
+    style: {
+      position: 'relative',
+      height: 56,
+      margin: '14px 6px 0',
+      borderRadius: 28,
+      touchAction: 'none',
+      WebkitUserSelect: 'none',
+      userSelect: 'none',
+      cursor: 'pointer'
+    }
+  }, React.createElement("div", {
+    "aria-hidden": "true",
+    style: {
+      position: 'absolute',
+      top: '50%',
+      left: 0,
+      right: 0,
+      height: 16,
+      transform: 'translateY(-50%)',
+      borderRadius: 8,
+      background: 'rgba(34,49,74,.10)'
+    }
+  }), React.createElement("div", {
+    "aria-hidden": "true",
+    style: {
+      position: 'absolute',
+      top: '50%',
+      left: 0,
+      right: 0,
+      height: 16,
+      transform: 'translateY(-50%)',
+      borderRadius: 8,
+      background: 'linear-gradient(90deg, #7e93e8 0%, #a78fe0 40%, #dfa0cd 72%, #f3a9c6 100%)',
+      clipPath: 'inset(0 ' + (100 - pct) + '% 0 0)',
+      opacity: has ? 1 : 0,
+      transition: grab ? 'none' : 'clip-path .12s ease-out, opacity .12s'
+    }
+  }), !has && !grab ? React.createElement(React.Fragment, null, React.createElement(Icon, {
+    name: "chevron_left",
+    size: 28,
+    className: "mg-hintarrow-l",
+    style: {
+      position: 'absolute',
+      top: '50%',
+      left: 'calc(' + pct + '% - 44px)',
+      transform: 'translate(-50%, -50%)',
+      color: 'var(--mg-accent, #6e86e0)',
+      pointerEvents: 'none'
+    }
+  }), React.createElement(Icon, {
+    name: "chevron_right",
+    size: 28,
+    className: "mg-hintarrow-r",
+    style: {
+      position: 'absolute',
+      top: '50%',
+      left: 'calc(' + pct + '% + 44px)',
+      transform: 'translate(-50%, -50%)',
+      color: 'var(--mg-accent, #6e86e0)',
+      pointerEvents: 'none'
+    }
+  })) : null, React.createElement("div", {
+    className: !has && !grab ? 'mg-slidehint' : '',
+    "aria-hidden": "true",
+    style: {
+      position: 'absolute',
+      top: '50%',
+      left: pct + '%',
+      width: 42,
+      height: 42,
+      borderRadius: 21,
+      transform: 'translate(-50%, -50%)' + (grab ? ' scale(1.1)' : ''),
+      background: '#fff',
+      border: '3px solid ' + (has ? _eng_moodInk(ratio) : 'var(--mg-accent, #6e86e0)'),
+      boxShadow: '0 8px 20px rgba(34,49,74,.20)',
+      transition: grab ? 'transform .12s' : 'transform .12s, left .12s ease-out'
+    }
+  })), React.createElement("div", {
+    className: "mg-ui",
+    style: {
+      textAlign: 'center',
+      margin: '10px 0 0',
+      fontSize: 12,
+      color: 'var(--mg-ink5, #8ba0b6)'
+    }
+  }, lowLabel, React.createElement("span", {
+    style: {
+      margin: '0 7px',
+      opacity: .6
+    }
+  }, "\u301C"), highLabel));
+}
 function SheetSurvey({
   open,
   props
@@ -24676,6 +25159,8 @@ function SheetSurvey({
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState(null);
   const [done, setDone] = useState(false);
+  const [step, setStep] = useState(0);
+  const [qdir, setQdir] = useState(1);
   const _autoPickRef = useRef(false);
   const _load = React.useCallback(() => {
     const token = typeof authStore !== 'undefined' && authStore.getToken ? authStore.getToken() : null;
@@ -24694,6 +25179,7 @@ function SheetSurvey({
     setAnswers({});
     setSubmitting(false);
     setFromList(false);
+    setStep(0);
     _autoPickRef.current = false;
     const p = props || {};
     if (p.survey && Array.isArray(p.survey.questions)) {
@@ -24725,13 +25211,14 @@ function SheetSurvey({
       setActive(pick);
       setAnswers({});
       setError(null);
+      setStep(0);
     }
   }, [open, active, loaded, surveys]);
   useEffect(() => {
     if (!done) return;
     const t = setTimeout(() => {
       if (A) A.closeSheet();
-    }, 2200);
+    }, 3400);
     return () => clearTimeout(t);
   }, [done]);
   const questions = active && Array.isArray(active.questions) ? active.questions : [];
@@ -24756,6 +25243,15 @@ function SheetSurvey({
     if (!qq || !qq.required) return true;
     const v = answers[qq.id];
     return !(v == null || v === '' || Array.isArray(v) && v.length === 0);
+  };
+  const moodRatio = qq => {
+    if (!qq || qq.type !== 'scale' && qq.type !== 'nps') return null;
+    const val = answers[qq.id];
+    if (val == null) return null;
+    const isN = qq.type === 'nps';
+    const l = isN ? 0 : isNaN(Number(qq.min)) ? 1 : Number(qq.min);
+    const h = isN ? 10 : isNaN(Number(qq.max)) ? 5 : Number(qq.max);
+    return (val - l) / (h - l || 1);
   };
   const qLabel = qq => lang === 'easy' && qq.label_easy || lang === 'en' && qq.label_en || qq.label;
   const optLabel = (qq, opt, oi) => lang === 'easy' && qq.options_easy && qq.options_easy[oi] || lang === 'en' && qq.options_en && qq.options_en[oi] || opt;
@@ -24803,232 +25299,138 @@ function SheetSurvey({
     setAnswers({});
     setError(null);
     setFromList(true);
+    setStep(0);
   };
   const renderScale = q => {
     const isNps = q.type === 'nps';
     const lo = isNps ? 0 : isNaN(Number(q.min)) ? 1 : Number(q.min);
     const hi = isNps ? 10 : isNaN(Number(q.max)) ? 5 : Number(q.max);
     const count = hi - lo + 1;
-    const v = answers[q.id];
-    const has = v != null;
-    if (count <= 6) {
-      const face4 = count === 4 ? L(_eng_T.svFace4) : null;
-      const cells = [];
-      for (let i = 0; i < count; i++) {
-        const val = lo + i;
-        const sel = has && v === val;
-        cells.push(React.createElement("button", {
-          key: val,
-          type: "button",
-          className: "mg-tap",
-          onClick: () => setVal(q.id, val),
-          "aria-pressed": sel,
-          style: {
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            gap: 6,
-            background: 'none',
-            border: 0,
-            padding: 0,
-            cursor: 'pointer'
-          }
-        }, React.createElement(Icon, {
-          name: _eng_faceIcon(val, lo, hi),
-          size: 34,
-          fill: sel,
-          style: {
-            color: sel ? 'var(--mg-accent, #6e86e0)' : '#a7b8c9',
-            transition: 'color .25s'
-          }
-        }), React.createElement("span", {
-          className: "mg-ui",
-          style: {
-            fontSize: 10.5,
-            color: sel ? 'var(--mg-accent, #6e86e0)' : 'var(--mg-ink5, #8ba0b6)'
-          }
-        }, face4 ? face4[i] : String(val))));
-      }
-      return React.createElement("div", null, React.createElement("div", {
-        style: {
-          display: 'flex',
-          justifyContent: 'space-between',
-          padding: 20,
-          borderRadius: 26,
-          background: 'rgba(255,255,255,.92)',
-          border: '1px solid rgba(34,49,74,.10)'
-        }
-      }, cells), !face4 && React.createElement("div", {
-        className: "mg-ui",
-        style: {
-          display: 'flex',
-          justifyContent: 'space-between',
-          margin: '7px 4px 0',
-          fontSize: 10.5,
-          color: 'var(--mg-ink5, #8ba0b6)'
-        }
-      }, React.createElement("span", null, lo, "\u30FB", isNps ? L(_eng_T.svNpsLow) : L(_eng_T.svScaleLow)), React.createElement("span", null, isNps ? L(_eng_T.svNpsHigh) : L(_eng_T.svScaleHigh), "\u30FB", hi)));
-    }
-    const pills = [];
-    for (let i = 0; i < count; i++) {
-      const val = lo + i;
-      const sel = has && v === val;
-      pills.push(React.createElement("button", {
-        key: val,
-        type: "button",
-        className: "mg-tap mg-ui",
-        onClick: () => setVal(q.id, val),
-        "aria-pressed": sel,
-        style: {
-          width: 38,
-          height: 38,
-          borderRadius: 19,
-          cursor: 'pointer',
-          fontSize: 13,
-          fontWeight: 500,
-          display: 'inline-flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          background: sel ? 'linear-gradient(180deg, #c05e97 0%, #9e4478 100%)' : 'rgba(255,255,255,.9)',
-          color: sel ? '#f2f7fc' : 'var(--mg-ink2, #2b3d57)',
-          border: sel ? '1px solid rgba(255,255,255,.35)' : '1px solid rgba(34,49,74,.12)'
-        }
-      }, val));
-    }
-    return React.createElement("div", null, React.createElement("div", {
-      style: {
-        textAlign: 'center',
-        marginBottom: 10
-      }
-    }, React.createElement(Icon, {
-      name: has ? _eng_faceIcon(v, lo, hi) : 'sentiment_neutral',
-      size: 44,
-      fill: has,
-      style: {
-        color: has ? 'var(--mg-accent, #6e86e0)' : '#a7b8c9'
-      }
-    })), React.createElement("div", {
-      style: {
-        display: 'flex',
-        flexWrap: 'wrap',
-        gap: 8,
-        justifyContent: 'center'
-      }
-    }, pills), React.createElement("div", {
-      className: "mg-ui",
-      style: {
-        display: 'flex',
-        justifyContent: 'space-between',
-        margin: '8px 4px 0',
-        fontSize: 10.5,
-        color: 'var(--mg-ink5, #8ba0b6)'
-      }
-    }, React.createElement("span", null, lo, "\u30FB", isNps ? L(_eng_T.svNpsLow) : L(_eng_T.svScaleLow)), React.createElement("span", null, isNps ? L(_eng_T.svNpsHigh) : L(_eng_T.svScaleHigh), "\u30FB", hi)));
+    const words = isNps ? L(_eng_T.svFaceNps5) : count === 4 ? L(_eng_T.svFace4) : L(_eng_T.svFace5);
+    return React.createElement(_eng_FaceSlider, {
+      lo: lo,
+      hi: hi,
+      value: answers[q.id] != null ? answers[q.id] : null,
+      words: words,
+      lowLabel: isNps ? L(_eng_T.svNpsLow) : L(_eng_T.svScaleLow),
+      highLabel: isNps ? L(_eng_T.svNpsHigh) : L(_eng_T.svScaleHigh),
+      pickHint: L(_eng_T.svPick),
+      ariaLabel: qLabel(q),
+      onChange: val => setVal(q.id, val)
+    });
   };
   const renderQuestion = q => {
     if (!q) return null;
-    return React.createElement("div", {
-      key: q.id,
-      style: {
-        marginBottom: 20
-      }
-    }, React.createElement(_eng_Label, null, qLabel(q), q.required ? React.createElement("span", {
-      style: {
-        color: 'var(--mg-accent, #6e86e0)',
-        marginLeft: 5
-      }
-    }, "*") : null), (q.type === 'nps' || q.type === 'scale') && renderScale(q), q.type === 'single' && React.createElement("div", {
-      style: {
-        display: 'flex',
-        flexDirection: 'column',
-        gap: 9
-      }
-    }, (q.options || []).map((opt, oi) => {
-      const sel = answers[q.id] === opt;
-      return React.createElement("button", {
-        key: oi,
-        type: "button",
-        className: "mg-tap mg-ui",
-        onClick: () => setVal(q.id, opt),
-        "aria-pressed": sel,
+    return (React.createElement(Glass, {
+        key: q.id + '@' + step,
+        className: qdir < 0 ? 'mg-qin-prev' : 'mg-qin-next',
+        level: "card",
+        style: {
+          borderRadius: 28,
+          padding: '22px 18px 20px'
+        }
+      }, React.createElement("div", {
+        className: "mg-serif",
+        style: {
+          fontSize: 23,
+          lineHeight: 1.5,
+          color: 'var(--mg-ink, #22314a)',
+          marginBottom: 16,
+          textAlign: 'center'
+        }
+      }, qLabel(q)), (q.type === 'nps' || q.type === 'scale') && renderScale(q), q.type === 'single' && React.createElement("div", {
         style: {
           display: 'flex',
-          alignItems: 'center',
-          gap: 12,
-          width: '100%',
-          textAlign: 'left',
-          cursor: 'pointer',
-          padding: '13px 15px',
-          borderRadius: 18,
-          fontSize: 14,
-          color: 'var(--mg-ink, #22314a)',
-          background: sel ? 'rgba(110,134,224,.10)' : 'rgba(255,255,255,.92)',
-          border: sel ? '1px solid rgba(110,134,224,.45)' : '1px solid rgba(34,49,74,.12)',
-          transition: 'background .2s, border-color .2s'
+          flexDirection: 'column',
+          gap: 10
         }
-      }, React.createElement("span", {
+      }, (q.options || []).map((opt, oi) => {
+        const sel = answers[q.id] === opt;
+        return React.createElement("button", {
+          key: oi,
+          type: "button",
+          className: "mg-tap mg-ui",
+          onClick: () => setVal(q.id, opt),
+          "aria-pressed": sel,
+          style: {
+            display: 'flex',
+            alignItems: 'center',
+            gap: 12,
+            width: '100%',
+            textAlign: 'left',
+            cursor: 'pointer',
+            padding: '17px 17px',
+            borderRadius: 20,
+            fontSize: 15.5,
+            color: 'var(--mg-ink, #22314a)',
+            background: sel ? 'rgba(110,134,224,.13)' : 'rgba(255,255,255,.55)',
+            border: sel ? '1px solid rgba(110,134,224,.45)' : '1px solid rgba(34,49,74,.10)',
+            transition: 'background .2s, border-color .2s'
+          }
+        }, React.createElement("span", {
+          style: {
+            width: 22,
+            height: 22,
+            borderRadius: 11,
+            flex: 'none',
+            border: sel ? '0' : '2px solid rgba(34,49,74,.25)',
+            background: sel ? 'linear-gradient(180deg, #7e93e8 0%, #5f76d6 100%)' : 'transparent',
+            display: 'inline-flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            color: '#fff'
+          }
+        }, sel ? React.createElement(Icon, {
+          name: "check",
+          size: 15
+        }) : null), React.createElement("span", null, optLabel(q, opt, oi)));
+      })), q.type === 'multi' && React.createElement("div", {
         style: {
-          width: 22,
-          height: 22,
-          borderRadius: 11,
-          flex: 'none',
-          border: sel ? '0' : '2px solid rgba(34,49,74,.25)',
-          background: sel ? 'linear-gradient(180deg, #7e93e8 0%, #5f76d6 100%)' : 'transparent',
-          display: 'inline-flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          color: '#fff'
+          display: 'flex',
+          flexWrap: 'wrap',
+          gap: 9
         }
-      }, sel ? React.createElement(Icon, {
-        name: "check",
-        size: 15
-      }) : null), React.createElement("span", null, optLabel(q, opt, oi)));
-    })), q.type === 'multi' && React.createElement("div", {
-      style: {
-        display: 'flex',
-        flexWrap: 'wrap',
-        gap: 8
-      }
-    }, (q.options || []).map((opt, oi) => React.createElement(Chip, {
-      key: oi,
-      label: optLabel(q, opt, oi),
-      on: Array.isArray(answers[q.id]) && answers[q.id].indexOf(opt) >= 0,
-      onClick: () => toggleMulti(q.id, opt)
-    }))), q.type === 'text' && React.createElement("div", {
-      style: {
-        position: 'relative'
-      }
-    }, React.createElement("textarea", {
-      className: "mg-ui",
-      rows: 4,
-      value: answers[q.id] || '',
-      onChange: e => setVal(q.id, e.target.value),
-      placeholder: L(_eng_T.svPlaceholder),
-      style: {
-        width: '100%',
-        minHeight: 96,
-        padding: '14px 16px 26px',
-        borderRadius: 20,
-        background: 'rgba(255,255,255,.92)',
-        border: '1px solid rgba(34,49,74,.12)',
-        fontSize: 14,
-        lineHeight: 1.8,
-        color: 'var(--mg-ink, #22314a)',
-        outline: 'none',
-        resize: 'vertical',
-        fontFamily: 'inherit'
-      }
-    }), React.createElement("span", {
-      className: "mg-ui",
-      style: {
-        position: 'absolute',
-        right: 12,
-        bottom: 12,
-        fontSize: 10.5,
-        color: 'var(--mg-ink5, #8ba0b6)',
-        pointerEvents: 'none'
-      }
-    }, String((answers[q.id] || '').length), " ", L(_eng_T.svChars))));
+      }, (q.options || []).map((opt, oi) => React.createElement(Chip, {
+        key: oi,
+        label: optLabel(q, opt, oi),
+        on: Array.isArray(answers[q.id]) && answers[q.id].indexOf(opt) >= 0,
+        onClick: () => toggleMulti(q.id, opt)
+      }))), q.type === 'text' && React.createElement("div", {
+        style: {
+          position: 'relative'
+        }
+      }, React.createElement("textarea", {
+        className: "mg-ui",
+        rows: 5,
+        value: answers[q.id] || '',
+        onChange: e => setVal(q.id, e.target.value),
+        placeholder: L(_eng_T.svPlaceholder),
+        style: {
+          width: '100%',
+          minHeight: 132,
+          padding: '15px 16px 26px',
+          borderRadius: 22,
+          background: 'rgba(255,255,255,.6)',
+          border: '1px solid rgba(34,49,74,.10)',
+          fontSize: 15.5,
+          lineHeight: 1.85,
+          color: 'var(--mg-ink, #22314a)',
+          outline: 'none',
+          resize: 'vertical',
+          fontFamily: 'inherit'
+        }
+      }), React.createElement("span", {
+        className: "mg-ui",
+        style: {
+          position: 'absolute',
+          right: 12,
+          bottom: 12,
+          fontSize: 10.5,
+          color: 'var(--mg-ink5, #8ba0b6)',
+          pointerEvents: 'none'
+        }
+      }, String((answers[q.id] || '').length), " ", L(_eng_T.svChars))))
+    );
   };
   let body = null;
   if (!user) {
@@ -25048,13 +25450,74 @@ function SheetSurvey({
       }
     }, L(_eng_T.svLoginNeed)));
   } else if (done) {
+    let mFace = null,
+      mWord = '',
+      mR = 0;
+    for (let mi = 0; mi < questions.length; mi++) {
+      const mq = questions[mi];
+      if (!mq || mq.type !== 'scale' && mq.type !== 'nps' || answers[mq.id] == null) continue;
+      const isN = mq.type === 'nps';
+      const mlo = isN ? 0 : isNaN(Number(mq.min)) ? 1 : Number(mq.min);
+      const mhi = isN ? 10 : isNaN(Number(mq.max)) ? 5 : Number(mq.max);
+      const mcount = mhi - mlo + 1;
+      const mw = isN ? L(_eng_T.svFaceNps5) : mcount === 4 ? L(_eng_T.svFace4) : mcount === 5 ? L(_eng_T.svFace5) : null;
+      mR = (answers[mq.id] - mlo) / (mhi - mlo || 1);
+      mFace = _eng_faceEmoji(mR);
+      mWord = mw ? mw[Math.min(mw.length - 1, Math.max(0, Math.round(mR * (mw.length - 1))))] : String(answers[mq.id]);
+      break;
+    }
     body = React.createElement("div", {
       style: {
-        padding: '70px 30px',
-        textAlign: 'center'
+        position: 'relative',
+        padding: '26px 30px 30px',
+        textAlign: 'center',
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'center',
+        minHeight: 336
       }
     }, React.createElement("div", {
+      "aria-hidden": "true",
+      className: "mg-wash-drift",
       style: {
+        position: 'absolute',
+        inset: '-24px -18px',
+        pointerEvents: 'none',
+        background: 'radial-gradient(66% 42% at 16% 12%, ' + _eng_moodGlow(mR, mFace ? .34 : .20) + ' 0%, rgba(255,255,255,0) 64%), ' + 'radial-gradient(60% 38% at 92% 26%, rgba(255,201,228,.55) 0%, rgba(255,255,255,0) 64%), ' + 'radial-gradient(84% 48% at 44% 96%, rgba(190,208,255,.50) 0%, rgba(255,255,255,0) 68%)'
+      }
+    }), mFace ? React.createElement("div", {
+      style: {
+        position: 'relative',
+        zIndex: 1,
+        height: 132,
+        display: 'grid',
+        placeItems: 'center',
+        animation: 'mgLineUp .7s cubic-bezier(.16,1,.3,1) both'
+      }
+    }, React.createElement("div", {
+      "aria-hidden": "true",
+      style: {
+        position: 'absolute',
+        width: 168,
+        height: 168,
+        borderRadius: 84,
+        pointerEvents: 'none',
+        background: 'radial-gradient(circle at 50% 34%, ' + _eng_moodGlow(mR, .5) + ' 0%, ' + _eng_moodGlow(mR, .14) + ' 58%, ' + _eng_moodGlow(mR, 0) + ' 74%)',
+        boxShadow: '0 18px 40px -12px ' + _eng_moodGlow(mR, .5)
+      }
+    }), React.createElement("span", {
+      className: "mg-nod",
+      role: "img",
+      "aria-hidden": "true",
+      style: {
+        position: 'relative',
+        fontSize: 92,
+        lineHeight: 1
+      }
+    }, mFace)) : React.createElement("div", {
+      style: {
+        position: 'relative',
+        zIndex: 1,
         width: 78,
         height: 78,
         borderRadius: 39,
@@ -25070,37 +25533,71 @@ function SheetSurvey({
     }, React.createElement(Icon, {
       name: "check",
       size: 38
-    })), React.createElement("div", {
+    })), mWord ? React.createElement("div", {
       className: "mg-serif",
       style: {
-        fontSize: 21,
+        position: 'relative',
+        zIndex: 1,
+        fontSize: 27,
+        color: 'var(--mg-ink, #22314a)',
+        margin: '6px 0 18px',
+        animation: 'mgLineUp .7s cubic-bezier(.16,1,.3,1) .1s both'
+      }
+    }, mWord) : null, React.createElement("div", {
+      className: "mg-serif",
+      style: {
+        position: 'relative',
+        zIndex: 1,
+        fontSize: 19,
         color: 'var(--mg-ink, #22314a)',
         marginBottom: 8,
-        animation: 'mgLineUp .7s cubic-bezier(.16,1,.3,1) .12s both'
+        animation: 'mgLineUp .7s cubic-bezier(.16,1,.3,1) .18s both'
       }
     }, L(_eng_T.svThanks)), React.createElement("div", {
       className: "mg-ui",
       style: {
-        fontSize: 12.5,
+        position: 'relative',
+        zIndex: 1,
+        fontSize: 13.5,
         color: 'var(--mg-ink4, #5b7796)',
-        animation: 'mgLineUp .7s cubic-bezier(.16,1,.3,1) .2s both'
+        animation: 'mgLineUp .7s cubic-bezier(.16,1,.3,1) .26s both'
       }
     }, L(_eng_T.svThanksSub)));
   } else if (active) {
     const svTitle = _eng_i18nField(active, 'title', lang) || active.title || '';
+    const total = questions.length;
+    const cur = questions[Math.min(step, Math.max(0, total - 1))];
+    const mr = moodRatio(cur);
     body = React.createElement("div", {
       style: {
-        padding: '4px 22px 0'
+        position: 'relative',
+        padding: '2px 18px 6px',
+        display: 'flex',
+        flexDirection: 'column',
+        minHeight: 330
       }
-    }, fromList && React.createElement("button", {
+    }, React.createElement("div", {
+      "aria-hidden": "true",
+      className: "mg-wash-drift",
+      style: {
+        position: 'absolute',
+        inset: '-24px -18px -24px -18px',
+        pointerEvents: 'none',
+        background: 'radial-gradient(66% 44% at 14% 8%, ' + _eng_moodGlow(mr == null ? 0 : mr, mr == null ? .20 : .34) + ' 0%, rgba(255,255,255,0) 64%), ' + 'radial-gradient(60% 40% at 94% 24%, rgba(255,201,228,.55) 0%, rgba(255,255,255,0) 64%), ' + 'radial-gradient(84% 50% at 44% 98%, rgba(190,208,255,.50) 0%, rgba(255,255,255,0) 68%)',
+        transition: 'background .28s linear'
+      }
+    }), fromList && step === 0 && React.createElement("button", {
       type: "button",
       className: "mg-pill mg-tap mg-ui",
       onClick: () => {
         setActive(null);
         setAnswers({});
         setError(null);
+        setStep(0);
       },
       style: {
+        position: 'relative',
+        alignSelf: 'flex-start',
         display: 'inline-flex',
         alignItems: 'center',
         gap: 6,
@@ -25110,64 +25607,94 @@ function SheetSurvey({
         fontSize: 12,
         color: 'var(--mg-ink2, #2b3d57)',
         cursor: 'pointer',
-        marginBottom: 14
+        marginBottom: 12
       }
     }, React.createElement(Icon, {
       name: "arrow_back",
       size: 15
     }), React.createElement("span", null, L(_eng_T.svBack))), (active.eventTitle || active.sessionDate) && React.createElement("div", {
-      className: "mg-ui",
+      className: "mg-ui mg-clamp1",
       style: {
-        fontSize: 11.5,
+        position: 'relative',
+        textAlign: 'center',
+        fontSize: 12.5,
         color: 'var(--mg-ink4, #5b7796)',
-        marginBottom: 8
+        marginBottom: 3
       }
     }, [active.sessionDate ? (active.sessionOrder ? (lang === 'easy' ? active.sessionOrder + 'にちめ' : 'Day ' + active.sessionOrder) + ' · ' : '') + _eng_fmtMD(active.sessionDate) : '', active.eventTitle || ''].filter(Boolean).join(' ／ ')), svTitle && svTitle !== active.eventTitle ? React.createElement("div", {
-      className: "mg-serif",
+      className: "mg-ui mg-clamp1",
       style: {
-        fontSize: 24,
-        lineHeight: 1.4,
-        marginBottom: 22,
-        color: 'var(--mg-ink, #22314a)'
+        position: 'relative',
+        textAlign: 'center',
+        fontSize: 12.5,
+        color: 'var(--mg-ink3, #4c6584)',
+        marginBottom: 3
       }
-    }, svTitle) : React.createElement("div", {
-      className: "mg-serif",
+    }, svTitle) : null, total > 1 ? React.createElement("div", {
       style: {
-        fontSize: 32,
-        lineHeight: 1.32,
-        marginBottom: 22,
-        color: 'var(--mg-ink, #22314a)'
+        position: 'relative',
+        margin: '12px 0 10px'
       }
-    }, L(_eng_T.svTitle).map((ln, i) => React.createElement("div", {
-      key: i
-    }, ln))), questions.length === 0 ? React.createElement("div", {
+    }, React.createElement("div", {
+      style: {
+        display: 'flex',
+        gap: 5
+      },
+      "aria-hidden": "true"
+    }, questions.map((_q, i) => React.createElement("span", {
+      key: i + (i <= step ? 'on' : 'off'),
+      className: i <= step ? 'mg-segfill' : '',
+      style: {
+        flex: 1,
+        height: 5,
+        borderRadius: 3,
+        background: i <= step ? _eng_moodInk(total > 1 ? i / (total - 1) : 0) : 'rgba(34,49,74,.12)',
+        opacity: i <= step ? 1 : 1,
+        transition: 'background .3s'
+      }
+    }))), React.createElement("div", {
+      className: "mg-ui",
+      style: {
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        gap: 8,
+        marginTop: 8,
+        fontSize: 12,
+        color: 'var(--mg-ink5, #8ba0b6)'
+      }
+    }, React.createElement("span", {
+      className: "mg-num",
+      style: {
+        fontSize: 13.5,
+        color: 'var(--mg-ink4, #5b7796)'
+      }
+    }, step + 1 + ' / ' + total), React.createElement("span", {
+      "aria-hidden": "true",
+      style: {
+        opacity: .5
+      }
+    }, "\xB7"), React.createElement("span", {
+      style: cur && cur.required ? {
+        color: 'var(--mg-accent, #6e86e0)'
+      } : null
+    }, cur && cur.required ? L(_eng_T.svRequired) : L(_eng_T.svOptional)))) : React.createElement("div", {
+      style: {
+        height: 16
+      }
+    }), React.createElement("div", {
+      style: {
+        position: 'relative',
+        marginBottom: 'auto'
+      }
+    }, total === 0 ? React.createElement("div", {
       className: "mg-empty mg-ui",
       style: {
         padding: '30px 20px',
         textAlign: 'center',
         color: 'var(--mg-ink4, #5b7796)'
       }
-    }, "\u2014") : questions.map(renderQuestion), error && React.createElement("div", {
-      className: "mg-cream mg-ui",
-      style: {
-        padding: '11px 14px',
-        fontSize: 12.5,
-        color: '#6b5f31',
-        marginBottom: 4
-      }
-    }, error), questions.length > 0 && React.createElement(PrimaryBtn, {
-      label: submitting ? L(_eng_T.svSending) : L(_eng_T.svSubmit),
-      icon: "send",
-      loading: submitting,
-      onClick: submit,
-      style: {
-        marginTop: 18
-      }
-    }), React.createElement("div", {
-      style: {
-        height: 30
-      }
-    }));
+    }, "\u2014") : renderQuestion(cur)));
   } else {
     const listArr = surveys;
     body = React.createElement("div", {
@@ -25292,12 +25819,84 @@ function SheetSurvey({
       color: 'var(--mg-ink4, #5b7796)'
     }
   }, L(_eng_T.svHead));
+  let footer = null;
+  if (user && !done && active && questions.length > 0) {
+    const total = questions.length;
+    const last = step >= total - 1;
+    const cur = questions[Math.min(step, total - 1)];
+    const blocked = !!(cur && cur.required && !isAnswered(cur));
+    footer = React.createElement("div", {
+      style: {
+        marginTop: -4,
+        marginBottom: -8
+      }
+    }, error && React.createElement("div", {
+      className: "mg-cream mg-ui",
+      style: {
+        padding: '10px 13px',
+        fontSize: 12.5,
+        color: '#6b5f31',
+        marginBottom: 9
+      }
+    }, error), React.createElement("div", {
+      style: {
+        display: 'flex',
+        alignItems: 'center',
+        gap: 10
+      }
+    }, step > 0 && React.createElement("button", {
+      type: "button",
+      className: "mg-tap mg-ui",
+      onClick: () => {
+        setError(null);
+        setQdir(-1);
+        setStep(st => Math.max(0, st - 1));
+      },
+      style: {
+        flex: 'none',
+        height: 50,
+        padding: '0 17px',
+        borderRadius: 25,
+        cursor: 'pointer',
+        border: '1px solid rgba(34,49,74,.14)',
+        background: 'rgba(255,255,255,.85)',
+        color: 'var(--mg-ink2, #2b3d57)',
+        fontSize: 13.5,
+        display: 'inline-flex',
+        alignItems: 'center',
+        gap: 6
+      }
+    }, React.createElement(Icon, {
+      name: "arrow_back",
+      size: 17
+    }), L(_eng_T.svBackStep)), React.createElement("div", {
+      style: {
+        flex: 1,
+        minWidth: 0
+      }
+    }, React.createElement(PrimaryBtn, {
+      label: last ? submitting ? L(_eng_T.svSending) : L(_eng_T.svSubmit) : L(_eng_T.svNext),
+      icon: last ? 'send' : 'arrow_forward',
+      loading: last && submitting,
+      disabled: blocked,
+      style: blocked ? undefined : {
+        background: 'radial-gradient(130% 120% at 0% -10%, rgba(255,255,255,.26), rgba(255,255,255,0) 46%), linear-gradient(100deg, #6e86e0 0%, #9a86df 46%, #e08cb4 100%)',
+        boxShadow: '0 2px 6px rgba(52,70,150,.22), 0 14px 26px -10px rgba(150,90,140,.42), inset 0 1px 0 rgba(255,255,255,.5)'
+      },
+      onClick: last ? submit : () => {
+        setError(null);
+        setQdir(1);
+        setStep(st => Math.min(total - 1, st + 1));
+      }
+    }))));
+  }
   return React.createElement(SheetShell, {
     open: open,
     onClose: () => A && A.closeSheet(),
     z: 45,
-    height: "790px",
-    header: header
+    height: "auto",
+    header: header,
+    footer: footer
   }, body);
 }
 function SheetAlbum({
