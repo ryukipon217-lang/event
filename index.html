@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-<script>window.__MG_BUILD='20260918115416';</script>
+<script>window.__MG_BUILD='20260918133859';</script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="robots" content="noindex, nofollow, noarchive, noimageindex">
@@ -8905,15 +8905,17 @@ function _home_publicEvents(events) {
   const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
   return events.filter(e => {
     if (!e) return false;
-    if (e.status === '終了' || e.status === 'アーカイブ' || e.status === '非公開' || e.status === '中止' || e.status === '延期') return false;
-    const isPubliclyMarked = PUBLIC_STATUSES.indexOf(e.status) >= 0;
+    if (e.status === '終了' || e.status === 'アーカイブ' || e.status === '非公開') return false;
+    const isLifecycle = e.status === '中止' || e.status === '延期';
+    const isPubliclyMarked = PUBLIC_STATUSES.indexOf(e.status) >= 0 || isLifecycle;
     let isScheduledPublished = false;
     if (e.publishAt) {
       const publishDate = new Date(e.publishAt);
       if (!isNaN(publishDate.getTime()) && publishDate <= now) isScheduledPublished = true;
     }
     if (!isPubliclyMarked && !isScheduledPublished) return false;
-    const endStr = e.endDate || e.date;
+    let endStr = e.endDate || e.date;
+    if (e.status === '延期' && e.postponedDate && String(e.postponedDate) > String(endStr || '')) endStr = e.postponedDate;
     if (endStr) {
       const endDate = new Date(String(endStr) + 'T23:59:59');
       if (!isNaN(endDate.getTime()) && endDate < todayStart) return false;
@@ -10442,7 +10444,18 @@ function TabHome() {
         gap: 8,
         flexWrap: 'wrap'
       }
-    }, React.createElement("span", null, jaTitle ? jaTitle(title) : title), isRegd ? React.createElement("span", {
+    }, (() => {
+      const cpEv = typeof _ev_evCp === 'function' ? _ev_evCp(ev, lang) : null;
+      return cpEv ? React.createElement(_ev_CpBadge, {
+        cp: cpEv,
+        lang: lang
+      }) : null;
+    })(), React.createElement("span", {
+      style: {
+        textDecoration: typeof _ev_evCp === 'function' && (_ev_evCp(ev, lang) || {}).cancelled ? 'line-through' : 'none',
+        textDecorationThickness: '1px'
+      }
+    }, jaTitle ? jaTitle(title) : title), isRegd ? React.createElement("span", {
       className: "mg-ui",
       style: {
         flex: 'none',
@@ -11091,6 +11104,17 @@ const _EV_STATUS_T = {
     statusFull: '満員 (キャンセル待ち)',
     statusRegOpenSoon: '%date% から申込開始',
     statusRegClosed: '申込受付終了',
+    cpCancelledTitle: 'このイベントは中止になりました',
+    cpPostponedTitle: 'このイベントは延期になりました',
+    cpDayCancelled: 'この日は中止',
+    cpDayPostponed: 'この日は延期',
+    cpReason: '理由',
+    cpNewDate: '新しい日程',
+    cpOtherDaysOk: 'ほかの開催日は予定どおり実施します。',
+    cpRefundNote: '参加費をお支払い済みの方には、運営より個別にご連絡します。',
+    cpAllDaysCancelled: 'すべての開催日が中止になりました',
+    cpCtaCancelled: '中止になりました',
+    cpCtaPostponed: '延期になりました',
     statusEventEnded: 'イベント終了',
     statusRegOpen: '申込受付中',
     feeFree: '無料',
@@ -11106,6 +11130,17 @@ const _EV_STATUS_T = {
     statusFull: 'まんいん (キャンセルまち)',
     statusRegOpenSoon: '%date% から もうしこみ かいし',
     statusRegClosed: 'もうしこみ おわり',
+    cpCancelledTitle: 'この イベントは ちゅうしに なりました',
+    cpPostponedTitle: 'この イベントは ひが かわりました',
+    cpDayCancelled: 'この日は ちゅうし',
+    cpDayPostponed: 'この日は えんき',
+    cpReason: 'りゆう',
+    cpNewDate: 'あたらしい 日',
+    cpOtherDaysOk: 'ほかの 日は よてい どおり です。',
+    cpRefundNote: 'おかねを はらった 人には、うんえいから れんらく します。',
+    cpAllDaysCancelled: 'ぜんぶの 日が ちゅうしに なりました',
+    cpCtaCancelled: 'ちゅうしに なりました',
+    cpCtaPostponed: 'えんきに なりました',
     statusEventEnded: 'イベント おわり',
     statusRegOpen: 'もうしこみ できます',
     feeFree: 'むりょう',
@@ -11121,6 +11156,17 @@ const _EV_STATUS_T = {
     statusFull: 'Full (waitlist)',
     statusRegOpenSoon: 'Registration opens %date%',
     statusRegClosed: 'Registration closed',
+    cpCancelledTitle: 'This event has been cancelled',
+    cpPostponedTitle: 'This event has been postponed',
+    cpDayCancelled: 'This day is cancelled',
+    cpDayPostponed: 'This day is postponed',
+    cpReason: 'Reason',
+    cpNewDate: 'New schedule',
+    cpOtherDaysOk: 'All other days will be held as scheduled.',
+    cpRefundNote: 'If you have already paid, our staff will contact you individually.',
+    cpAllDaysCancelled: 'All days have been cancelled',
+    cpCtaCancelled: 'Cancelled',
+    cpCtaPostponed: 'Postponed',
     statusEventEnded: 'Event ended',
     statusRegOpen: 'Open for registration',
     feeFree: 'Free',
@@ -11129,6 +11175,72 @@ const _EV_STATUS_T = {
 };
 function _ev_st(lang) {
   return _EV_STATUS_T[lang] || _EV_STATUS_T.ja;
+}
+function _ev_cpInfo(kind, reason, newDate, newTime, lang) {
+  if (kind !== '中止' && kind !== '延期') return null;
+  const st = _ev_st(lang);
+  const cancelled = kind === '中止';
+  return {
+    cancelled: cancelled,
+    label: cancelled ? st.statusCancelled : st.statusPostponed,
+    reason: String(reason || ''),
+    newDate: String(newDate || ''),
+    newTime: String(newTime || ''),
+    fg: cancelled ? '#8a2f28' : '#8a6d1c',
+    bg: cancelled ? 'rgba(179,69,63,.10)' : 'rgba(233,208,106,.18)',
+    bd: cancelled ? 'rgba(179,69,63,.34)' : 'rgba(233,208,106,.72)',
+    icon: cancelled ? 'cancel' : 'event_repeat'
+  };
+}
+function _ev_cpDate(dateStr, lang) {
+  const dp = _ev_dateParts(dateStr);
+  if (!dp) return String(dateStr || '');
+  if (lang === 'en') {
+    const MON = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    return MON[dp.m - 1] + ' ' + dp.d;
+  }
+  const W = {
+    SUN: '日',
+    MON: '月',
+    TUE: '火',
+    WED: '水',
+    THU: '木',
+    FRI: '金',
+    SAT: '土'
+  };
+  return dp.m + '月' + dp.d + '日(' + (W[dp.day] || '') + ')';
+}
+function _ev_evCp(ev, lang) {
+  if (!ev) return null;
+  return _ev_cpInfo(ev.status, ev.cancelPostponeReason, ev.postponedDate, ev.postponedTime, lang);
+}
+function _ev_sessCp(s, lang) {
+  if (!s) return null;
+  return _ev_cpInfo(s.dayStatus, s.cancelPostponeReason, s.postponedDate, s.postponedStartTime, lang);
+}
+function _ev_CpBadge({
+  cp,
+  lang,
+  small
+}) {
+  if (!cp) return null;
+  return React.createElement("span", {
+    className: "mg-ui",
+    style: {
+      display: 'inline-flex',
+      alignItems: 'center',
+      gap: 3,
+      flex: 'none',
+      padding: small ? '1px 7px' : '2px 9px',
+      borderRadius: 999,
+      fontSize: small ? 10 : 10.5,
+      fontWeight: 700,
+      letterSpacing: '.06em',
+      background: cp.bg,
+      color: cp.fg,
+      border: '1px solid ' + cp.bd
+    }
+  }, cp.label);
 }
 function _ev_isPreview() {
   try {
@@ -11177,15 +11289,17 @@ function _ev_publicEvents(events) {
   const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
   return events.filter(e => {
     if (!e) return false;
-    if (e.status === '終了' || e.status === 'アーカイブ' || e.status === '非公開' || e.status === '中止' || e.status === '延期') return false;
-    const isPubliclyMarked = PUBLIC_STATUSES.indexOf(e.status) >= 0;
+    if (e.status === '終了' || e.status === 'アーカイブ' || e.status === '非公開') return false;
+    const isLifecycle = e.status === '中止' || e.status === '延期';
+    const isPubliclyMarked = PUBLIC_STATUSES.indexOf(e.status) >= 0 || isLifecycle;
     let isScheduledPublished = false;
     if (e.publishAt) {
       const publishDate = new Date(e.publishAt);
       if (!isNaN(publishDate.getTime()) && publishDate <= now) isScheduledPublished = true;
     }
     if (!isPubliclyMarked && !isScheduledPublished) return false;
-    const endStr = e.endDate || e.date;
+    let endStr = e.endDate || e.date;
+    if (e.status === '延期' && e.postponedDate && String(e.postponedDate) > String(endStr || '')) endStr = e.postponedDate;
     if (endStr) {
       const endDate = new Date(String(endStr) + 'T23:59:59');
       if (!isNaN(endDate.getTime()) && endDate < todayStart) return false;
@@ -13046,6 +13160,7 @@ function TabEvents() {
     const time = _ev_fmtTime(ev.time);
     const venue = _ev_venueLabel(ev, lang);
     const fee = _ev_feeLabelList(ev, lang);
+    const cpEv = _ev_evCp(ev, lang);
     return React.createElement("div", {
       key: ev.id,
       className: "mg-card mg-tap",
@@ -13058,7 +13173,8 @@ function TabEvents() {
         gap: 14,
         alignItems: 'center',
         borderRadius: 26,
-        padding: 14
+        padding: 14,
+        opacity: cpEv && cpEv.cancelled ? .74 : 1
       }
     }, React.createElement("div", {
       style: {
@@ -13109,11 +13225,30 @@ function TabEvents() {
         flex: 1,
         minWidth: 0
       }
-    }, React.createElement("div", {
+    }, cpEv ? React.createElement("div", {
+      style: {
+        display: 'flex',
+        alignItems: 'center',
+        gap: 6,
+        marginBottom: 4,
+        flexWrap: 'wrap'
+      }
+    }, React.createElement(_ev_CpBadge, {
+      cp: cpEv,
+      lang: lang
+    }), !cpEv.cancelled && cpEv.newDate ? React.createElement("span", {
+      className: "mg-num",
+      style: {
+        fontSize: 11.5,
+        color: 'var(--mg-ink3, #4c6584)'
+      }
+    }, "\u2192 ", _ev_md(cpEv.newDate)) : null) : null, React.createElement("div", {
       className: "mg-serif mg-clamp2",
       style: {
         fontSize: 16.5,
-        lineHeight: 1.3
+        lineHeight: 1.3,
+        textDecoration: cpEv && cpEv.cancelled ? 'line-through' : 'none',
+        textDecorationThickness: '1px'
       }
     }, jaTitle(title)), ev.minRank ? React.createElement("div", {
       className: "mg-ui",
@@ -13149,6 +13284,7 @@ function TabEvents() {
           const over = typeof mgSessionOver === 'function' && mgSessionOver(s2.date, s2.endTime);
           const n2 = Number(s2.order) || i2 + 1;
           const sdp2 = _ev_dateParts(s2.date);
+          const cp2 = _ev_sessCp(s2, lang);
           return React.createElement("div", {
             key: s2.id || i2,
             style: {
@@ -13157,7 +13293,8 @@ function TabEvents() {
               gap: 7,
               fontSize: 12,
               color: over ? 'var(--mg-ink5, #8ba0b6)' : 'var(--mg-ink3, #4c6584)',
-              minWidth: 0
+              minWidth: 0,
+              textDecoration: cp2 && cp2.cancelled ? 'line-through' : 'none'
             }
           }, React.createElement("span", {
             style: {
@@ -13190,7 +13327,11 @@ function TabEvents() {
             style: {
               minWidth: 0
             }
-          }, s2.online ? lang === 'en' ? 'Online' : 'オンライン' : s2.venue || ''), over ? React.createElement("span", {
+          }, s2.online ? lang === 'en' ? 'Online' : 'オンライン' : s2.venue || ''), cp2 ? React.createElement(_ev_CpBadge, {
+            cp: cp2,
+            lang: lang,
+            small: true
+          }) : null, over && !cp2 ? React.createElement("span", {
             style: {
               fontSize: 10.5,
               flex: 'none'
@@ -13540,7 +13681,7 @@ function SheetEventDetail({
     });
     setSelectedSessionIds(prev => prev.filter(sid => validIds[sid] && !blockedIds[sid]));
   }, [sessions, myRegs, eventId]);
-  const blocked = !!ev && !_ev_isPreview() && (ev.status === '終了' || ev.status === 'アーカイブ' || ev.status === '非公開' || ev.status === '下書き' || ev.status === '中止' || ev.status === '延期');
+  const blocked = !!ev && !_ev_isPreview() && (ev.status === '終了' || ev.status === 'アーカイブ' || ev.status === '非公開' || ev.status === '下書き');
   const isMulti = !!ev && ev.format === 'multi' && sessions.length > 0;
   const isMultiEvt = !!ev && ev.format === 'multi';
   const _pcfg = myPts && myPts.config || {};
@@ -13860,7 +14001,7 @@ function SheetEventDetail({
         const n = selectedSessionIds.length;
         let label = L(_ev_T.proceed);
         if (cantRegister) {
-          label = regStatus.label || '—';
+          label = regStatus.reason === 'cancelled' ? st.cpCtaCancelled : regStatus.reason === 'postponed' ? st.cpCtaPostponed : regStatus.label || '—';
         } else if (!user) {
           label = L(_ev_T.loginProceed);
         } else if (isMulti) {
@@ -14049,9 +14190,106 @@ function SheetEventDetail({
       style: {
         marginBottom: 10
       }
-    }, title), React.createElement("div", {
+    }, title), (() => {
+      const cpEv = _ev_evCp(ev, lang);
+      const dayCps = isMulti ? sessions.map(s2 => _ev_sessCp(s2, lang)).filter(Boolean) : [];
+      const allDaysCancelled = isMulti && sessions.length > 0 && sessions.every(s2 => String(s2.dayStatus || '') === '中止');
+      const cp = cpEv || (allDaysCancelled ? _ev_cpInfo('中止', '', '', '', lang) : null);
+      if (!cp && !dayCps.length) return null;
+      const head = cp ? allDaysCancelled && !cpEv ? st.cpAllDaysCancelled : cp.cancelled ? st.cpCancelledTitle : st.cpPostponedTitle : dayCps.length === 1 ? dayCps[0].cancelled ? st.cpDayCancelled : st.cpDayPostponed : lang === 'en' ? 'Some days have changed' : lang === 'easy' ? 'かわった 日が あります' : '日程に変更があります';
+      const tone = cp || dayCps[0];
+      return React.createElement("div", {
+        role: "status",
+        style: {
+          marginBottom: 14,
+          padding: '13px 15px',
+          borderRadius: 16,
+          background: tone.bg,
+          border: '1px solid ' + tone.bd,
+          display: 'flex',
+          gap: 11,
+          alignItems: 'flex-start'
+        }
+      }, React.createElement(Icon, {
+        name: tone.icon,
+        size: 20,
+        style: {
+          color: tone.fg,
+          flex: 'none',
+          marginTop: 1
+        }
+      }), React.createElement("div", {
+        style: {
+          minWidth: 0,
+          flex: 1
+        }
+      }, React.createElement("div", {
+        className: "mg-ui",
+        style: {
+          fontSize: 14,
+          fontWeight: 700,
+          color: tone.fg,
+          lineHeight: 1.45
+        }
+      }, head), cp && !cp.cancelled && cp.newDate ? React.createElement("div", {
+        style: {
+          marginTop: 5,
+          fontSize: 13,
+          color: 'var(--mg-ink2, #33455f)'
+        }
+      }, st.cpNewDate, ": ", React.createElement("span", {
+        className: "mg-num"
+      }, _ev_cpDate(cp.newDate, lang), cp.newTime ? ' ' + _ev_fmtTime(cp.newTime) : '')) : null, cp && cp.reason ? React.createElement("div", {
+        style: {
+          marginTop: 5,
+          fontSize: 13,
+          color: 'var(--mg-ink2, #33455f)',
+          lineHeight: 1.65
+        }
+      }, st.cpReason, ": ", cp.reason) : null, !cp && dayCps.length ? React.createElement("div", {
+        style: {
+          marginTop: 6,
+          display: 'flex',
+          flexDirection: 'column',
+          gap: 4
+        }
+      }, sessions.map((s2, i2) => {
+        const c2 = _ev_sessCp(s2, lang);
+        if (!c2) return null;
+        return React.createElement("div", {
+          key: s2.id || i2,
+          style: {
+            fontSize: 12.5,
+            color: 'var(--mg-ink2, #33455f)',
+            lineHeight: 1.6
+          }
+        }, React.createElement("span", {
+          className: "mg-num"
+        }, _ev_md(s2.date)), ' ', c2.label, !c2.cancelled && c2.newDate ? React.createElement("span", {
+          className: "mg-num"
+        }, ' → ' + _ev_md(c2.newDate)) : null, c2.reason ? React.createElement("span", {
+          style: {
+            color: 'var(--mg-ink3, #4c6584)'
+          }
+        }, '（' + c2.reason + '）') : null);
+      }), React.createElement("div", {
+        style: {
+          fontSize: 12,
+          color: 'var(--mg-ink3, #4c6584)',
+          marginTop: 2
+        }
+      }, st.cpOtherDaysOk)) : null, (cp && cp.cancelled || dayCps.some(c => c.cancelled)) && myRegs.some(_ev_isActiveReg) ? React.createElement("div", {
+        style: {
+          marginTop: 7,
+          fontSize: 12,
+          color: 'var(--mg-ink3, #4c6584)',
+          lineHeight: 1.65
+        }
+      }, st.cpRefundNote) : null));
+    })(), React.createElement("div", {
       style: {
-        marginBottom: 14
+        marginBottom: 14,
+        display: regStatus.reason === 'cancelled' || regStatus.reason === 'postponed' ? 'none' : undefined
       }
     }, React.createElement("span", {
       style: {
@@ -14175,7 +14413,7 @@ function SheetEventDetail({
       icon: "payments"
     }, feeLabel) : null, !regMode && langsLabel ? React.createElement(_ev_MetaRow, {
       icon: "translate"
-    }, langsLabel) : null, !regMode && !isMultiEvt && cap > 0 ? React.createElement(_ev_MetaRow, {
+    }, langsLabel) : null, !regMode && !isMultiEvt && cap > 0 && regStatus.reason !== 'cancelled' && regStatus.reason !== 'postponed' ? React.createElement(_ev_MetaRow, {
       icon: "group"
     }, React.createElement("span", {
       className: "mg-num",
@@ -14370,7 +14608,9 @@ function SheetEventDetail({
       const sIsMyCancelled = sState === 'cancelled';
       const sPast = _sessPast(s);
       const selected = selectedSessionIds.indexOf(s.id) >= 0;
-      const sDisabled = sIsMyActive || sIsMyPending || isLocked || (sFull || sPast) && !selected;
+      const sCp = _ev_sessCp(s, lang);
+      const sCancelled = !!(sCp && sCp.cancelled);
+      const sDisabled = sIsMyActive || sIsMyPending || isLocked || (sFull || sPast || sCancelled) && !selected;
       const sdp = _ev_dateParts(s.date);
       const sVenue = s.online ? lang === 'en' ? 'Online' : 'オンライン' : s.venue || '—';
       const sName = (lang === 'easy' ? s.name_easy || s.name : lang === 'en' ? s.name_en || s.name : s.name) || 'Session ' + (s.order || i + 1);
@@ -14392,10 +14632,24 @@ function SheetEventDetail({
           outline: selected || sState !== 'available' ? '2px solid ' + borderColor : 'none',
           outlineOffset: '-2px',
           boxShadow: selected && !sDisabled ? '0 12px 26px rgba(110,134,224,.28)' : undefined,
-          opacity: sFull && !isLocked || sIsMyPending || sPast ? .6 : 1,
+          opacity: sFull && !isLocked || sIsMyPending || sPast || sCancelled ? .6 : 1,
           cursor: sDisabled ? 'default' : 'pointer'
         }
-      }, sPast && sState === 'available' ? React.createElement("span", {
+      }, sCp ? React.createElement("span", {
+        style: {
+          position: 'absolute',
+          top: 8,
+          right: 10,
+          padding: '2px 9px',
+          borderRadius: 10,
+          fontSize: 9.5,
+          letterSpacing: '.06em',
+          fontWeight: 700,
+          color: sCp.fg,
+          background: sCp.bg,
+          border: '1px solid ' + sCp.bd
+        }
+      }, sCp.label) : null, sPast && sState === 'available' && !sCp ? React.createElement("span", {
         style: {
           position: 'absolute',
           top: 8,
