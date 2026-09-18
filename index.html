@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-<script>window.__MG_BUILD='20260918133859';</script>
+<script>window.__MG_BUILD='20260918145030';</script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="robots" content="noindex, nofollow, noarchive, noimageindex">
@@ -10446,9 +10446,13 @@ function TabHome() {
       }
     }, (() => {
       const cpEv = typeof _ev_evCp === 'function' ? _ev_evCp(ev, lang) : null;
-      return cpEv ? React.createElement(_ev_CpBadge, {
+      if (cpEv) return React.createElement(_ev_CpBadge, {
         cp: cpEv,
         lang: lang
+      });
+      const adv = typeof _ev_evAdv === 'function' ? _ev_evAdv(ev, lang) : null;
+      return adv ? React.createElement(_ev_AdvBadge, {
+        adv: adv
       }) : null;
     })(), React.createElement("span", {
       style: {
@@ -11115,6 +11119,14 @@ const _EV_STATUS_T = {
     cpAllDaysCancelled: 'すべての開催日が中止になりました',
     cpCtaCancelled: '中止になりました',
     cpCtaPostponed: '延期になりました',
+    advMayCancel: '中止になる可能性があります',
+    advMayPostpone: '延期になる可能性があります',
+    advPending: '開催するか検討しています',
+    advDecideBy: '判断の予定',
+    advStillOpen: '現時点では申込を受け付けています。決まり次第おしらせします。',
+    advDayMayCancel: 'この日は中止の可能性',
+    advDayMayPostpone: 'この日は延期の可能性',
+    advDayPending: 'この日は検討中',
     statusEventEnded: 'イベント終了',
     statusRegOpen: '申込受付中',
     feeFree: '無料',
@@ -11141,6 +11153,14 @@ const _EV_STATUS_T = {
     cpAllDaysCancelled: 'ぜんぶの 日が ちゅうしに なりました',
     cpCtaCancelled: 'ちゅうしに なりました',
     cpCtaPostponed: 'えんきに なりました',
+    advMayCancel: 'ちゅうしに なるかも しれません',
+    advMayPostpone: 'ひが かわるかも しれません',
+    advPending: 'いま かんがえて います',
+    advDecideBy: 'きまる とき',
+    advStillOpen: 'いまは まだ もうしこみ できます。きまったら おしらせ します。',
+    advDayMayCancel: 'この日は ちゅうしかも',
+    advDayMayPostpone: 'この日は えんきかも',
+    advDayPending: 'この日は かんがえちゅう',
     statusEventEnded: 'イベント おわり',
     statusRegOpen: 'もうしこみ できます',
     feeFree: 'むりょう',
@@ -11167,6 +11187,14 @@ const _EV_STATUS_T = {
     cpAllDaysCancelled: 'All days have been cancelled',
     cpCtaCancelled: 'Cancelled',
     cpCtaPostponed: 'Postponed',
+    advMayCancel: 'May be cancelled',
+    advMayPostpone: 'May be postponed',
+    advPending: 'Decision pending',
+    advDecideBy: 'Decision expected by',
+    advStillOpen: 'Registration is still open. We will post an update once decided.',
+    advDayMayCancel: 'This day may be cancelled',
+    advDayMayPostpone: 'This day may be postponed',
+    advDayPending: 'This day is under review',
     statusEventEnded: 'Event ended',
     statusRegOpen: 'Open for registration',
     feeFree: 'Free',
@@ -11209,6 +11237,53 @@ function _ev_cpDate(dateStr, lang) {
     SAT: '土'
   };
   return dp.m + '月' + dp.d + '日(' + (W[dp.day] || '') + ')';
+}
+function _ev_advInfo(kind, reason, decideBy, lang) {
+  const k = String(kind || '');
+  if (!k) return null;
+  const st = _ev_st(lang);
+  const label = k === '延期の可能性' ? st.advMayPostpone : k === '判断中' ? st.advPending : st.advMayCancel;
+  const dayLabel = k === '延期の可能性' ? st.advDayMayPostpone : k === '判断中' ? st.advDayPending : st.advDayMayCancel;
+  return {
+    kind: k,
+    label: label,
+    dayLabel: dayLabel,
+    reason: String(reason || ''),
+    decideBy: String(decideBy || ''),
+    fg: '#3f52a8',
+    bg: 'rgba(110,134,224,.10)',
+    bd: 'rgba(110,134,224,.34)',
+    icon: 'info'
+  };
+}
+function _ev_evAdv(ev, lang) {
+  return ev ? _ev_advInfo(ev.advisory, ev.advisoryReason, ev.advisoryDecideBy, lang) : null;
+}
+function _ev_sessAdv(s, lang) {
+  return s ? _ev_advInfo(s.advisory, s.advisoryReason, s.advisoryDecideBy, lang) : null;
+}
+function _ev_AdvBadge({
+  adv,
+  small
+}) {
+  if (!adv) return null;
+  return React.createElement("span", {
+    className: "mg-ui",
+    style: {
+      display: 'inline-flex',
+      alignItems: 'center',
+      gap: 3,
+      flex: 'none',
+      padding: small ? '1px 7px' : '2px 9px',
+      borderRadius: 999,
+      fontSize: small ? 10 : 10.5,
+      fontWeight: 700,
+      letterSpacing: '.04em',
+      background: adv.bg,
+      color: adv.fg,
+      border: '1px solid ' + adv.bd
+    }
+  }, small ? adv.dayLabel : adv.label);
 }
 function _ev_evCp(ev, lang) {
   if (!ev) return null;
@@ -13242,7 +13317,16 @@ function TabEvents() {
         fontSize: 11.5,
         color: 'var(--mg-ink3, #4c6584)'
       }
-    }, "\u2192 ", _ev_md(cpEv.newDate)) : null) : null, React.createElement("div", {
+    }, "\u2192 ", _ev_md(cpEv.newDate)) : null) : (() => {
+      const advEv = _ev_evAdv(ev, lang);
+      return advEv ? React.createElement("div", {
+        style: {
+          marginBottom: 4
+        }
+      }, React.createElement(_ev_AdvBadge, {
+        adv: advEv
+      })) : null;
+    })(), React.createElement("div", {
       className: "mg-serif mg-clamp2",
       style: {
         fontSize: 16.5,
@@ -13331,7 +13415,13 @@ function TabEvents() {
             cp: cp2,
             lang: lang,
             small: true
-          }) : null, over && !cp2 ? React.createElement("span", {
+          }) : (() => {
+            const a2 = _ev_sessAdv(s2, lang);
+            return a2 ? React.createElement(_ev_AdvBadge, {
+              adv: a2,
+              small: true
+            }) : null;
+          })(), over && !cp2 ? React.createElement("span", {
             style: {
               fontSize: 10.5,
               flex: 'none'
@@ -14195,7 +14285,94 @@ function SheetEventDetail({
       const dayCps = isMulti ? sessions.map(s2 => _ev_sessCp(s2, lang)).filter(Boolean) : [];
       const allDaysCancelled = isMulti && sessions.length > 0 && sessions.every(s2 => String(s2.dayStatus || '') === '中止');
       const cp = cpEv || (allDaysCancelled ? _ev_cpInfo('中止', '', '', '', lang) : null);
-      if (!cp && !dayCps.length) return null;
+      if (!cp && !dayCps.length) {
+        const advEv = _ev_evAdv(ev, lang);
+        const dayAdvs = isMulti ? sessions.map(s2 => _ev_sessAdv(s2, lang)).filter(Boolean) : [];
+        const adv = advEv || dayAdvs[0];
+        if (!adv) return null;
+        return React.createElement("div", {
+          role: "status",
+          style: {
+            marginBottom: 14,
+            padding: '13px 15px',
+            borderRadius: 16,
+            background: adv.bg,
+            border: '1px solid ' + adv.bd,
+            display: 'flex',
+            gap: 11,
+            alignItems: 'flex-start'
+          }
+        }, React.createElement(Icon, {
+          name: adv.icon,
+          size: 20,
+          style: {
+            color: adv.fg,
+            flex: 'none',
+            marginTop: 1
+          }
+        }), React.createElement("div", {
+          style: {
+            minWidth: 0,
+            flex: 1
+          }
+        }, React.createElement("div", {
+          className: "mg-ui",
+          style: {
+            fontSize: 14,
+            fontWeight: 700,
+            color: adv.fg,
+            lineHeight: 1.45
+          }
+        }, advEv ? adv.label : lang === 'en' ? 'Some days may change' : lang === 'easy' ? 'かわるかも しれない 日が あります' : '変更の可能性がある日があります'), advEv && advEv.reason ? React.createElement("div", {
+          style: {
+            marginTop: 5,
+            fontSize: 13,
+            color: 'var(--mg-ink2, #33455f)',
+            lineHeight: 1.65
+          }
+        }, st.cpReason, ": ", advEv.reason) : null, advEv && advEv.decideBy ? React.createElement("div", {
+          style: {
+            marginTop: 5,
+            fontSize: 13,
+            color: 'var(--mg-ink2, #33455f)'
+          }
+        }, st.advDecideBy, ": ", advEv.decideBy) : null, !advEv && dayAdvs.length ? React.createElement("div", {
+          style: {
+            marginTop: 6,
+            display: 'flex',
+            flexDirection: 'column',
+            gap: 4
+          }
+        }, sessions.map((s2, i2) => {
+          const a2 = _ev_sessAdv(s2, lang);
+          if (!a2) return null;
+          return React.createElement("div", {
+            key: s2.id || i2,
+            style: {
+              fontSize: 12.5,
+              color: 'var(--mg-ink2, #33455f)',
+              lineHeight: 1.6
+            }
+          }, React.createElement("span", {
+            className: "mg-num"
+          }, _ev_md(s2.date)), ' ', a2.label, a2.reason ? React.createElement("span", {
+            style: {
+              color: 'var(--mg-ink3, #4c6584)'
+            }
+          }, '（' + a2.reason + '）') : null, a2.decideBy ? React.createElement("span", {
+            style: {
+              color: 'var(--mg-ink3, #4c6584)'
+            }
+          }, ' / ' + st.advDecideBy + ': ' + a2.decideBy) : null);
+        })) : null, React.createElement("div", {
+          style: {
+            marginTop: 7,
+            fontSize: 12,
+            color: 'var(--mg-ink3, #4c6584)',
+            lineHeight: 1.65
+          }
+        }, st.advStillOpen)));
+      }
       const head = cp ? allDaysCancelled && !cpEv ? st.cpAllDaysCancelled : cp.cancelled ? st.cpCancelledTitle : st.cpPostponedTitle : dayCps.length === 1 ? dayCps[0].cancelled ? st.cpDayCancelled : st.cpDayPostponed : lang === 'en' ? 'Some days have changed' : lang === 'easy' ? 'かわった 日が あります' : '日程に変更があります';
       const tone = cp || dayCps[0];
       return React.createElement("div", {
@@ -14635,7 +14812,21 @@ function SheetEventDetail({
           opacity: sFull && !isLocked || sIsMyPending || sPast || sCancelled ? .6 : 1,
           cursor: sDisabled ? 'default' : 'pointer'
         }
-      }, sCp ? React.createElement("span", {
+      }, !sCp && _ev_sessAdv(s, lang) ? React.createElement("span", {
+        style: {
+          position: 'absolute',
+          top: 8,
+          right: 10,
+          padding: '2px 9px',
+          borderRadius: 10,
+          fontSize: 9.5,
+          letterSpacing: '.04em',
+          fontWeight: 700,
+          color: _ev_sessAdv(s, lang).fg,
+          background: _ev_sessAdv(s, lang).bg,
+          border: '1px solid ' + _ev_sessAdv(s, lang).bd
+        }
+      }, _ev_sessAdv(s, lang).dayLabel) : null, sCp ? React.createElement("span", {
         style: {
           position: 'absolute',
           top: 8,
