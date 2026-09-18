@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-<script>window.__MG_BUILD='20260917085812';</script>
+<script>window.__MG_BUILD='20260918034037';</script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="robots" content="noindex, nofollow, noarchive, noimageindex">
@@ -9980,7 +9980,7 @@ function TabHome() {
     const cap = Number(featured.capacity) || 0;
     const reg = Number(featured.registered) || 0;
     fSpots = !isMultiF && cap > 0 ? Math.max(0, cap - reg) : null;
-    fFull = featured.status === '満員' || !isMultiF && cap > 0 && fSpots === 0;
+    fFull = featured.status === '満員' || _ev_capFull(featured) || !isMultiF && cap > 0 && fSpots === 0;
     fDayLabel = isMultiF ? fCurDayN && featured.sessionCount ? 'DAY ' + fCurDayN + ' / ' + featured.sessionCount : featured.sessionCount ? featured.sessionCount + ' DAYS' : L(_home_T.multiDay) : fDp ? fDp.day : '';
   }
   let surveyTitle = '',
@@ -11100,6 +11100,14 @@ function _ev_seatSymbol(cap, registered) {
   if (ratio >= 0.5) return '◎';
   if (ratio >= 0.2) return '〇';
   return '△';
+}
+function _ev_capFull(ev) {
+  if (!ev) return false;
+  const cap = Number(ev.capacity) || 0;
+  if (cap <= 0) return false;
+  const multi = ev.format === 'multi' || (Number(ev.sessionCount) || 0) > 1;
+  if (multi && !ev.capacityShared) return false;
+  return (Number(ev.registered) || 0) >= cap;
 }
 function _ev_seatColor(symbol) {
   switch (symbol) {
@@ -12517,6 +12525,11 @@ function _ev_regStatus(event, lang, member) {
     }
   }
   if (event.status === '満員') return {
+    open: false,
+    reason: 'full',
+    label: st.statusFull
+  };
+  if (_ev_capFull(event)) return {
     open: false,
     reason: 'full',
     label: st.statusFull
@@ -14124,7 +14137,16 @@ function SheetEventDetail({
         fontSize: 15,
         marginRight: 6
       }
-    }, sym), sym === '✕' ? L(_ev_T.seatsFull) : L(_ev_T.remainPre) + spotsLeft + L(_ev_T.remainPost)) : null, !regMode && ev.regCloseDate ? React.createElement(_ev_MetaRow, {
+    }, sym), sym === '✕' ? L(_ev_T.seatsFull) : L(_ev_T.remainPre) + spotsLeft + L(_ev_T.remainPost)) : null, !regMode && isMultiEvt && _ev_capFull(ev) ? React.createElement(_ev_MetaRow, {
+      icon: "group"
+    }, React.createElement("span", {
+      className: "mg-num",
+      style: {
+        color: _ev_seatColor('✕'),
+        fontSize: 15,
+        marginRight: 6
+      }
+    }, "\u2715"), L(_ev_T.seatsFull)) : null, !regMode && ev.regCloseDate ? React.createElement(_ev_MetaRow, {
       icon: "hourglass_bottom"
     }, (t.detail && t.detail.meta && t.detail.meta.regClose || '申込締切') + '：' + ev.regCloseDate) : null), myRegsForEvent.length > 0 || window.__mgGuidePreview ? React.createElement(_ev_Guide, {
       ev: ev,
