@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-<script>window.__MG_BUILD='20260918145030';</script>
+<script>window.__MG_BUILD='20260919050016';</script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="robots" content="noindex, nofollow, noarchive, noimageindex">
@@ -19675,6 +19675,31 @@ const _my_T = {
     easy: 'もういちど',
     en: 'Try again'
   },
+  surveyLoad: {
+    ja: 'アンケートを開いています…',
+    easy: 'アンケートを ひらいています',
+    en: 'Opening the survey…'
+  },
+  surveySlow: {
+    ja: '混み合っています。読み込み中…',
+    easy: 'こんでいます。まってね',
+    en: 'Busy right now — still loading'
+  },
+  surveyDone: {
+    ja: 'このアンケートは回答済みです。ありがとうございました',
+    easy: 'もう こたえて くれました。ありがとう',
+    en: 'You have already answered this survey. Thank you!'
+  },
+  surveyNone: {
+    ja: 'このアンケートはまだ受け取れていません',
+    easy: 'この アンケートは まだ ありません',
+    en: 'This survey is not available to you yet'
+  },
+  surveyFail: {
+    ja: 'アンケートを読み込めませんでした',
+    easy: 'アンケートを よみこめませんでした',
+    en: 'Could not load the survey'
+  },
   close: {
     ja: 'とじる',
     easy: 'とじる',
@@ -20338,7 +20363,7 @@ function _my_mviewerPayload(r, photos, lang) {
     sealPos: r.sessionId && r.sessionSealPos || ev.sealPos || ''
   };
 }
-function _my_mementoReq(hash) {
+function _my_hashQuery(hash) {
   let h = '';
   try {
     h = String((hash == null ? typeof window !== 'undefined' ? window.location.hash : '' : hash) || '');
@@ -20359,21 +20384,52 @@ function _my_mementoReq(hash) {
       q[k] = v;
     }
   });
-  const id = String(q.memento || '').trim();
+  return q;
+}
+function _my_pushReq(hash, key) {
+  const q = _my_hashQuery(hash);
+  if (!q) return null;
+  const id = String(q[key] || '').trim();
   if (!id) return null;
   return {
     id: id,
     n: String(q._r || '')
   };
 }
-function _my_clearMementoHash() {
+function _my_mementoReq(hash) {
+  return _my_pushReq(hash, 'memento');
+}
+function _my_surveyReq(hash) {
+  return _my_pushReq(hash, 'survey');
+}
+function _my_clearHashParam(key) {
   try {
     const h = String(window.location.hash || '');
     const qi = h.indexOf('?');
-    if (qi < 0 || h.indexOf('memento=') < 0) return;
+    if (qi < 0 || h.indexOf(key + '=') < 0) return;
     const base = h.slice(0, qi) || '#/mypage';
     window.history.replaceState(null, '', window.location.pathname + window.location.search + base);
   } catch (e) {}
+}
+function _my_clearMementoHash() {
+  _my_clearHashParam('memento');
+}
+function _my_clearSurveyHash() {
+  _my_clearHashParam('survey');
+}
+function _my_surveyHit(list, id) {
+  const want = String(id || '');
+  if (!want) return null;
+  const rows = Array.isArray(list) ? list : [];
+  for (let i = 0; i < rows.length; i++) {
+    const s = rows[i];
+    if (!s) continue;
+    if (String(s.surveyId || s.id || '') === want) return {
+      s: s,
+      answered: !!s.answered
+    };
+  }
+  return null;
 }
 function _my_Pill({
   children
@@ -22147,10 +22203,12 @@ function TabMyPage() {
     if (A && A.tab === 4 && userKey) A.refreshRegs(false);
   }, [A && A.tab, userKey]);
   const [surveys, setSurveys] = useState([]);
+  const loadSurveysRef = useRef(null);
   useEffect(() => {
     let dead = false;
     if (!userKey) {
       setSurveys([]);
+      loadSurveysRef.current = null;
       return undefined;
     }
     const load = () => {
@@ -22158,11 +22216,14 @@ function TabMyPage() {
       try {
         token = typeof authStore !== 'undefined' && authStore && authStore.getToken ? authStore.getToken() : null;
       } catch (e) {}
-      if (!token || typeof authApi === 'undefined' || !authApi || !authApi.getMySurveys) return;
-      authApi.getMySurveys(token).then(res => {
-        if (!dead && res && Array.isArray(res.surveys)) setSurveys(res.surveys);
-      }).catch(() => {});
+      if (!token || typeof authApi === 'undefined' || !authApi || !authApi.getMySurveys) return Promise.resolve(null);
+      return authApi.getMySurveys(token).then(res => {
+        const list = res && Array.isArray(res.surveys) ? res.surveys : null;
+        if (!dead && list) setSurveys(list);
+        return list;
+      }).catch(() => null);
     };
+    loadSurveysRef.current = load;
     load();
     const onVis = () => {
       if (!document.hidden) load();
@@ -22171,6 +22232,7 @@ function TabMyPage() {
     return () => {
       dead = true;
       document.removeEventListener('visibilitychange', onVis);
+      loadSurveysRef.current = null;
     };
   }, [userKey]);
   const surveyOn = typeof MG_FEATURES === 'undefined' || !!(MG_FEATURES && MG_FEATURES.survey);
@@ -22284,6 +22346,84 @@ function TabMyPage() {
       clearTimeout(slowT);
     };
   }, [mreqKey, userKey]);
+  const [sreq, setSreq] = useState(() => _my_surveyReq());
+  const [sreqBusy, setSreqBusy] = useState(false);
+  const [sreqSlow, setSreqSlow] = useState(false);
+  const [sreqErr, setSreqErr] = useState(false);
+  const [sreqTry, setSreqTry] = useState(0);
+  useEffect(() => {
+    const fromHash = () => {
+      const q = _my_surveyReq();
+      if (q) setSreq(q);
+    };
+    const fromPush = e => {
+      const q = _my_surveyReq(e && e.detail && e.detail.hash);
+      if (q) setSreq(q);
+    };
+    window.addEventListener('hashchange', fromHash);
+    window.addEventListener('mg-push-open', fromPush);
+    return () => {
+      window.removeEventListener('hashchange', fromHash);
+      window.removeEventListener('mg-push-open', fromPush);
+    };
+  }, []);
+  const sreqKey = sreq ? sreq.id + '|' + sreq.n + '|' + sreqTry : '';
+  useEffect(() => {
+    if (!sreq || !sreq.id || !userKey) return undefined;
+    let dead = false;
+    const id = String(sreq.id);
+    setSreqErr(false);
+    setSreqSlow(false);
+    _my_clearSurveyHash();
+    const open = (sv, list) => {
+      try {
+        if (typeof logAction === 'function') logAction('survey_open', id);
+      } catch (e) {}
+      A.openSheet('survey', {
+        survey: sv,
+        surveyId: sv.surveyId || sv.id || id,
+        surveys: (Array.isArray(list) ? list : []).filter(x => x && !x.answered)
+      });
+    };
+    const hit0 = _my_surveyHit(surveys, id);
+    if (hit0 && !hit0.answered) {
+      open(hit0.s, surveys);
+      return () => {
+        dead = true;
+      };
+    }
+    setSreqBusy(true);
+    const slowT = setTimeout(() => {
+      if (!dead) setSreqSlow(true);
+    }, 8000);
+    (async () => {
+      const load = loadSurveysRef.current;
+      let list = null;
+      try {
+        list = load ? await load() : null;
+      } catch (e) {
+        list = null;
+      }
+      if (dead) return;
+      clearTimeout(slowT);
+      setSreqBusy(false);
+      setSreqSlow(false);
+      if (!list) {
+        setSreqErr(true);
+        return;
+      }
+      const hit = _my_surveyHit(list, id);
+      if (hit && !hit.answered) {
+        open(hit.s, list);
+        return;
+      }
+      if (A && A.toast) A.toast(L(hit ? _my_T.surveyDone : _my_T.surveyNone));
+    })();
+    return () => {
+      dead = true;
+      clearTimeout(slowT);
+    };
+  }, [sreqKey, userKey]);
   const [pushState, setPushState] = useState('default');
   useEffect(() => {
     if (typeof window === 'undefined' || !('Notification' in window) || !('serviceWorker' in navigator) || !('PushManager' in window)) {
@@ -23213,7 +23353,7 @@ function TabMyPage() {
     right: null,
     onClick: () => setConfirmLogout(true),
     last: true
-  }))), mreqBusy && !mviewer ? React.createElement("div", {
+  }))), mreqBusy && !mviewer || sreqBusy ? React.createElement("div", {
     "aria-live": "polite",
     style: {
       position: 'fixed',
@@ -23236,7 +23376,7 @@ function TabMyPage() {
   }, React.createElement(_uk_Spinner, {
     size: 16,
     color: "var(--mg-accent, #6e86e0)"
-  }), mreqSlow ? L(_my_T.mementoSlow) : L(_my_T.mementoLoad)) : null, mreqErr && !mviewer ? React.createElement("div", {
+  }), sreqBusy ? sreqSlow ? L(_my_T.surveySlow) : L(_my_T.surveyLoad) : mreqSlow ? L(_my_T.mementoSlow) : L(_my_T.mementoLoad)) : null, mreqErr && !mviewer || sreqErr ? React.createElement("div", {
     role: "alert",
     style: {
       position: 'fixed',
@@ -23257,7 +23397,7 @@ function TabMyPage() {
       fontSize: 13.5,
       color: 'var(--mg-ink, #22314a)'
     }
-  }, L(_my_T.mementoFail)), React.createElement("div", {
+  }, L(sreqErr ? _my_T.surveyFail : _my_T.mementoFail)), React.createElement("div", {
     style: {
       fontSize: 12,
       lineHeight: 1.7,
@@ -23272,7 +23412,10 @@ function TabMyPage() {
     }
   }, React.createElement(GhostBtn, {
     label: L(_my_T.close),
-    onClick: () => setMreqErr(false),
+    onClick: () => {
+      setMreqErr(false);
+      setSreqErr(false);
+    },
     style: {
       height: 42,
       borderRadius: 21,
@@ -23281,8 +23424,13 @@ function TabMyPage() {
   }), React.createElement(PrimaryBtn, {
     label: L(_my_T.mementoRetry),
     onClick: () => {
-      setMreqErr(false);
-      setMreqTry(n => n + 1);
+      if (sreqErr) {
+        setSreqErr(false);
+        setSreqTry(n => n + 1);
+      } else {
+        setMreqErr(false);
+        setMreqTry(n => n + 1);
+      }
     },
     style: {
       height: 42,
