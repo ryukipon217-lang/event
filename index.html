@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-<script>window.__MG_BUILD='20260919050016';</script>
+<script>window.__MG_BUILD='20260919051554';</script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="robots" content="noindex, nofollow, noarchive, noimageindex">
@@ -20331,11 +20331,15 @@ function _my_isUnpaid(r) {
   if ((Number(r.amount) || 0) <= 0) return false;
   return r.status === '申込済み' && !r.paid || r.status === '未決済';
 }
+function _my_attended(status) {
+  const v = String(status || '');
+  return v === 'チェックイン済' || v === 'チェックイン保留';
+}
 function _my_mementoPhotos(r) {
   if (!r) return [];
   const ev = r.event || {};
   const mTest = !!r.mementoTestVisible;
-  if (!mTest && r.status !== 'チェックイン済') return [];
+  if (!mTest && !_my_attended(r.status)) return [];
   const now = new Date();
   const pubS = r.sessionMementoPublishAt ? new Date(r.sessionMementoPublishAt) : null;
   const sessHidden = !mTest && pubS && !isNaN(pubS.getTime()) && pubS > now;
