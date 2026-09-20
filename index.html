@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-<script>window.__MG_BUILD='20260919070940';</script>
+<script>window.__MG_BUILD='20260919144048';</script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="robots" content="noindex, nofollow, noarchive, noimageindex">
@@ -1890,7 +1890,7 @@ async function postToGAS(action, payload, retryCount) {
 }
 function _mgAfterGasRead() {
   try {
-    if (typeof window.__mgCheckUpdate === 'function') window.__mgCheckUpdate(false);
+    if (typeof window.__mgCheckUpdate === 'function') window.__mgCheckUpdate(false, 20000);
   } catch (e) {}
 }
 async function postFastRead(action, payload, _retried) {
@@ -2166,6 +2166,14 @@ window.playChime = function (opts) {
     console.warn('playChime failed', e);
   }
 };
+(function () {
+  try {
+    if (authStore && authStore.getToken && authStore.getToken()) return;
+    const h = String(window.location.hash || '');
+    if (!/[?&](survey|memento)=/.test(h)) return;
+    sessionStorage.setItem('connecta_redirect_after_login', h.charAt(0) === '#' ? h : '#' + h);
+  } catch (e) {}
+})();
 function captureReferralFromUrl() {
   try {
     const params = new URLSearchParams(window.location.search);
@@ -2713,7 +2721,7 @@ function mgNextSession(ev, now) {
     const cur = String(window.__MG_BUILD || '');
     if (!cur) return;
     let lastCheck = 0;
-    const check = async force => {
+    const check = async (force, jitterMs) => {
       const now = Date.now();
       if (!force && now - lastCheck < 60000) return false;
       lastCheck = now;
@@ -2730,12 +2738,17 @@ function mgNextSession(ev, now) {
         const ae = document.activeElement;
         if (ae && (ae.tagName === 'INPUT' || ae.tagName === 'TEXTAREA')) return false;
         sessionStorage.setItem('mg_reloaded_for', nb);
-        location.replace(location.pathname + '?v=' + nb + (location.hash || ''));
+        const go = () => {
+          if (_mgWritesInFlight > 0) return;
+          location.replace(location.pathname + '?v=' + nb + (location.hash || ''));
+        };
+        const jw = Math.max(0, Number(jitterMs) || 0);
+        if (!jw) go();else setTimeout(go, Math.floor(Math.random() * jw));
         return true;
       } catch (e) {}
       return false;
     };
-    window.__mgCheckUpdate = function (force) {
+    window.__mgCheckUpdate = function (force, jitterMs) {
       try {
         if (navigator.serviceWorker && navigator.serviceWorker.getRegistration) {
           navigator.serviceWorker.getRegistration().then(function (reg) {
@@ -2743,16 +2756,16 @@ function mgNextSession(ev, now) {
           }).catch(function () {});
         }
       } catch (e) {}
-      return check(force !== false);
+      return check(force !== false, jitterMs);
     };
-    setTimeout(check, 250);
+    setTimeout(() => check(false, 0), 250);
     let hiddenAt = 0;
     document.addEventListener('visibilitychange', () => {
       if (document.hidden) {
         hiddenAt = Date.now();
         return;
       }
-      if (hiddenAt && Date.now() - hiddenAt > 10 * 60 * 1000) setTimeout(check, 400);
+      if (hiddenAt && Date.now() - hiddenAt > 10 * 60 * 1000) setTimeout(() => check(false, 8000), 400);
     });
   } catch (e) {}
 })();
