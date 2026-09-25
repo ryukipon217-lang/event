@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-<script>window.__MG_BUILD='20260919144048';</script>
+<script>window.__MG_BUILD='20260925132845';</script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="robots" content="noindex, nofollow, noarchive, noimageindex">
@@ -1308,6 +1308,7 @@ function _extends() { return _extends = Object.assign ? Object.assign.bind() : f
 const CONFIG = {
   GAS_URL: 'https://script.google.com/macros/s/AKfycbxLs1eXm39MHM0lSioBf9ghVFL8p8fIhIdYJpBBweBTCLOFDqWclPhoF66c0FgfrbHg/exec',
   EDGE_READ_URL: 'https://connecta-edge-read.solitary-cloud-f083.workers.dev',
+  EDGE_WRITE_URL: '',
   ORG: {
     name: 'connec+a',
     nameEn: 'connec+a · Tokyo',
@@ -1326,6 +1327,8 @@ const EDGE_READ_ACTIONS = {
   listActivities: 1,
   getFrontBundle: 1,
   listFrontNews: 1,
+  listFrontNewsAll: 1,
+  getFrontNews: 1,
   listHeroSlides: 1,
   listHeroSlidesMobile: 1,
   getLifeInfo: 1,
@@ -1888,6 +1891,77 @@ async function postToGAS(action, payload, retryCount) {
     if (isWrite) _mgWritesInFlight = Math.max(0, _mgWritesInFlight - 1);
   }
 }
+const EDGE_WRITE_ACTIONS = {
+  'auth.toggleFavorite': 1
+};
+const EDGE_WRITE_TIMEOUT_MS = 4000;
+let __edgeWFails = 0,
+  __edgeWOffUntil = 0;
+try {
+  window.__mgEdgeW = {
+    edge: 0,
+    fallback: 0
+  };
+} catch (e) {}
+async function postEdgeWrite(action, payload) {
+  if (!CONFIG.EDGE_WRITE_URL || !EDGE_WRITE_ACTIONS[action]) return {
+    hit: false
+  };
+  if (Date.now() < __edgeWOffUntil) return {
+    hit: false
+  };
+  const ctl = typeof AbortController !== 'undefined' ? new AbortController() : null;
+  const to = ctl ? setTimeout(() => {
+    try {
+      ctl.abort();
+    } catch (e) {}
+  }, EDGE_WRITE_TIMEOUT_MS) : null;
+  let businessError = null;
+  try {
+    const res = await fetch(CONFIG.EDGE_WRITE_URL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'text/plain;charset=utf-8'
+      },
+      body: JSON.stringify({
+        action,
+        payload
+      }),
+      signal: ctl ? ctl.signal : undefined,
+      cache: 'no-store'
+    });
+    if (to) clearTimeout(to);
+    if (res.ok) {
+      const json = await res.json();
+      if (json && json.ok) {
+        __edgeWFails = 0;
+        try {
+          window.__mgEdgeW.edge++;
+        } catch (e) {}
+        return {
+          hit: true,
+          data: json.data
+        };
+      }
+      if (json && json.error && String(json.error).indexOf('EDGE_') !== 0) {
+        businessError = new Error(json.error);
+      }
+    }
+  } catch (e) {
+    if (to) clearTimeout(to);
+  }
+  if (businessError) throw businessError;
+  if (++__edgeWFails >= 2) {
+    __edgeWOffUntil = Date.now() + 300000;
+    __edgeWFails = 0;
+  }
+  try {
+    window.__mgEdgeW.fallback++;
+  } catch (e) {}
+  return {
+    hit: false
+  };
+}
 function _mgAfterGasRead() {
   try {
     if (typeof window.__mgCheckUpdate === 'function') window.__mgCheckUpdate(false, 20000);
@@ -2078,7 +2152,11 @@ const favoritesStore = {
     }
     this._notify();
     try {
-      await authApi.toggleFavorite(token, id);
+      const res = await authApi.toggleFavorite(token, id, wasInList ? 'remove' : 'add');
+      if (res && Array.isArray(res.favorites)) {
+        this._cache = new Set(res.favorites.map(String));
+        this._notify();
+      }
       return !wasInList;
     } catch (e) {
       console.error('[favoritesStore] toggle failed, rolling back:', e);
@@ -2416,7 +2494,13 @@ const authApi = {
       sessionToken
     });
   },
-  async toggleFavorite(sessionToken, eventId) {
+  async toggleFavorite(sessionToken, eventId, desired) {
+    const r = await postEdgeWrite('auth.toggleFavorite', {
+      sessionToken,
+      eventId,
+      desired
+    });
+    if (r.hit) return r.data;
     return postToGAS('auth.toggleFavorite', {
       sessionToken,
       eventId
@@ -2991,6 +3075,48 @@ async function fetchFrontNews() {
     if (err && err.name === 'AbortError') return [];
     console.error('[Participants] fetchFrontNews error:', err);
     return [];
+  }
+}
+async function fetchFrontNewsAll(limit) {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 15000);
+  try {
+    const qs = '&params=' + encodeURIComponent(JSON.stringify({
+      limit: Number(limit) || 60
+    }));
+    const res = await mgReadFetch('listFrontNewsAll', qs, controller.signal);
+    clearTimeout(timeoutId);
+    if (res.ok) {
+      const json = await res.json();
+      const list = json && json.ok && Array.isArray(json.data) ? json.data : Array.isArray(json) ? json : null;
+      if (list && list.length) return list;
+    }
+  } catch (err) {
+    clearTimeout(timeoutId);
+    if (!(err && err.name === 'AbortError')) console.error('[Participants] fetchFrontNewsAll error:', err);
+  }
+  return fetchFrontNews();
+}
+async function fetchFrontNewsOne(newsId) {
+  const id = String(newsId == null ? '' : newsId).trim();
+  if (!id) return null;
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 15000);
+  try {
+    const qs = '&params=' + encodeURIComponent(JSON.stringify({
+      newsId: id
+    }));
+    const res = await mgReadFetch('getFrontNews', qs, controller.signal);
+    clearTimeout(timeoutId);
+    if (!res.ok) return null;
+    const json = await res.json();
+    if (json && json.ok && json.data && typeof json.data === 'object') return json.data;
+    if (json && json.id) return json;
+    return null;
+  } catch (err) {
+    clearTimeout(timeoutId);
+    if (!(err && err.name === 'AbortError')) console.error('[Participants] fetchFrontNewsOne error:', err);
+    return null;
   }
 }
 async function fetchLifeInfo() {
@@ -9399,8 +9525,30 @@ function _home_NotifBell({
   onOpen
 }) {
   const H = (ja, easy, en) => lang === 'easy' ? easy : lang === 'en' ? en : ja;
-  const items = (Array.isArray(news) ? news.slice() : []).sort((a, b) => _home_newsTime(b) - _home_newsTime(a)).slice(0, 8);
   const [open, setOpen] = React.useState(false);
+  const [all, setAll] = React.useState(null);
+  const pulled = React.useRef(false);
+  React.useEffect(() => {
+    if (!open || pulled.current || typeof fetchFrontNewsAll !== 'function') return undefined;
+    pulled.current = true;
+    let dead = false;
+    try {
+      const c = typeof getSwrCached === 'function' ? getSwrCached('frontNewsAll') : null;
+      if (Array.isArray(c) && c.length) setAll(c);
+    } catch (e) {}
+    fetchFrontNewsAll().then(list => {
+      if (dead || !Array.isArray(list) || !list.length) return;
+      setAll(list);
+      try {
+        if (typeof setSwrCache === 'function') setSwrCache('frontNewsAll', list);
+      } catch (e) {}
+    }).catch(() => {});
+    return () => {
+      dead = true;
+    };
+  }, [open]);
+  const src = all && all.length ? all : news;
+  const items = (Array.isArray(src) ? src.slice() : []).sort((a, b) => _home_newsTime(b) - _home_newsTime(a)).slice(0, 8);
   const [seen, setSeen] = React.useState(() => {
     try {
       return JSON.parse(localStorage.getItem('mg_notif_seen') || '{}') || {};
@@ -34823,6 +34971,11 @@ function ScreenCouponClaim({
 }
 const _ni_L = (lang, o) => o[lang] || o.ja;
 const _ni_T = {
+  mayBeEnded: {
+    ja: '掲載が終了した可能性があります。',
+    easy: 'この おしらせは おわった かもしれません。',
+    en: 'This announcement may no longer be published.'
+  },
   newsLabel: {
     ja: 'お知らせ',
     easy: 'おしらせ',
@@ -35034,30 +35187,32 @@ function _ni_useNewsItems(open) {
   const [loading, setLoading] = useState(false);
   const tried = useRef(false);
   useEffect(() => {
-    if (!open || bundleNews.length || tried.current) return undefined;
+    if (!open || tried.current) return undefined;
     tried.current = true;
     let dead = false;
     try {
-      const c = typeof getSwrCached === 'function' ? getSwrCached('frontNews') : null;
+      const c = typeof getSwrCached === 'function' ? getSwrCached('frontNewsAll') : null;
       if (Array.isArray(c) && c.length) setFetched(c);
     } catch (e) {}
-    if (typeof fetchFrontNews !== 'function') return undefined;
-    setLoading(true);
-    fetchFrontNews().then(list => {
+    if (typeof fetchFrontNewsAll !== 'function') return undefined;
+    if (!bundleNews.length) setLoading(true);
+    fetchFrontNewsAll().then(list => {
       if (dead) return;
       const arr = Array.isArray(list) ? list : [];
-      setFetched(arr);
-      try {
-        if (typeof setSwrCache === 'function' && arr.length) setSwrCache('frontNews', arr);
-      } catch (e) {}
+      if (arr.length) {
+        setFetched(arr);
+        try {
+          if (typeof setSwrCache === 'function') setSwrCache('frontNewsAll', arr);
+        } catch (e) {}
+      }
     }).catch(() => {}).then(() => {
       if (!dead) setLoading(false);
     });
     return () => {
       dead = true;
     };
-  }, [open, bundleNews.length]);
-  const items = bundleNews.length ? bundleNews : fetched || [];
+  }, [open]);
+  const items = fetched && fetched.length ? fetched : bundleNews;
   return {
     items,
     loading: loading && !items.length
@@ -35410,7 +35565,28 @@ function SheetNewsDetail({
     items,
     loading
   } = _ni_useNewsItems(open);
-  const news = newsId == null ? null : items.find(n => n && String(n.id) === String(newsId)) || items[Number(newsId)] || null;
+  const fromList = newsId == null ? null : items.find(n => n && String(n.id) === String(newsId)) || items[Number(newsId)] || null;
+  const [one, setOne] = useState(null);
+  const [oneBusy, setOneBusy] = useState(false);
+  const oneTried = useRef('');
+  useEffect(() => {
+    if (!open || newsId == null || fromList) return undefined;
+    if (loading) return undefined;
+    if (oneTried.current === String(newsId)) return undefined;
+    oneTried.current = String(newsId);
+    if (typeof fetchFrontNewsOne !== 'function') return undefined;
+    let dead = false;
+    setOneBusy(true);
+    fetchFrontNewsOne(newsId).then(n => {
+      if (!dead && n) setOne(n);
+    }).catch(() => {}).then(() => {
+      if (!dead) setOneBusy(false);
+    });
+    return () => {
+      dead = true;
+    };
+  }, [open, newsId, !!fromList, loading]);
+  const news = fromList || (one && String(one.id) === String(newsId) ? one : null);
   const related = news ? items.filter(n => n && String(n.id) !== String(news.id)).slice(0, 3) : [];
   React.useEffect(() => {
     if (news && news.id != null) _ni_markSeen(news.id);
@@ -35470,7 +35646,7 @@ function SheetNewsDetail({
     style: {
       padding: '4px 22px 30px'
     }
-  }, !news && loading ? React.createElement("div", {
+  }, !news && (loading || oneBusy) ? React.createElement("div", {
     style: {
       display: 'flex',
       flexDirection: 'column',
@@ -35503,6 +35679,13 @@ function SheetNewsDetail({
   }, React.createElement("div", null, React.createElement("span", {
     className: "msr"
   }, "search_off")), L(_ni_T.notFound), React.createElement("div", {
+    className: "mg-ui",
+    style: {
+      fontSize: 12,
+      marginTop: 8,
+      opacity: .8
+    }
+  }, L(_ni_T.mayBeEnded)), React.createElement("div", {
     style: {
       marginTop: 18
     }
