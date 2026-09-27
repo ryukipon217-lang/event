@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-<script>window.__MG_BUILD='20260925132845';</script>
+<script>window.__MG_BUILD='20260927004243';</script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="robots" content="noindex, nofollow, noarchive, noimageindex">
@@ -3277,34 +3277,46 @@ function formatEventDate(dateStr) {
 function linkifyNodes(text, linkColor) {
   const s = String(text == null ? '' : text);
   const out = [];
-  const re = /(https?:\/\/[^\s<]+)/g;
-  let last = 0,
-    m,
-    i = 0;
-  while ((m = re.exec(s)) !== null) {
-    if (m.index > last) out.push(s.slice(last, m.index));
-    let url = m[0];
-    let trail = '';
-    const tm = url.match(/[)\].,!?:;。、）】」』]+$/);
-    if (tm) {
-      trail = tm[0];
-      url = url.slice(0, -trail.length);
-    }
-    out.push(React.createElement("a", {
+  const color = linkColor || 'var(--mg-accent, #6e86e0)';
+  let i = 0;
+  const anchor = (href, label) => {
+    const internal = href.charAt(0) === '#';
+    return React.createElement("a", {
       key: 'lk' + i++,
-      href: url,
-      target: "_blank",
-      rel: "noopener noreferrer",
+      href: href,
+      target: internal ? undefined : '_blank',
+      rel: internal ? undefined : 'noopener noreferrer',
       onClick: e => {
         e.stopPropagation();
       },
       style: {
-        color: linkColor || 'var(--mg-accent, #6e86e0)',
+        color: color,
         textDecoration: 'underline',
         wordBreak: 'break-all'
       }
-    }, url));
-    if (trail) out.push(trail);
+    }, label);
+  };
+  const TRAIL = /[)\].,!?:;。、）】」』]+$/;
+  const re = /\[([^\]\n]{1,120})\]\((https?:\/\/[^\s)]+|#\/[^\s)]*)\)|(https?:\/\/[^\s<]+)|(^|[^A-Za-z0-9@\/._-])(www\.[A-Za-z0-9-]+(?:\.[A-Za-z0-9-]+)+[^\s<]*)/g;
+  let last = 0,
+    m;
+  while ((m = re.exec(s)) !== null) {
+    if (m.index > last) out.push(s.slice(last, m.index));
+    if (m[1] != null) {
+      out.push(anchor(m[2], m[1]));
+    } else {
+      const bare = m[3] != null;
+      let url = bare ? m[3] : m[5];
+      if (!bare && m[4]) out.push(m[4]);
+      let trail = '';
+      const tm = url.match(TRAIL);
+      if (tm) {
+        trail = tm[0];
+        url = url.slice(0, -trail.length);
+      }
+      out.push(anchor(bare ? url : 'https://' + url, url));
+      if (trail) out.push(trail);
+    }
     last = re.lastIndex;
   }
   if (last < s.length) out.push(s.slice(last));
@@ -35636,6 +35648,10 @@ function SheetNewsDetail({
   const imgSrc = news && !isMemento ? _ni_imgUrl(news.imageUrl || news.coverImageUrl || news.thumbnailImageUrl, 1200) : '';
   const bodyText = news ? _ni_i18nField(news, 'body', lang) || news.body || news.content || news.description || news.shortDescription || '(本文なし)' : '';
   const easyBody = news && lang !== 'easy' && news.body_easy && String(news.body_easy).trim() ? news.body_easy : '';
+  const ctaRaw = news ? String(news.ctaLink || '').trim() : '';
+  const ctaInternal = /^#\//.test(ctaRaw);
+  const ctaHref = ctaInternal || /^https?:\/\//.test(ctaRaw) ? ctaRaw : '';
+  const ctaLabel = news && String(news.ctaText || '').trim() || (lang === 'en' ? 'Learn more' : lang === 'easy' ? 'くわしく みる' : 'くわしく見る');
   const cat = news ? _ni_newsCat(news.category, lang) : '';
   return React.createElement(SheetShell, {
     open: open,
@@ -35776,7 +35792,31 @@ function SheetNewsDetail({
       color: 'var(--mg-ink, #22314a)',
       whiteSpace: 'pre-wrap'
     }
-  }, easyBody)) : null, related.length > 0 && React.createElement("div", {
+  }, typeof linkifyNodes === 'function' ? linkifyNodes(easyBody) : easyBody)) : null, ctaHref ? React.createElement("a", {
+    className: "mg-pill mg-ui mg-tap",
+    href: ctaHref,
+    target: ctaInternal ? undefined : '_blank',
+    rel: ctaInternal ? undefined : 'noopener noreferrer',
+    style: {
+      marginTop: 24,
+      width: '100%',
+      height: 54,
+      borderRadius: 27,
+      boxSizing: 'border-box',
+      display: 'inline-flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      gap: 8,
+      fontSize: 15,
+      fontWeight: 500,
+      letterSpacing: '.06em',
+      color: 'var(--mg-ink, #22314a)',
+      textDecoration: 'none'
+    }
+  }, React.createElement("span", null, ctaLabel), React.createElement(Icon, {
+    name: ctaInternal ? 'arrow_forward' : 'arrow_outward',
+    size: 20
+  })) : null, related.length > 0 && React.createElement("div", {
     style: {
       marginTop: 28,
       paddingTop: 14,
