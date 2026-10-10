@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-<script>window.__MG_BUILD='20261010072036';</script>
+<script>window.__MG_BUILD='20261010095709';</script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="robots" content="noindex, nofollow, noarchive, noimageindex">
@@ -32193,33 +32193,43 @@ const _cs_FAQS = [{
   }
 }];
 let _cs_faqSource = _cs_FAQS;
+let _cs_faqSourceAt = 0;
 const _CS_FAQ_CACHE_KEY = 'mg_public_faq_v1';
 function _cs_validFaqs(list) {
   return Array.isArray(list) && list.length > 0 && list.every(f => f && f.id && f.q && f.a && (f.q.ja || f.q.easy || f.q.en));
 }
 try {
   const c = JSON.parse(localStorage.getItem(_CS_FAQ_CACHE_KEY) || 'null');
-  if (c && _cs_validFaqs(c.list) && Date.now() - (c.at || 0) < 86400000) _cs_faqSource = c.list;
+  if (c && _cs_validFaqs(c.list) && Date.now() - (c.at || 0) < 86400000) {
+    _cs_faqSource = c.list;
+    _cs_faqSourceAt = c.at || 0;
+  }
 } catch (e) {}
 let _cs_faqLoading = null;
+let _cs_faqFailAt = 0;
 const _CS_FAQ_FRESH_MS = 6 * 3600000;
 function _cs_freshCachedFaqs() {
   try {
     const c = JSON.parse(localStorage.getItem(_CS_FAQ_CACHE_KEY) || 'null');
     const age = Date.now() - (c && c.at || 0);
-    return c && _cs_validFaqs(c.list) && age >= 0 && age < _CS_FAQ_FRESH_MS ? c.list : null;
-  } catch (e) {
-    return null;
-  }
+    if (c && _cs_validFaqs(c.list) && age >= 0 && age < _CS_FAQ_FRESH_MS) {
+      if (c.at > _cs_faqSourceAt) {
+        _cs_faqSource = c.list;
+        _cs_faqSourceAt = c.at;
+      }
+      return _cs_faqSource;
+    }
+  } catch (e) {}
+  const mAge = Date.now() - _cs_faqSourceAt;
+  return _cs_faqSourceAt && _cs_faqSource !== _cs_FAQS && mAge >= 0 && mAge < _CS_FAQ_FRESH_MS ? _cs_faqSource : null;
 }
 function _cs_loadPublicFaqs() {
   if (_cs_faqLoading) return _cs_faqLoading;
   const fresh = _cs_freshCachedFaqs();
-  if (fresh) {
-    _cs_faqSource = fresh;
-    return Promise.resolve(fresh);
-  }
-  _cs_faqLoading = (async () => {
+  if (fresh) return Promise.resolve(fresh);
+  if (Date.now() - _cs_faqFailAt < 60000) return Promise.resolve(_cs_faqSource);
+  const p = (async () => {
+    let got = false;
     const ctl = typeof AbortController !== 'undefined' ? new AbortController() : null;
     const tid = ctl ? setTimeout(() => {
       try {
@@ -32228,25 +32238,34 @@ function _cs_loadPublicFaqs() {
     }, 15000) : null;
     try {
       const res = await mgReadFetch('getPublicFaq', '', ctl ? ctl.signal : undefined);
-      if (tid) clearTimeout(tid);
-      if (!res.ok) return _cs_faqSource;
-      const json = await res.json();
-      const list = json && json.ok ? json.data : null;
-      if (_cs_validFaqs(list)) {
-        _cs_faqSource = list;
-        try {
-          localStorage.setItem(_CS_FAQ_CACHE_KEY, JSON.stringify({
-            at: Date.now(),
-            list: list
-          }));
-        } catch (e) {}
+      if (res.ok) {
+        const json = await res.json();
+        const list = json && json.ok ? json.data : null;
+        if (_cs_validFaqs(list)) {
+          const at = Date.now();
+          _cs_faqSource = list;
+          _cs_faqSourceAt = at;
+          got = true;
+          try {
+            localStorage.setItem(_CS_FAQ_CACHE_KEY, JSON.stringify({
+              at: at,
+              list: list
+            }));
+          } catch (e) {}
+        }
       }
+      if (tid) clearTimeout(tid);
     } catch (e) {
       if (tid) clearTimeout(tid);
     }
+    if (!got) _cs_faqFailAt = Date.now();
     return _cs_faqSource;
   })();
-  return _cs_faqLoading;
+  _cs_faqLoading = p;
+  p.then(() => {
+    if (_cs_faqLoading === p) _cs_faqLoading = null;
+  });
+  return p;
 }
 const _cs_LIFE_TOPICS = [{
   id: 'residence-card',
