@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-<script>window.__MG_BUILD='20261010062712';</script>
+<script>window.__MG_BUILD='20261010072036';</script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="robots" content="noindex, nofollow, noarchive, noimageindex">
@@ -32202,8 +32202,23 @@ try {
   if (c && _cs_validFaqs(c.list) && Date.now() - (c.at || 0) < 86400000) _cs_faqSource = c.list;
 } catch (e) {}
 let _cs_faqLoading = null;
+const _CS_FAQ_FRESH_MS = 6 * 3600000;
+function _cs_freshCachedFaqs() {
+  try {
+    const c = JSON.parse(localStorage.getItem(_CS_FAQ_CACHE_KEY) || 'null');
+    const age = Date.now() - (c && c.at || 0);
+    return c && _cs_validFaqs(c.list) && age >= 0 && age < _CS_FAQ_FRESH_MS ? c.list : null;
+  } catch (e) {
+    return null;
+  }
+}
 function _cs_loadPublicFaqs() {
   if (_cs_faqLoading) return _cs_faqLoading;
+  const fresh = _cs_freshCachedFaqs();
+  if (fresh) {
+    _cs_faqSource = fresh;
+    return Promise.resolve(fresh);
+  }
   _cs_faqLoading = (async () => {
     const ctl = typeof AbortController !== 'undefined' ? new AbortController() : null;
     const tid = ctl ? setTimeout(() => {
@@ -32685,6 +32700,7 @@ function SheetConsult({
   };
   const [faqs, setFaqs] = React.useState(_cs_faqSource);
   React.useEffect(() => {
+    if (!open) return;
     let alive = true;
     _cs_loadPublicFaqs().then(l => {
       if (alive && l) setFaqs(l);
@@ -32692,7 +32708,7 @@ function SheetConsult({
     return () => {
       alive = false;
     };
-  }, []);
+  }, [open]);
   const chipCandidates = React.useMemo(() => faqs.slice(0, 5), [faqs]);
   const goContactWith = draft => {
     if (!A) return;
