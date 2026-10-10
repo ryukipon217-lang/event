@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-<script>window.__MG_BUILD='20261010041041';</script>
+<script>window.__MG_BUILD='20261010062712';</script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="robots" content="noindex, nofollow, noarchive, noimageindex">
@@ -32192,6 +32192,47 @@ const _cs_FAQS = [{
     }
   }
 }];
+let _cs_faqSource = _cs_FAQS;
+const _CS_FAQ_CACHE_KEY = 'mg_public_faq_v1';
+function _cs_validFaqs(list) {
+  return Array.isArray(list) && list.length > 0 && list.every(f => f && f.id && f.q && f.a && (f.q.ja || f.q.easy || f.q.en));
+}
+try {
+  const c = JSON.parse(localStorage.getItem(_CS_FAQ_CACHE_KEY) || 'null');
+  if (c && _cs_validFaqs(c.list) && Date.now() - (c.at || 0) < 86400000) _cs_faqSource = c.list;
+} catch (e) {}
+let _cs_faqLoading = null;
+function _cs_loadPublicFaqs() {
+  if (_cs_faqLoading) return _cs_faqLoading;
+  _cs_faqLoading = (async () => {
+    const ctl = typeof AbortController !== 'undefined' ? new AbortController() : null;
+    const tid = ctl ? setTimeout(() => {
+      try {
+        ctl.abort();
+      } catch (e) {}
+    }, 15000) : null;
+    try {
+      const res = await mgReadFetch('getPublicFaq', '', ctl ? ctl.signal : undefined);
+      if (tid) clearTimeout(tid);
+      if (!res.ok) return _cs_faqSource;
+      const json = await res.json();
+      const list = json && json.ok ? json.data : null;
+      if (_cs_validFaqs(list)) {
+        _cs_faqSource = list;
+        try {
+          localStorage.setItem(_CS_FAQ_CACHE_KEY, JSON.stringify({
+            at: Date.now(),
+            list: list
+          }));
+        } catch (e) {}
+      }
+    } catch (e) {
+      if (tid) clearTimeout(tid);
+    }
+    return _cs_faqSource;
+  })();
+  return _cs_faqLoading;
+}
 const _cs_LIFE_TOPICS = [{
   id: 'residence-card',
   keywords: ['在留カード', 'ざいりゅうカード', 'ざいりゅう', '在留', '在留資格', 'ビザ', 'びざ', '在留期間', '更新', 'こうしん', 'residence card', 'residence', 'visa', 'status of residence', 'renew'],
@@ -32288,11 +32329,12 @@ function _cs_match(text) {
   const qTokens = qNorm.split(/[\s、。,.!?！？]+/).filter(Boolean);
   let bestFaq = null,
     bestFaqScore = 0;
-  for (let i = 0; i < _cs_FAQS.length; i++) {
-    const sc = _cs_score(_cs_FAQS[i], qNorm, qTokens);
+  const faqs = _cs_faqSource;
+  for (let i = 0; i < faqs.length; i++) {
+    const sc = _cs_score(faqs[i], qNorm, qTokens);
     if (sc > bestFaqScore) {
       bestFaqScore = sc;
-      bestFaq = _cs_FAQS[i];
+      bestFaq = faqs[i];
     }
   }
   let bestLife = null,
@@ -32641,7 +32683,17 @@ function SheetConsult({
     if (e) e.preventDefault();
     ask(input);
   };
-  const chipCandidates = React.useMemo(() => _cs_FAQS.slice(0, 5), []);
+  const [faqs, setFaqs] = React.useState(_cs_faqSource);
+  React.useEffect(() => {
+    let alive = true;
+    _cs_loadPublicFaqs().then(l => {
+      if (alive && l) setFaqs(l);
+    }).catch(() => {});
+    return () => {
+      alive = false;
+    };
+  }, []);
+  const chipCandidates = React.useMemo(() => faqs.slice(0, 5), [faqs]);
   const goContactWith = draft => {
     if (!A) return;
     try {
@@ -33100,13 +33152,13 @@ function SheetConsult({
       overflow: 'hidden',
       padding: 0
     }
-  }, _cs_FAQS.map((f, i) => React.createElement(_cs_Faq, {
+  }, faqs.map((f, i) => React.createElement(_cs_Faq, {
     key: f.id,
     q: _cs_L(lang, f.q),
     a: _cs_L(lang, f.a),
     openNow: openFaq === i,
     onToggle: () => setOpenFaq(openFaq === i ? -1 : i),
-    last: i === _cs_FAQS.length - 1
+    last: i === faqs.length - 1
   })))) : null));
 }
 const _rx_L = (lang, o) => o[lang] || o.ja;
